@@ -49,13 +49,19 @@ export class StravaController {
     @Query('state') state: string,
     @Res() res: Response,
   ) {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+
     if (!code || !state) {
-      throw new BadRequestException('Missing code or state');
+      return res.redirect(`${frontendUrl}/profile?strava=error&reason=missing_params`);
     }
 
-    await this.stravaService.handleCallback(code, state);
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-    return res.redirect(`${frontendUrl}/profile?strava=connected`);
+    try {
+      await this.stravaService.handleCallback(code, state);
+      return res.redirect(`${frontendUrl}/profile?strava=connected`);
+    } catch (err) {
+      this.logger.error(`Strava callback failed: ${err.message}`, err.stack);
+      return res.redirect(`${frontendUrl}/profile?strava=error&reason=${encodeURIComponent(err.message)}`);
+    }
   }
 
   @Post('disconnect')

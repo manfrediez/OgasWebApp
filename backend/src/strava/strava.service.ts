@@ -36,6 +36,16 @@ export class StravaService {
       'STRAVA_WEBHOOK_VERIFY_TOKEN',
       '',
     );
+
+    const missing = [
+      !this.clientId && 'STRAVA_CLIENT_ID',
+      !this.clientSecret && 'STRAVA_CLIENT_SECRET',
+      !this.redirectUri && 'STRAVA_REDIRECT_URI',
+      !this.encryptionKey && 'ENCRYPTION_KEY',
+    ].filter(Boolean);
+    if (missing.length) {
+      this.logger.warn(`Missing env vars for Strava: ${missing.join(', ')}`);
+    }
   }
 
   getAuthUrl(userId: string): string {

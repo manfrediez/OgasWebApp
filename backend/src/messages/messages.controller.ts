@@ -77,11 +77,11 @@ const fileFilter = (
 };
 
 @Controller('messages')
-@UseGuards(JwtAuthGuard)
 export class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FilesInterceptor('files', 3, {
       storage,
@@ -109,22 +109,25 @@ export class MessagesController {
     const ext = path.extname(storedName).toLowerCase();
     const contentType = MIME_MAP[ext] || 'application/octet-stream';
     res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     res.sendFile(filePath);
   }
 
   @Get('conversations')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.COACH)
   getConversations(@CurrentUser('sub') coachId: string) {
     return this.messagesService.getConversationList(coachId);
   }
 
   @Get('unread-count')
+  @UseGuards(JwtAuthGuard)
   getUnreadCount(@CurrentUser('sub') userId: string) {
     return this.messagesService.getUnreadCount(userId);
   }
 
   @Get('conversation/:userId')
+  @UseGuards(JwtAuthGuard)
   getConversation(
     @Param('userId') otherUserId: string,
     @Query() query: GetMessagesQueryDto,
@@ -139,6 +142,7 @@ export class MessagesController {
   }
 
   @Patch('read/:userId')
+  @UseGuards(JwtAuthGuard)
   markAsRead(
     @Param('userId') senderUserId: string,
     @CurrentUser('sub') currentUserId: string,

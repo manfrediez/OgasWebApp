@@ -370,21 +370,21 @@ export class ImportService {
   private parseGoalRaces(ws: XLSX.WorkSheet, layout: Layout): ParsedGoalRace[] {
     const races: ParsedGoalRace[] = [];
     // Goal races are typically in rows 5-8 (0-indexed: 4-7)
-    // Offset columns based on layout
-    const offset = layout.labelCol; // 0 for A-layout, 1 for B-layout
+    // Use layout.dataCol as base: C(2) for A/C layout, D(3) for B/D layout
+    const base = layout.dataCol;
 
     for (let r = 3; r <= 8; r++) {
       // Check if this row has race data
-      const distCell = this.cellStr(ws, r, 3 + offset); // D or E
-      const dateCell = this.cellValue(ws, r, 4 + offset); // E or F
-      const nameCell = this.cellStr(ws, r, 5 + offset); // F or G
+      const distCell = this.cellStr(ws, r, base);       // C or D
+      const dateCell = this.cellValue(ws, r, base + 1);  // D or E
+      const nameCell = this.cellStr(ws, r, base + 2);    // E or F
 
       if (!nameCell && !distCell) continue;
 
       const date = this.parseDate(dateCell);
       if (!date && !nameCell) continue;
 
-      const locationCell = this.cellStr(ws, r, 7 + offset); // H or I
+      const locationCell = this.cellStr(ws, r, base + 4); // G or H
 
       // Result columns (K, L, M = 10, 11, 12)
       const genPos = this.cellNum(ws, r, 10);
@@ -545,21 +545,21 @@ export class ImportService {
 
   private parseWeekSessions(
     ws: XLSX.WorkSheet,
-    layout: Layout,
+    _layout: Layout,
     startRow: number,
     endRow: number,
   ): ParsedSession[] {
     const sessions: ParsedSession[] = [];
-    const offset = layout.labelCol;
 
+    // Sessions ALWAYS use fixed columns A-K regardless of layout:
+    // A(0)=date, B(1)=day, C(2)=type, D(3)=description,
+    // E(4)=distance/activation, F(5)=secondary/name, H(7)=alt/location,
+    // I(8)=altDesc, K(10)=feedback
     for (let r = startRow; r < endRow; r++) {
-      // Column mapping (adjusted by layout offset):
-      // A/B: date, B/C: day name, C/D: type, D/E: description,
-      // F/G: secondary, H/I+I/J: alternative, K/L: feedback
-      const dateVal = this.cellValue(ws, r, 0 + offset);
-      const dayStr = this.cellStr(ws, r, 1 + offset).toUpperCase().trim();
-      const typeStr = this.cellStr(ws, r, 2 + offset).toUpperCase().trim();
-      const description = this.cellStr(ws, r, 3 + offset);
+      const dateVal = this.cellValue(ws, r, 0);    // A
+      const dayStr = this.cellStr(ws, r, 1).toUpperCase().trim();   // B
+      const typeStr = this.cellStr(ws, r, 2).toUpperCase().trim();  // C
+      let description = this.cellStr(ws, r, 3);     // D
 
       // Skip empty rows or header rows
       if (!dayStr && !typeStr && !description) continue;
@@ -569,30 +569,51 @@ export class ImportService {
       if (!dayOfWeek && !typeStr) continue;
 
       const date = this.parseDate(dateVal);
-      const type = this.mapWorkoutType(typeStr);
 
-      // Check for secondary type (column F/G)
-      const secondaryStr = this.cellStr(ws, r, 5 + offset).toUpperCase().trim();
+      // BUG 3 fix: If typeStr is empty, check if description contains a known type
+      let type = this.mapWorkoutType(typeStr);
+      if (!typeStr && description) {
+        const descUpper = description.toUpperCase().trim();
+        const descType = TYPE_MAP[descUpper] || TYPE_MAP[descUpper.split(' ')[0]];
+        if (descType) {
+          type = descType;
+          description = ''; // The "description" was actually the type
+        }
+      }
+
+      // BUG 5 fix: For ACTIVATION, description may be in col E instead of D
+      if (type === WorkoutType.ACTIVATION && !description) {
+        description = this.cellStr(ws, r, 4); // E
+      }
+
+      // Check for secondary type (column F)
+      const secondaryStr = this.cellStr(ws, r, 5).toUpperCase().trim(); // F
       let secondaryType: WorkoutType | undefined;
       let secondaryDescription: string | undefined;
       if (secondaryStr.includes('FUERZA')) {
         secondaryType = WorkoutType.STRENGTH;
-        secondaryDescription = this.cellStr(ws, r, 5 + offset);
+        secondaryDescription = this.cellStr(ws, r, 5);
       }
 
-      // Alternative workout (columns H+I / I+J)
-      const altLabel = this.cellStr(ws, r, 7 + offset);
-      const altDesc = this.cellStr(ws, r, 8 + offset);
+      // Alternative workout (columns H + I)
+      const altLabel = this.cellStr(ws, r, 7);  // H
+      const altDesc = this.cellStr(ws, r, 8);   // I
 
-      // Athlete feedback (column K / L)
-      const feedback = this.cellStr(ws, r, 10);
+      // Athlete feedback (column K)
+      const feedback = this.cellStr(ws, r, 10);  // K
 
-      // Competition data from description
+      // BUG 4 fix: Competition data from correct fixed columns
       let competitionName: string | undefined;
       let competitionDistance: string | undefined;
       let competitionLocation: string | undefined;
-      if (type === WorkoutType.COMPETITION && description) {
-        competitionName = description;
+      if (type === WorkoutType.COMPETITION) {
+        competitionDistance = this.cellStr(ws, r, 4);  // E
+        competitionName = this.cellStr(ws, r, 5);      // F
+        competitionLocation = this.cellStr(ws, r, 7);  // H
+        if (!description) {
+          description = [competitionDistance, competitionName, competitionLocation]
+            .filter(Boolean).join(' - ');
+        }
       }
 
       sessions.push({
@@ -838,10 +859,21 @@ export class ImportService {
         if (kmMatch) {
           const fromKm = parseInt(kmMatch[1]);
           const toKm = parseInt(kmMatch[2]);
-          const objective = col1 || '';
-          const paceZone = this.cellStr(ws, r, 2);
-          const technicalFocus = this.cellStr(ws, r, 3);
-          const strategicKey = this.cellStr(ws, r, 4);
+
+          // Try individual columns first
+          let objective = col1 || '';
+          let paceZone = this.cellStr(ws, r, 2);
+          let technicalFocus = this.cellStr(ws, r, 3);
+          let strategicKey = this.cellStr(ws, r, 4);
+
+          // BUG 6 fix: If cols B-E are empty, parse from concatenated col A
+          if (!objective && !paceZone) {
+            const parsed = this.parseStrategyRow(col0, fromKm, toKm);
+            objective = parsed.objective;
+            paceZone = parsed.paceZone;
+            technicalFocus = parsed.technicalFocus;
+            strategicKey = parsed.strategicKey;
+          }
 
           currentStrategy.segments.push({
             fromKm,
@@ -888,9 +920,22 @@ export class ImportService {
     }> = [];
 
     for (let r = 0; r <= range.e.r; r++) {
-      const label = this.cellStr(ws, r, 0).toUpperCase().trim();
-      const value = this.cellValue(ws, r, 1);
-      const valueStr = this.cellStr(ws, r, 1);
+      let label = this.cellStr(ws, r, 0).toUpperCase().trim();
+      let value: any = this.cellValue(ws, r, 1);
+      let valueStr = this.cellStr(ws, r, 1);
+
+      // BUG 7 fix: If col B is empty, try to split col A by ":" to get label:value
+      if (!valueStr && label.includes(':')) {
+        const colonIdx = label.indexOf(':');
+        const extractedValue = label.slice(colonIdx + 1).trim();
+        label = label.slice(0, colonIdx).trim();
+        if (extractedValue) {
+          valueStr = extractedValue;
+          value = extractedValue;
+          const numParsed = Number(extractedValue);
+          if (!isNaN(numParsed)) value = numParsed;
+        }
+      }
 
       if (label.includes('EDAD') || label.includes('AGE')) {
         const num = parseInt(String(value));
@@ -1051,6 +1096,37 @@ export class ImportService {
       }
     }
     return null;
+  }
+
+  /**
+   * Parse strategy segment fields from a concatenated string in col A.
+   * E.g.: "KM 0-3  Arranque conservador  Z1-Z2  Cadencia alta  No salir rápido"
+   */
+  private parseStrategyRow(
+    text: string,
+    _fromKm: number,
+    _toKm: number,
+  ): { objective: string; paceZone: string; technicalFocus: string; strategicKey: string } {
+    // Remove the KM range prefix
+    let remainder = text.replace(/KM\s*\d+\s*[-–]\s*\d+\s*/i, '').trim();
+
+    // Try to find a pace zone pattern (Z1, Z2, Z3, Z4, Z1-Z2, etc.)
+    const zoneMatch = remainder.match(/\b(Z\d(?:\s*[-–]\s*Z\d)?)\b/i);
+    let paceZone = '';
+    if (zoneMatch) {
+      paceZone = zoneMatch[1];
+      remainder = remainder.replace(zoneMatch[0], '').trim();
+    }
+
+    // Split remaining text by multiple spaces (2+) to separate fields
+    const parts = remainder.split(/\s{2,}/).map(s => s.trim()).filter(Boolean);
+
+    return {
+      objective: parts[0] || '',
+      paceZone,
+      technicalFocus: parts[1] || '',
+      strategicKey: parts[2] || '',
+    };
   }
 
   private mapWorkoutType(type: string): WorkoutType {

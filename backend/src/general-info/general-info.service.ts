@@ -119,13 +119,14 @@ export class GeneralInfoService {
   async deleteTopic(coachId: string, topicId: string) {
     await this.assertTopicOwner(topicId, coachId);
 
-    const posts = await this.infoPostModel.find({ topicId }).lean();
+    const topicOid = new Types.ObjectId(topicId);
+    const posts = await this.infoPostModel.find({ topicId: topicOid }).lean();
     const allFiles = posts.flatMap((p) =>
       p.attachments.map((a) => a.storedName),
     );
     this.deleteFiles(allFiles);
 
-    await this.infoPostModel.deleteMany({ topicId });
+    await this.infoPostModel.deleteMany({ topicId: topicOid });
     await this.topicModel.findByIdAndDelete(topicId);
     return { deleted: true };
   }
@@ -169,14 +170,15 @@ export class GeneralInfoService {
     const limit = pagination?.limit ?? 20;
     const skip = (page - 1) * limit;
 
+    const topicOid = new Types.ObjectId(topicId);
     const [data, total] = await Promise.all([
       this.infoPostModel
-        .find({ topicId })
+        .find({ topicId: topicOid })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      this.infoPostModel.countDocuments({ topicId }),
+      this.infoPostModel.countDocuments({ topicId: topicOid }),
     ]);
 
     return { data, total, page, limit };
