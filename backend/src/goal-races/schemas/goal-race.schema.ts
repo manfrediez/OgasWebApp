@@ -42,3 +42,5 @@ export class GoalRace {
 }
 
 export const GoalRaceSchema = SchemaFactory.createForClass(GoalRace);
+GoalRaceSchema.index({ athleteId: 1, date: 1 });
+GoalRaceSchema.index({ coachId: 1 });

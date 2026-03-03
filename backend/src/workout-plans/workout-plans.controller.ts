@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  Query,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -19,6 +20,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Role } from '../common/enums';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @Controller('workout-plans')
 @UseGuards(JwtAuthGuard)
@@ -68,18 +70,40 @@ export class WorkoutPlansController {
   }
 
   @Get('athlete/:athleteId')
-  findByAthlete(@Param('athleteId') athleteId: string) {
-    return this.workoutPlansService.findByAthlete(athleteId);
+  findByAthlete(
+    @Param('athleteId') athleteId: string,
+    @CurrentUser('sub') requesterId: string,
+    @CurrentUser('role') role: string,
+    @Query() pagination: PaginationQueryDto,
+  ) {
+    return this.workoutPlansService.findByAthlete(
+      athleteId,
+      requesterId,
+      role,
+      pagination,
+    );
   }
 
   @Get('athlete/:athleteId/summary')
-  getAthleteSummary(@Param('athleteId') athleteId: string) {
-    return this.workoutPlansService.getAthleteSummary(athleteId);
+  getAthleteSummary(
+    @Param('athleteId') athleteId: string,
+    @CurrentUser('sub') requesterId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.workoutPlansService.getAthleteSummary(
+      athleteId,
+      requesterId,
+      role,
+    );
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.workoutPlansService.findById(id);
+  findOne(
+    @Param('id') id: string,
+    @CurrentUser('sub') requesterId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.workoutPlansService.findByIdWithAccess(id, requesterId, role);
   }
 
   @Patch(':id')

@@ -4,6 +4,7 @@ import {
   RaceStrategy,
   RaceStrategySchema,
 } from './schemas/race-strategy.schema';
+import { User, UserSchema } from '../users/schemas/user.schema';
 import { RaceStrategiesService } from './race-strategies.service';
 import { RaceStrategiesController } from './race-strategies.controller';
 
@@ -11,6 +12,7 @@ import { RaceStrategiesController } from './race-strategies.controller';
   imports: [
     MongooseModule.forFeature([
       { name: RaceStrategy.name, schema: RaceStrategySchema },
+      { name: User.name, schema: UserSchema },
     ]),
   ],
   controllers: [RaceStrategiesController],

@@ -13,6 +13,7 @@ import { UpdateAthleteMetricsDto } from './dto/update-athlete-metrics.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Role } from '../common/enums';
 
 @Controller('athlete-metrics')
@@ -22,18 +23,31 @@ export class AthleteMetricsController {
 
   @Post()
   @Roles(Role.COACH)
-  create(@Body() dto: CreateAthleteMetricsDto) {
-    return this.metricsService.create(dto);
+  create(
+    @Body() dto: CreateAthleteMetricsDto,
+    @CurrentUser('sub') requesterId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.metricsService.create(dto, requesterId, role);
   }
 
   @Get('athlete/:athleteId')
-  findByAthlete(@Param('athleteId') athleteId: string) {
-    return this.metricsService.findByAthlete(athleteId);
+  findByAthlete(
+    @Param('athleteId') athleteId: string,
+    @CurrentUser('sub') requesterId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.metricsService.findByAthlete(athleteId, requesterId, role);
   }
 
   @Patch(':id')
   @Roles(Role.COACH)
-  update(@Param('id') id: string, @Body() dto: UpdateAthleteMetricsDto) {
-    return this.metricsService.update(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateAthleteMetricsDto,
+    @CurrentUser('sub') requesterId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.metricsService.update(id, dto, requesterId, role);
   }
 }

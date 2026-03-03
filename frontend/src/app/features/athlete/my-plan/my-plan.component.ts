@@ -2,7 +2,9 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { AuthService } from '../../../core/services/auth.service';
 import { WorkoutPlansService } from '../../../services/workout-plans.service';
+import { ActivityDataService } from '../../../services/activity-data.service';
 import { WorkoutPlan, Week, Session, UpdateSessionFeedbackRequest } from '../../../models/workout-plan.model';
+import { ActivityData } from '../../../models/activity-data.model';
 import { SessionStatus } from '../../../core/models/enums';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
@@ -63,6 +65,8 @@ import { SessionFeedbackDialogComponent } from './session-feedback-dialog/sessio
           @if (currentWeek(); as week) {
             <app-week-view
               [week]="week"
+              [activityDataMap]="activityDataMap()"
+              [planId]="plan._id"
               (sessionClick)="openFeedback($event)" />
           }
 
@@ -91,6 +95,7 @@ import { SessionFeedbackDialogComponent } from './session-feedback-dialog/sessio
 export class MyPlanComponent implements OnInit {
   private authService = inject(AuthService);
   private plansService = inject(WorkoutPlansService);
+  private activityDataService = inject(ActivityDataService);
   private dialog = inject(Dialog);
 
   plans = signal<WorkoutPlan[]>([]);
@@ -105,6 +110,8 @@ export class MyPlanComponent implements OnInit {
     return plan.weeks.find(w => w.weekNumber === this.selectedWeek()) || null;
   });
 
+  activityDataMap = signal<Map<string, ActivityData>>(new Map());
+
   ngOnInit() {
     const user = this.authService.currentUser();
     if (!user) return;
@@ -118,6 +125,20 @@ export class MyPlanComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
+    });
+
+    // Load activity data for this athlete
+    this.activityDataService.getByAthlete(user._id).subscribe({
+      next: activities => {
+        const map = new Map<string, ActivityData>();
+        for (const activity of activities) {
+          if (activity.matched && activity.planId && activity.weekNumber != null && activity.sessionIndex != null) {
+            const key = `${activity.planId}-${activity.weekNumber}-${activity.sessionIndex}`;
+            map.set(key, activity);
+          }
+        }
+        this.activityDataMap.set(map);
+      },
     });
   }
 

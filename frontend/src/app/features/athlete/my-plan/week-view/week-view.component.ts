@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { Week, Session } from '../../../../models/workout-plan.model';
+import { ActivityData } from '../../../../models/activity-data.model';
 import { SessionStatus } from '../../../../core/models/enums';
 import { SessionDetailComponent } from '../session-detail/session-detail.component';
 import { DateEsPipe } from '../../../../shared/pipes/date-es.pipe';
@@ -29,7 +30,9 @@ const DAY_NAMES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábad
               }
             </p>
             <div (click)="sessionClick.emit({ session: session, dayOfWeek: dayIdx })" class="cursor-pointer">
-              <app-session-detail [session]="session" />
+              <app-session-detail
+                [session]="session"
+                [activityData]="getActivityForSession(dayIdx)" />
             </div>
           </div>
         } @else {
@@ -44,6 +47,8 @@ const DAY_NAMES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábad
 })
 export class WeekViewComponent {
   week = input.required<Week>();
+  activityDataMap = input<Map<string, ActivityData>>(new Map());
+  planId = input<string>('');
   sessionClick = output<{ session: Session; dayOfWeek: number }>();
 
   dayIndices = [0, 1, 2, 3, 4, 5, 6];
@@ -51,6 +56,15 @@ export class WeekViewComponent {
 
   getSession(dayOfWeek: number): Session | undefined {
     return this.week().sessions.find(s => s.dayOfWeek === dayOfWeek);
+  }
+
+  getActivityForSession(dayOfWeek: number): ActivityData | undefined {
+    const sessions = this.week().sessions;
+    const sessionIdx = sessions.findIndex(s => s.dayOfWeek === dayOfWeek);
+    if (sessionIdx === -1) return undefined;
+
+    const key = `${this.planId()}-${this.week().weekNumber}-${sessionIdx}`;
+    return this.activityDataMap().get(key);
   }
 
   hasPendingFeedback(): boolean {

@@ -23,11 +23,18 @@ import { AuthService } from '../../../core/services/auth.service';
               id="password"
               type="password"
               [(ngModel)]="password"
+              #passwordInput="ngModel"
               name="password"
               required
               minlength="6"
               class="w-full"
+              [class.border-danger-500]="passwordInput.invalid && passwordInput.touched"
               placeholder="Mínimo 6 caracteres" />
+            @if (passwordInput.touched && passwordInput.errors?.['required']) {
+              <p class="text-xs text-danger-500 mt-1">La contraseña es obligatoria</p>
+            } @else if (passwordInput.touched && passwordInput.errors?.['minlength']) {
+              <p class="text-xs text-danger-500 mt-1">Mínimo 6 caracteres</p>
+            }
           </div>
 
           <div>
@@ -36,10 +43,17 @@ import { AuthService } from '../../../core/services/auth.service';
               id="confirmPassword"
               type="password"
               [(ngModel)]="confirmPassword"
+              #confirmInput="ngModel"
               name="confirmPassword"
               required
               class="w-full"
+              [class.border-danger-500]="(confirmInput.touched && confirmInput.invalid) || (confirmInput.touched && password !== confirmPassword && confirmPassword)"
               placeholder="Repetí tu contraseña" />
+            @if (confirmInput.touched && confirmInput.errors?.['required']) {
+              <p class="text-xs text-danger-500 mt-1">Confirmá tu contraseña</p>
+            } @else if (confirmInput.touched && password !== confirmPassword && confirmPassword) {
+              <p class="text-xs text-danger-500 mt-1">Las contraseñas no coinciden</p>
+            }
           </div>
 
           @if (error()) {

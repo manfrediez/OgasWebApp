@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { StrengthCircuitsService } from '../../../../services/strength-circuits.service';
 import { StrengthCircuit, Exercise } from '../../../../models/strength-circuit.model';
+import { ToastService } from '../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-strength-circuit-form',
@@ -82,6 +83,7 @@ export class StrengthCircuitFormComponent implements OnInit {
   dialogRef = inject(DialogRef<boolean>);
   data: { circuit?: StrengthCircuit } = inject(DIALOG_DATA);
   private circuitsService = inject(StrengthCircuitsService);
+  private toast = inject(ToastService);
 
   isEdit = false;
   form = { name: '', circuitNumber: 1, routineNumber: null as number | null, timerFormat: '' };
@@ -112,9 +114,15 @@ export class StrengthCircuitFormComponent implements OnInit {
       exercises: this.exercises,
     };
     if (this.isEdit) {
-      this.circuitsService.update(this.data.circuit!._id, payload).subscribe(() => this.dialogRef.close(true));
+      this.circuitsService.update(this.data.circuit!._id, payload).subscribe({
+        next: () => { this.toast.success('Circuito actualizado'); this.dialogRef.close(true); },
+        error: () => this.toast.error('Error al guardar el circuito'),
+      });
     } else {
-      this.circuitsService.create(payload).subscribe(() => this.dialogRef.close(true));
+      this.circuitsService.create(payload).subscribe({
+        next: () => { this.toast.success('Circuito creado'); this.dialogRef.close(true); },
+        error: () => this.toast.error('Error al crear el circuito'),
+      });
     }
   }
 }

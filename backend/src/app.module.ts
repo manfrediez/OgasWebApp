@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -12,6 +13,8 @@ import { StrengthCircuitsModule } from './strength-circuits/strength-circuits.mo
 import { GoalRacesModule } from './goal-races/goal-races.module';
 import { MessagesModule } from './messages/messages.module';
 import { GeneralInfoModule } from './general-info/general-info.module';
+import { StravaModule } from './strava/strava.module';
+import { ActivityDataModule } from './activity-data/activity-data.module';
 
 @Module({
   imports: [
@@ -27,6 +30,7 @@ import { GeneralInfoModule } from './general-info/general-info.module';
         uri: configService.get<string>('MONGODB_URI'),
       }),
     }),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }]),
     AuthModule,
     UsersModule,
     WorkoutPlansModule,
@@ -36,6 +40,8 @@ import { GeneralInfoModule } from './general-info/general-info.module';
     GoalRacesModule,
     MessagesModule,
     GeneralInfoModule,
+    StravaModule,
+    ActivityDataModule,
   ],
 })
 export class AppModule {}

@@ -3,6 +3,7 @@ import {
   IsDateString,
   IsOptional,
   IsNumber,
+  MaxLength,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -18,6 +19,7 @@ export class RaceResultDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(20)
   time?: string;
 }
 
@@ -26,9 +28,11 @@ export class CreateGoalRaceDto {
   athleteId: string;
 
   @IsString()
+  @MaxLength(200)
   name: string;
 
   @IsString()
+  @MaxLength(50)
   distance: string;
 
   @IsDateString()
@@ -36,6 +40,7 @@ export class CreateGoalRaceDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   location?: string;
 
   @IsOptional()

@@ -147,3 +147,6 @@ export class WorkoutPlan {
 }
 
 export const WorkoutPlanSchema = SchemaFactory.createForClass(WorkoutPlan);
+WorkoutPlanSchema.index({ athleteId: 1, startDate: -1 });
+WorkoutPlanSchema.index({ coachId: 1 });
+WorkoutPlanSchema.index({ isTemplate: 1, coachId: 1 });

@@ -16,6 +16,10 @@ import { UpdateTopicDto } from './dto/update-topic.dto';
 import { CreateInfoPostDto } from './dto/create-info-post.dto';
 import { UpdateInfoPostDto } from './dto/update-info-post.dto';
 import { Role } from '../common/enums';
+import {
+  PaginationQueryDto,
+  PaginatedResult,
+} from '../common/dto/pagination-query.dto';
 
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'general-info');
 
@@ -149,16 +153,32 @@ export class GeneralInfoService {
     });
   }
 
-  async getPostsByTopic(userId: string, role: Role, topicId: string) {
+  async getPostsByTopic(
+    userId: string,
+    role: Role,
+    topicId: string,
+    pagination?: PaginationQueryDto,
+  ): Promise<PaginatedResult<any>> {
     const coachId = await this.resolveCoachId(userId, role);
     const topic = await this.topicModel.findById(topicId).lean();
     if (!topic || topic.coachId.toString() !== coachId) {
       throw new NotFoundException('Tópico no encontrado');
     }
-    return this.infoPostModel
-      .find({ topicId })
-      .sort({ createdAt: -1 })
-      .lean();
+    const page = pagination?.page ?? 1;
+    const limit = pagination?.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      this.infoPostModel
+        .find({ topicId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.infoPostModel.countDocuments({ topicId }),
+    ]);
+
+    return { data, total, page, limit };
   }
 
   async getPost(userId: string, role: Role, postId: string) {

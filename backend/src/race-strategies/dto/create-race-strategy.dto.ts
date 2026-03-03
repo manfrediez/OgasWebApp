@@ -4,6 +4,7 @@ import {
   IsDateString,
   IsArray,
   IsOptional,
+  MaxLength,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -17,18 +18,22 @@ export class CreateSegmentDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   objective?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(50)
   paceZone?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   technicalFocus?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   strategicKey?: string;
 }
 
@@ -37,6 +42,7 @@ export class CreateRaceStrategyDto {
   athleteId: string;
 
   @IsString()
+  @MaxLength(200)
   raceName: string;
 
   @IsDateString()
@@ -53,13 +59,16 @@ export class CreateRaceStrategyDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   preRaceActivation?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   preRaceNotes?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   generalTechnique?: string;
 }

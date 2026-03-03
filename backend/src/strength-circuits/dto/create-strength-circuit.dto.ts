@@ -3,12 +3,14 @@ import {
   IsNumber,
   IsArray,
   IsOptional,
+  MaxLength,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateExerciseDto {
   @IsString()
+  @MaxLength(200)
   name: string;
 
   @IsOptional()
@@ -17,6 +19,7 @@ export class CreateExerciseDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(50)
   reps?: string;
 
   @IsOptional()
@@ -33,6 +36,7 @@ export class CreateExerciseDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(1000)
   notes?: string;
 }
 
@@ -41,6 +45,7 @@ export class CreateStrengthCircuitDto {
   circuitNumber: number;
 
   @IsString()
+  @MaxLength(200)
   name: string;
 
   @IsOptional()
@@ -59,5 +64,6 @@ export class CreateStrengthCircuitDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(100)
   timerFormat?: string;
 }

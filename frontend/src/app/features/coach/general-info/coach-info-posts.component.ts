@@ -9,6 +9,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-coach-info-posts',
@@ -161,6 +162,7 @@ export class CoachInfoPostsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   infoService = inject(GeneralInfoService);
   private dialog = inject(Dialog);
+  private toast = inject(ToastService);
 
   topicId = '';
   topicName = signal('');
@@ -191,7 +193,10 @@ export class CoachInfoPostsComponent implements OnInit {
         this.posts.set(posts);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.toast.error('Error al cargar publicaciones');
+        this.loading.set(false);
+      },
     });
   }
 
@@ -259,11 +264,15 @@ export class CoachInfoPostsComponent implements OnInit {
 
     obs.subscribe({
       next: () => {
+        this.toast.success(editing ? 'Publicación actualizada' : 'Publicación creada');
         this.cancelForm();
         this.saving.set(false);
         this.loadPosts();
       },
-      error: () => this.saving.set(false),
+      error: () => {
+        this.toast.error('Error al guardar la publicación');
+        this.saving.set(false);
+      },
     });
   }
 
@@ -279,7 +288,10 @@ export class CoachInfoPostsComponent implements OnInit {
 
     ref.closed.subscribe((confirmed) => {
       if (confirmed) {
-        this.infoService.deletePost(post._id).subscribe(() => this.loadPosts());
+        this.infoService.deletePost(post._id).subscribe({
+          next: () => { this.toast.success('Publicación eliminada'); this.loadPosts(); },
+          error: () => this.toast.error('Error al eliminar publicación'),
+        });
       }
     });
   }

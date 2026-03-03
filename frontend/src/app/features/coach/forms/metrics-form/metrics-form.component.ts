@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { AthleteMetricsService } from '../../../../services/athlete-metrics.service';
 import { AthleteMetrics } from '../../../../models/athlete-metrics.model';
+import { ToastService } from '../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-metrics-form',
@@ -88,6 +89,7 @@ export class MetricsFormComponent implements OnInit {
   dialogRef = inject(DialogRef<boolean>);
   data: { athleteId: string; metrics?: AthleteMetrics | null } = inject(DIALOG_DATA);
   private metricsService = inject(AthleteMetricsService);
+  private toast = inject(ToastService);
 
   isEdit = false;
   form: any = {};
@@ -127,9 +129,15 @@ export class MetricsFormComponent implements OnInit {
     };
 
     if (this.isEdit) {
-      this.metricsService.update(this.data.metrics!._id, payload).subscribe(() => this.dialogRef.close(true));
+      this.metricsService.update(this.data.metrics!._id, payload).subscribe({
+        next: () => { this.toast.success('Métricas actualizadas'); this.dialogRef.close(true); },
+        error: () => this.toast.error('Error al guardar las métricas'),
+      });
     } else {
-      this.metricsService.create({ ...payload, athleteId: this.data.athleteId }).subscribe(() => this.dialogRef.close(true));
+      this.metricsService.create({ ...payload, athleteId: this.data.athleteId }).subscribe({
+        next: () => { this.toast.success('Métricas creadas'); this.dialogRef.close(true); },
+        error: () => this.toast.error('Error al crear las métricas'),
+      });
     }
   }
 }

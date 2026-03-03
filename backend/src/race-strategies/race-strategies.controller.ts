@@ -30,13 +30,21 @@ export class RaceStrategiesController {
   }
 
   @Get('athlete/:athleteId')
-  findByAthlete(@Param('athleteId') athleteId: string) {
-    return this.strategiesService.findByAthlete(athleteId);
+  findByAthlete(
+    @Param('athleteId') athleteId: string,
+    @CurrentUser('sub') requesterId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.strategiesService.findByAthlete(athleteId, requesterId, role);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.strategiesService.findById(id);
+  findOne(
+    @Param('id') id: string,
+    @CurrentUser('sub') requesterId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.strategiesService.findByIdWithAccess(id, requesterId, role);
   }
 
   @Patch(':id')

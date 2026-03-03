@@ -58,3 +58,5 @@ export class StrengthCircuit {
 
 export const StrengthCircuitSchema =
   SchemaFactory.createForClass(StrengthCircuit);
+StrengthCircuitSchema.index({ coachId: 1 });
+StrengthCircuitSchema.index({ planId: 1 });

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { GoalRacesService } from '../../../../services/goal-races.service';
 import { GoalRace } from '../../../../models/goal-race.model';
+import { ToastService } from '../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-goal-race-form',
@@ -17,16 +18,30 @@ import { GoalRace } from '../../../../models/goal-race.model';
       <form (ngSubmit)="onSubmit()" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-primary-600 mb-1">Nombre</label>
-          <input [(ngModel)]="form.name" name="name" required class="w-full" placeholder="Ej: Ultra Trail de Córdoba" />
+          <input [(ngModel)]="form.name" #nameInput="ngModel" name="name" required maxlength="100" class="w-full"
+                 [class.border-danger-500]="nameInput.invalid && nameInput.touched"
+                 placeholder="Ej: Ultra Trail de Córdoba" />
+          @if (nameInput.invalid && nameInput.touched) {
+            <p class="text-xs text-danger-500 mt-1">El nombre es obligatorio</p>
+          }
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-primary-600 mb-1">Distancia</label>
-            <input [(ngModel)]="form.distance" name="distance" required class="w-full" placeholder="Ej: 42K" />
+            <input [(ngModel)]="form.distance" #distInput="ngModel" name="distance" required class="w-full"
+                   [class.border-danger-500]="distInput.invalid && distInput.touched"
+                   placeholder="Ej: 42K" />
+            @if (distInput.invalid && distInput.touched) {
+              <p class="text-xs text-danger-500 mt-1">La distancia es obligatoria</p>
+            }
           </div>
           <div>
             <label class="block text-sm font-medium text-primary-600 mb-1">Fecha</label>
-            <input [(ngModel)]="form.date" name="date" type="date" required class="w-full" />
+            <input [(ngModel)]="form.date" #dateInput="ngModel" name="date" type="date" required class="w-full"
+                   [class.border-danger-500]="dateInput.invalid && dateInput.touched" />
+            @if (dateInput.invalid && dateInput.touched) {
+              <p class="text-xs text-danger-500 mt-1">La fecha es obligatoria</p>
+            }
           </div>
         </div>
         <div>
@@ -66,6 +81,7 @@ export class GoalRaceFormComponent implements OnInit {
   dialogRef = inject(DialogRef<boolean>);
   data: { athleteId: string; race?: GoalRace } = inject(DIALOG_DATA);
   private racesService = inject(GoalRacesService);
+  private toast = inject(ToastService);
 
   isEdit = false;
   form = { name: '', distance: '', date: '', location: '' };
@@ -92,9 +108,15 @@ export class GoalRaceFormComponent implements OnInit {
       : undefined;
 
     if (this.isEdit) {
-      this.racesService.update(this.data.race!._id, { ...this.form, result }).subscribe(() => this.dialogRef.close(true));
+      this.racesService.update(this.data.race!._id, { ...this.form, result }).subscribe({
+        next: () => { this.toast.success('Carrera actualizada'); this.dialogRef.close(true); },
+        error: () => this.toast.error('Error al guardar la carrera'),
+      });
     } else {
-      this.racesService.create({ ...this.form, athleteId: this.data.athleteId, result }).subscribe(() => this.dialogRef.close(true));
+      this.racesService.create({ ...this.form, athleteId: this.data.athleteId, result }).subscribe({
+        next: () => { this.toast.success('Carrera creada'); this.dialogRef.close(true); },
+        error: () => this.toast.error('Error al crear la carrera'),
+      });
     }
   }
 }

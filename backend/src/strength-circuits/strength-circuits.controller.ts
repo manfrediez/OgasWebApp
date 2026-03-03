@@ -5,6 +5,7 @@ import {
   Patch,
   Param,
   Body,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { StrengthCircuitsService } from './strength-circuits.service';
@@ -14,6 +15,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Role } from '../common/enums';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @Controller('strength-circuits')
 @UseGuards(JwtAuthGuard)
@@ -31,18 +33,31 @@ export class StrengthCircuitsController {
   }
 
   @Get()
-  findAll() {
-    return this.circuitsService.findAll();
+  @UseGuards(RolesGuard)
+  @Roles(Role.COACH)
+  findAll(
+    @CurrentUser('sub') coachId: string,
+    @Query() pagination: PaginationQueryDto,
+  ) {
+    return this.circuitsService.findAllByCoach(coachId, pagination);
   }
 
   @Get('plan/:planId')
-  findByPlan(@Param('planId') planId: string) {
-    return this.circuitsService.findByPlan(planId);
+  findByPlan(
+    @Param('planId') planId: string,
+    @CurrentUser('sub') requesterId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.circuitsService.findByPlan(planId, requesterId, role);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.circuitsService.findById(id);
+  findOne(
+    @Param('id') id: string,
+    @CurrentUser('sub') requesterId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.circuitsService.findByIdWithAccess(id, requesterId, role);
   }
 
   @Patch(':id')

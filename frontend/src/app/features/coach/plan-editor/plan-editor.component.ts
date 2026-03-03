@@ -7,6 +7,7 @@ import { SessionStatus } from '../../../core/models/enums';
 import { WeekEditorComponent } from './week-editor/week-editor.component';
 import { StimulusMatrixComponent } from './stimulus-matrix/stimulus-matrix.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-plan-editor',
@@ -45,7 +46,12 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div class="col-span-2">
                 <label class="block text-sm font-medium text-primary-600 mb-1">Nombre del plan</label>
-                <input [(ngModel)]="form.name" name="name" required class="w-full" placeholder="Ej: Mesociclo 5 - Competitivo" />
+                <input [(ngModel)]="form.name" #nameInput="ngModel" name="name" required maxlength="100" class="w-full"
+                       [class.border-danger-500]="nameInput.invalid && nameInput.touched"
+                       placeholder="Ej: Mesociclo 5 - Competitivo" />
+                @if (nameInput.invalid && nameInput.touched) {
+                  <p class="text-xs text-danger-500 mt-1">El nombre es obligatorio</p>
+                }
               </div>
               <div>
                 <label class="block text-sm font-medium text-primary-600 mb-1">Nro. Mesociclo</label>
@@ -59,11 +65,21 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-primary-600 mb-1">Fecha inicio</label>
-                <input [(ngModel)]="form.startDate" name="startDate" type="date" required class="w-full" />
+                <input [(ngModel)]="form.startDate" #startInput="ngModel" name="startDate" type="date" required class="w-full"
+                       [class.border-danger-500]="startInput.invalid && startInput.touched" />
+                @if (startInput.invalid && startInput.touched) {
+                  <p class="text-xs text-danger-500 mt-1">La fecha de inicio es obligatoria</p>
+                }
               </div>
               <div>
                 <label class="block text-sm font-medium text-primary-600 mb-1">Fecha fin</label>
-                <input [(ngModel)]="form.endDate" name="endDate" type="date" required class="w-full" />
+                <input [(ngModel)]="form.endDate" #endInput="ngModel" name="endDate" type="date" required class="w-full"
+                       [class.border-danger-500]="(endInput.invalid && endInput.touched) || (form.endDate && form.startDate && form.endDate < form.startDate)" />
+                @if (endInput.invalid && endInput.touched) {
+                  <p class="text-xs text-danger-500 mt-1">La fecha de fin es obligatoria</p>
+                } @else if (form.endDate && form.startDate && form.endDate < form.startDate) {
+                  <p class="text-xs text-danger-500 mt-1">La fecha fin debe ser posterior a la de inicio</p>
+                }
               </div>
             </div>
           </div>
@@ -124,6 +140,7 @@ export class PlanEditorComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private plansService = inject(WorkoutPlansService);
+  private toast = inject(ToastService);
 
   isEdit = false;
   athleteId = '';
@@ -245,9 +262,11 @@ export class PlanEditorComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.saving.set(false);
+        this.toast.success('Plan guardado');
         this.goBack();
       },
       error: () => {
+        this.toast.error('Error al guardar el plan');
         this.error.set('Error al guardar el plan');
         this.saving.set(false);
       },

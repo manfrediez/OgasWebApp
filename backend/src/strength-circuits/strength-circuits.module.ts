@@ -4,6 +4,11 @@ import {
   StrengthCircuit,
   StrengthCircuitSchema,
 } from './schemas/strength-circuit.schema';
+import { User, UserSchema } from '../users/schemas/user.schema';
+import {
+  WorkoutPlan,
+  WorkoutPlanSchema,
+} from '../workout-plans/schemas/workout-plan.schema';
 import { StrengthCircuitsService } from './strength-circuits.service';
 import { StrengthCircuitsController } from './strength-circuits.controller';
 
@@ -11,6 +16,8 @@ import { StrengthCircuitsController } from './strength-circuits.controller';
   imports: [
     MongooseModule.forFeature([
       { name: StrengthCircuit.name, schema: StrengthCircuitSchema },
+      { name: User.name, schema: UserSchema },
+      { name: WorkoutPlan.name, schema: WorkoutPlanSchema },
     ]),
   ],
   controllers: [StrengthCircuitsController],

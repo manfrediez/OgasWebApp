@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import {
@@ -6,14 +10,18 @@ import {
   AthleteMetricsDocument,
   HRZones,
 } from './schemas/athlete-metrics.schema';
+import { User, UserDocument } from '../users/schemas/user.schema';
 import { CreateAthleteMetricsDto } from './dto/create-athlete-metrics.dto';
 import { UpdateAthleteMetricsDto } from './dto/update-athlete-metrics.dto';
+import { assertAccess } from '../common/helpers/access.helper';
 
 @Injectable()
 export class AthleteMetricsService {
   constructor(
     @InjectModel(AthleteMetrics.name)
     private metricsModel: Model<AthleteMetricsDocument>,
+    @InjectModel(User.name)
+    private userModel: Model<UserDocument>,
   ) {}
 
   calculateHRZones(fcMax: number): HRZones {
@@ -26,7 +34,12 @@ export class AthleteMetricsService {
     };
   }
 
-  async create(dto: CreateAthleteMetricsDto): Promise<AthleteMetricsDocument> {
+  async create(
+    dto: CreateAthleteMetricsDto,
+    requesterId: string,
+    role: string,
+  ): Promise<AthleteMetricsDocument> {
+    await assertAccess(requesterId, role, dto.athleteId, this.userModel);
     const data: any = {
       ...dto,
       athleteId: new Types.ObjectId(dto.athleteId),
@@ -37,10 +50,15 @@ export class AthleteMetricsService {
     return this.metricsModel.create(data);
   }
 
-  async findByAthlete(athleteId: string): Promise<AthleteMetricsDocument> {
-    const metrics = await this.metricsModel.findOne({
-      athleteId: new Types.ObjectId(athleteId),
-    });
+  async findByAthlete(
+    athleteId: string,
+    requesterId: string,
+    role: string,
+  ) {
+    await assertAccess(requesterId, role, athleteId, this.userModel);
+    const metrics = await this.metricsModel
+      .findOne({ athleteId: new Types.ObjectId(athleteId) })
+      .lean();
     if (!metrics) throw new NotFoundException('Athlete metrics not found');
     return metrics;
   }
@@ -48,9 +66,17 @@ export class AthleteMetricsService {
   async update(
     id: string,
     dto: UpdateAthleteMetricsDto,
+    requesterId: string,
+    role: string,
   ): Promise<AthleteMetricsDocument> {
     const metrics = await this.metricsModel.findById(id);
     if (!metrics) throw new NotFoundException('Athlete metrics not found');
+    await assertAccess(
+      requesterId,
+      role,
+      metrics.athleteId.toString(),
+      this.userModel,
+    );
 
     Object.assign(metrics, dto);
     if (dto.fcMax) {

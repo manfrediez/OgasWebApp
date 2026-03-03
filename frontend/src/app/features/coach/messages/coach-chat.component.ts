@@ -16,6 +16,7 @@ import { Message } from '../../../models/message.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-coach-chat',
@@ -83,6 +84,7 @@ export class CoachChatComponent implements OnInit, OnDestroy {
   private messagesService = inject(MessagesService);
   private usersService = inject(UsersService);
   private authService = inject(AuthService);
+  private toast = inject(ToastService);
 
   private scrollContainer = viewChild<ElementRef>('scrollContainer');
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
@@ -168,6 +170,7 @@ export class CoachChatComponent implements OnInit, OnDestroy {
           this.displayMessages.set(this.messages());
           this.scrollToBottom();
         },
+        error: () => this.toast.error('Error al enviar mensaje'),
       });
   }
 

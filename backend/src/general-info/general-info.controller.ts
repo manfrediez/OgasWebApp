@@ -6,10 +6,12 @@ import {
   Delete,
   Param,
   Body,
+  Query,
   UseGuards,
   UseInterceptors,
   UploadedFiles,
   Res,
+  BadRequestException,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -39,9 +41,21 @@ import { CreateTopicDto } from './dto/create-topic.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
 import { CreateInfoPostDto } from './dto/create-info-post.dto';
 import { UpdateInfoPostDto } from './dto/update-info-post.dto';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 const ALLOWED_EXTENSIONS = /\.(jpg|jpeg|png|gif|webp|pdf|doc|docx)$/i;
+const ALLOWED_MIMES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]);
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const UUID_FILENAME_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|jpeg|png|gif|webp|pdf|doc|docx)$/i;
 
 const storage = diskStorage({
   destination: './uploads/general-info',
@@ -58,6 +72,9 @@ const fileFilter = (
 ) => {
   if (!ALLOWED_EXTENSIONS.test(file.originalname)) {
     return cb(new Error('Tipo de archivo no permitido'), false);
+  }
+  if (!ALLOWED_MIMES.has(file.mimetype)) {
+    return cb(new Error('Tipo MIME no permitido'), false);
   }
   cb(null, true);
 };
@@ -133,8 +150,9 @@ export class GeneralInfoController {
     @CurrentUser('sub') userId: string,
     @CurrentUser('role') role: Role,
     @Param('topicId') topicId: string,
+    @Query() pagination: PaginationQueryDto,
   ) {
-    return this.service.getPostsByTopic(userId, role, topicId);
+    return this.service.getPostsByTopic(userId, role, topicId, pagination);
   }
 
   @Get('posts/:id')
@@ -182,6 +200,9 @@ export class GeneralInfoController {
     @Param('storedName') storedName: string,
     @Res() res: Response,
   ) {
+    if (!UUID_FILENAME_REGEX.test(storedName)) {
+      throw new BadRequestException('Nombre de archivo inválido');
+    }
     const filePath = this.service.getFilePath(storedName);
     const ext = path.extname(storedName).toLowerCase();
     const contentType = MIME_MAP[ext] || 'application/octet-stream';

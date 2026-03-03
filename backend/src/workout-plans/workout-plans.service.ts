@@ -9,15 +9,23 @@ import {
   WorkoutPlan,
   WorkoutPlanDocument,
 } from './schemas/workout-plan.schema';
+import { User, UserDocument } from '../users/schemas/user.schema';
 import { CreateWorkoutPlanDto } from './dto/create-workout-plan.dto';
 import { UpdateSessionFeedbackDto } from './dto/update-session-feedback.dto';
 import { ClonePlanDto } from './dto/clone-plan.dto';
+import { assertAccess, assertOwnerOrCoach } from '../common/helpers/access.helper';
+import {
+  PaginationQueryDto,
+  PaginatedResult,
+} from '../common/dto/pagination-query.dto';
 
 @Injectable()
 export class WorkoutPlansService {
   constructor(
     @InjectModel(WorkoutPlan.name)
     private workoutPlanModel: Model<WorkoutPlanDocument>,
+    @InjectModel(User.name)
+    private userModel: Model<UserDocument>,
   ) {}
 
   async create(
@@ -31,16 +39,50 @@ export class WorkoutPlansService {
     });
   }
 
-  async findByAthlete(athleteId: string): Promise<WorkoutPlanDocument[]> {
-    return this.workoutPlanModel
-      .find({ athleteId: new Types.ObjectId(athleteId) })
-      .sort({ startDate: -1 })
-      .exec();
+  async findByAthlete(
+    athleteId: string,
+    requesterId: string,
+    role: string,
+    pagination?: PaginationQueryDto,
+  ): Promise<PaginatedResult<any>> {
+    await assertAccess(requesterId, role, athleteId, this.userModel);
+    const page = pagination?.page ?? 1;
+    const limit = pagination?.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const filter = { athleteId: new Types.ObjectId(athleteId) };
+    const [data, total] = await Promise.all([
+      this.workoutPlanModel
+        .find(filter)
+        .sort({ startDate: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean()
+        .exec(),
+      this.workoutPlanModel.countDocuments(filter),
+    ]);
+    return { data, total, page, limit };
   }
 
   async findById(id: string): Promise<WorkoutPlanDocument> {
     const plan = await this.workoutPlanModel.findById(id);
     if (!plan) throw new NotFoundException('Workout plan not found');
+    return plan;
+  }
+
+  async findByIdWithAccess(
+    id: string,
+    requesterId: string,
+    role: string,
+  ) {
+    const plan = await this.workoutPlanModel.findById(id).lean();
+    if (!plan) throw new NotFoundException('Workout plan not found');
+    await assertOwnerOrCoach(
+      requesterId,
+      role,
+      plan.coachId.toString(),
+      plan.athleteId?.toString() || '',
+    );
     return plan;
   }
 
@@ -89,10 +131,11 @@ export class WorkoutPlansService {
     });
   }
 
-  async findTemplates(coachId: string): Promise<WorkoutPlanDocument[]> {
+  async findTemplates(coachId: string) {
     return this.workoutPlanModel
       .find({ coachId: new Types.ObjectId(coachId), isTemplate: true })
       .sort({ createdAt: -1 })
+      .lean()
       .exec();
   }
 
@@ -152,7 +195,12 @@ export class WorkoutPlansService {
     });
   }
 
-  async getAthleteSummary(athleteId: string) {
+  async getAthleteSummary(
+    athleteId: string,
+    requesterId: string,
+    role: string,
+  ) {
+    await assertAccess(requesterId, role, athleteId, this.userModel);
     const plans = await this.workoutPlanModel
       .find({ athleteId: new Types.ObjectId(athleteId) })
       .sort({ startDate: -1 })

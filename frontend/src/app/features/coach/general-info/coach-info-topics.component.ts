@@ -7,6 +7,7 @@ import { Topic } from '../../../models/general-info.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-coach-info-topics',
@@ -92,6 +93,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
 export class CoachInfoTopicsComponent implements OnInit {
   private infoService = inject(GeneralInfoService);
   private dialog = inject(Dialog);
+  private toast = inject(ToastService);
 
   topics = signal<Topic[]>([]);
   loading = signal(true);
@@ -110,7 +112,10 @@ export class CoachInfoTopicsComponent implements OnInit {
         this.topics.set(topics);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.toast.error('Error al cargar temas');
+        this.loading.set(false);
+      },
     });
   }
 
@@ -142,11 +147,15 @@ export class CoachInfoTopicsComponent implements OnInit {
 
     obs.subscribe({
       next: () => {
+        this.toast.success(editing ? 'Tema actualizado' : 'Tema creado');
         this.cancelForm();
         this.saving.set(false);
         this.loadTopics();
       },
-      error: () => this.saving.set(false),
+      error: () => {
+        this.toast.error('Error al guardar el tema');
+        this.saving.set(false);
+      },
     });
   }
 
@@ -162,7 +171,10 @@ export class CoachInfoTopicsComponent implements OnInit {
 
     ref.closed.subscribe((confirmed) => {
       if (confirmed) {
-        this.infoService.deleteTopic(topic._id).subscribe(() => this.loadTopics());
+        this.infoService.deleteTopic(topic._id).subscribe({
+          next: () => { this.toast.success('Tema eliminado'); this.loadTopics(); },
+          error: () => this.toast.error('Error al eliminar tema'),
+        });
       }
     });
   }

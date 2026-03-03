@@ -4,6 +4,7 @@ import {
   AthleteMetrics,
   AthleteMetricsSchema,
 } from './schemas/athlete-metrics.schema';
+import { User, UserSchema } from '../users/schemas/user.schema';
 import { AthleteMetricsService } from './athlete-metrics.service';
 import { AthleteMetricsController } from './athlete-metrics.controller';
 
@@ -11,6 +12,7 @@ import { AthleteMetricsController } from './athlete-metrics.controller';
   imports: [
     MongooseModule.forFeature([
       { name: AthleteMetrics.name, schema: AthleteMetricsSchema },
+      { name: User.name, schema: UserSchema },
     ]),
   ],
   controllers: [AthleteMetricsController],

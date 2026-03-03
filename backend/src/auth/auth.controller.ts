@@ -1,4 +1,5 @@
 import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { InviteAthleteDto } from './dto/invite-athlete.dto';
@@ -15,6 +16,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @UseGuards(ThrottlerGuard)
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
@@ -30,6 +32,7 @@ export class AuthController {
   }
 
   @Post('accept-invite')
+  @UseGuards(ThrottlerGuard)
   acceptInvite(@Body() dto: AcceptInviteDto) {
     return this.authService.acceptInvite(dto);
   }

@@ -61,3 +61,5 @@ export class RaceStrategy {
 }
 
 export const RaceStrategySchema = SchemaFactory.createForClass(RaceStrategy);
+RaceStrategySchema.index({ athleteId: 1, raceDate: -1 });
+RaceStrategySchema.index({ coachId: 1 });

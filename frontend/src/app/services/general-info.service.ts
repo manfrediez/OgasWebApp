@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Topic, InfoPost } from '../models/general-info.model';
 
 @Injectable({ providedIn: 'root' })
@@ -28,7 +28,9 @@ export class GeneralInfoService {
   // ── posts ──
 
   getPostsByTopic(topicId: string): Observable<InfoPost[]> {
-    return this.http.get<InfoPost[]>(`/api/general-info/posts/topic/${topicId}`);
+    return this.http.get<any>(`/api/general-info/posts/topic/${topicId}`).pipe(
+      map(res => res.data ?? res),
+    );
   }
 
   getPost(id: string): Observable<InfoPost> {

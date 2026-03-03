@@ -5,6 +5,7 @@ import {
   Param,
   Body,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -38,14 +39,33 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(
+    @Param('id') id: string,
+    @CurrentUser('sub') requesterId: string,
+    @CurrentUser('role') role: string,
+  ) {
     const user = await this.usersService.findById(id);
+    if (role === Role.ATHLETE && requesterId !== id) {
+      throw new ForbiddenException('No tenés acceso a estos datos');
+    }
+    if (role === Role.COACH && requesterId !== id) {
+      if (user.coachId?.toString() !== requesterId) {
+        throw new ForbiddenException('No tenés acceso a estos datos');
+      }
+    }
     const { password, ...result } = user.toObject();
     return result;
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto,
+    @CurrentUser('sub') requesterId: string,
+  ) {
+    if (requesterId !== id) {
+      throw new ForbiddenException('Solo podés editar tu propio perfil');
+    }
     return this.usersService.update(id, dto);
   }
 }

@@ -14,6 +14,7 @@ import {
   ClonePlanDialogComponent,
   ClonePlanDialogData,
 } from './clone-plan-dialog.component';
+import { ToastService } from '../../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-plans-tab',
@@ -89,6 +90,7 @@ import {
 export class PlansTabComponent implements OnInit {
   private plansService = inject(WorkoutPlansService);
   private dialog = inject(Dialog);
+  private toast = inject(ToastService);
 
   athleteId = input.required<string>();
   plans = signal<WorkoutPlan[]>([]);
@@ -100,11 +102,14 @@ export class PlansTabComponent implements OnInit {
 
   private loadPlans() {
     this.plansService.getByAthlete(this.athleteId()).subscribe({
-      next: plans => {
-        this.plans.set(plans);
+      next: (res: any) => {
+        this.plans.set(res.data ?? res);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.toast.error('Error al cargar planes');
+        this.loading.set(false);
+      },
     });
   }
 
@@ -120,7 +125,10 @@ export class PlansTabComponent implements OnInit {
 
     ref.closed.subscribe(confirmed => {
       if (confirmed) {
-        this.plansService.saveAsTemplate(plan._id).subscribe();
+        this.plansService.saveAsTemplate(plan._id).subscribe({
+          next: () => this.toast.success('Plantilla guardada'),
+          error: () => this.toast.error('Error al guardar plantilla'),
+        });
       }
     });
   }
@@ -139,7 +147,8 @@ export class PlansTabComponent implements OnInit {
         this.plansService
           .clone(plan._id, { targetAthleteId })
           .subscribe({
-            next: () => this.loadPlans(),
+            next: () => { this.toast.success('Plan clonado'); this.loadPlans(); },
+            error: () => this.toast.error('Error al clonar plan'),
           });
       }
     });
@@ -160,7 +169,9 @@ export class PlansTabComponent implements OnInit {
         this.plansService.delete(plan._id).subscribe({
           next: () => {
             this.plans.update(plans => plans.filter(p => p._id !== plan._id));
+            this.toast.success('Plan eliminado');
           },
+          error: () => this.toast.error('Error al eliminar plan'),
         });
       }
     });

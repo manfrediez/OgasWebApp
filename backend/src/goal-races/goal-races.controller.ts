@@ -35,13 +35,21 @@ export class GoalRacesController {
   }
 
   @Get('athlete/:athleteId')
-  findByAthlete(@Param('athleteId') athleteId: string) {
-    return this.goalRacesService.findByAthlete(athleteId);
+  findByAthlete(
+    @Param('athleteId') athleteId: string,
+    @CurrentUser('sub') requesterId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.goalRacesService.findByAthlete(athleteId, requesterId, role);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.goalRacesService.findById(id);
+  findOne(
+    @Param('id') id: string,
+    @CurrentUser('sub') requesterId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.goalRacesService.findByIdWithAccess(id, requesterId, role);
   }
 
   @Patch(':id')

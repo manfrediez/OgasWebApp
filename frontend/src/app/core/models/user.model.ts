@@ -11,6 +11,10 @@ export interface User {
   birthDate?: string;
   phone?: string;
   address?: string;
+  strava?: {
+    athleteId: number;
+    connectedAt: string;
+  };
 }
 
 export interface JwtPayload {

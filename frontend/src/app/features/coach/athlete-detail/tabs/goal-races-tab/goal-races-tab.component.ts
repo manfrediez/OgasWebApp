@@ -7,6 +7,7 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
 import { DateEsPipe } from '../../../../../shared/pipes/date-es.pipe';
 import { GoalRaceFormComponent } from '../../../forms/goal-race-form/goal-race-form.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ToastService } from '../../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-goal-races-tab',
@@ -66,6 +67,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared
 export class GoalRacesTabComponent implements OnInit {
   private racesService = inject(GoalRacesService);
   private dialog = inject(Dialog);
+  private toast = inject(ToastService);
 
   athleteId = input.required<string>();
   races = signal<GoalRace[]>([]);
@@ -81,7 +83,10 @@ export class GoalRacesTabComponent implements OnInit {
         this.races.set(races);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.toast.error('Error al cargar carreras');
+        this.loading.set(false);
+      },
     });
   }
 
@@ -105,7 +110,10 @@ export class GoalRacesTabComponent implements OnInit {
     });
     ref.closed.subscribe(confirmed => {
       if (confirmed) {
-        this.racesService.delete(race._id).subscribe(() => this.loadRaces());
+        this.racesService.delete(race._id).subscribe({
+          next: () => { this.toast.success('Carrera eliminada'); this.loadRaces(); },
+          error: () => this.toast.error('Error al eliminar carrera'),
+        });
       }
     });
   }

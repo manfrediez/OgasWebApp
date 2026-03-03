@@ -6,6 +6,7 @@ import { LoadingSpinnerComponent } from '../../../../../shared/components/loadin
 import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
 import { DateEsPipe } from '../../../../../shared/pipes/date-es.pipe';
 import { RaceStrategyFormComponent } from '../../../forms/race-strategy-form/race-strategy-form.component';
+import { ToastService } from '../../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-race-strategies-tab',
@@ -72,6 +73,7 @@ import { RaceStrategyFormComponent } from '../../../forms/race-strategy-form/rac
 export class RaceStrategiesTabComponent implements OnInit {
   private strategiesService = inject(RaceStrategiesService);
   private dialog = inject(Dialog);
+  private toast = inject(ToastService);
 
   athleteId = input.required<string>();
   strategies = signal<RaceStrategy[]>([]);
@@ -87,7 +89,10 @@ export class RaceStrategiesTabComponent implements OnInit {
         this.strategies.set(s);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.toast.error('Error al cargar estrategias');
+        this.loading.set(false);
+      },
     });
   }
 
@@ -102,6 +107,9 @@ export class RaceStrategiesTabComponent implements OnInit {
   }
 
   publish(strategy: RaceStrategy) {
-    this.strategiesService.publish(strategy._id).subscribe(() => this.loadStrategies());
+    this.strategiesService.publish(strategy._id).subscribe({
+      next: () => { this.toast.success('Estrategia publicada'); this.loadStrategies(); },
+      error: () => this.toast.error('Error al publicar'),
+    });
   }
 }

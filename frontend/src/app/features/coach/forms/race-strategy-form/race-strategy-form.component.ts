@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { RaceStrategiesService } from '../../../../services/race-strategies.service';
 import { RaceStrategy, Segment } from '../../../../models/race-strategy.model';
+import { ToastService } from '../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-race-strategy-form',
@@ -98,6 +99,7 @@ export class RaceStrategyFormComponent implements OnInit {
   dialogRef = inject(DialogRef<boolean>);
   data: { athleteId: string; strategy?: RaceStrategy } = inject(DIALOG_DATA);
   private strategiesService = inject(RaceStrategiesService);
+  private toast = inject(ToastService);
 
   isEdit = false;
   form = { raceName: '', raceDate: '', totalDistance: 0, preRaceActivation: '', preRaceNotes: '', generalTechnique: '' };
@@ -131,9 +133,15 @@ export class RaceStrategyFormComponent implements OnInit {
     const payload = { ...this.form, segments: this.segments, athleteId: this.data.athleteId };
     if (this.isEdit) {
       const { athleteId, ...rest } = payload;
-      this.strategiesService.update(this.data.strategy!._id, rest).subscribe(() => this.dialogRef.close(true));
+      this.strategiesService.update(this.data.strategy!._id, rest).subscribe({
+        next: () => { this.toast.success('Estrategia actualizada'); this.dialogRef.close(true); },
+        error: () => this.toast.error('Error al guardar la estrategia'),
+      });
     } else {
-      this.strategiesService.create(payload).subscribe(() => this.dialogRef.close(true));
+      this.strategiesService.create(payload).subscribe({
+        next: () => { this.toast.success('Estrategia creada'); this.dialogRef.close(true); },
+        error: () => this.toast.error('Error al crear la estrategia'),
+      });
     }
   }
 }

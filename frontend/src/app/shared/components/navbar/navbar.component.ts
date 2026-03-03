@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { MessagesService } from '../../../services/messages.service';
 import { Role } from '../../../core/models/enums';
@@ -7,6 +7,7 @@ import { Role } from '../../../core/models/enums';
 @Component({
   selector: 'app-navbar',
   standalone: true,
+  imports: [RouterLink],
   template: `
     <nav class="bg-primary-500 text-white px-4 py-3 flex items-center justify-between shadow-md">
       <div class="flex items-center gap-2 md:gap-3">
@@ -25,7 +26,7 @@ import { Role } from '../../../core/models/enums';
               </span>
             }
           </button>
-          <span class="text-sm text-primary-100 hidden md:inline">{{ user.firstName }} {{ user.lastName }}</span>
+          <a routerLink="/profile" class="text-sm text-primary-100 hidden md:inline hover:text-white hover:underline cursor-pointer">{{ user.firstName }} {{ user.lastName }}</a>
           <button
             (click)="auth.logout()"
             class="rounded-lg bg-primary-700 px-2 py-1.5 text-xs md:text-sm md:px-3 hover:bg-primary-800">
