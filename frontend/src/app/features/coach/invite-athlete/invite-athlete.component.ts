@@ -101,8 +101,11 @@ export class InviteAthleteComponent {
         this.emailSent.set(res.emailSent);
         this.loading.set(false);
       },
-      error: () => {
-        this.error.set('Error al crear la invitación');
+      error: (err) => {
+        const msg = err?.status === 409
+          ? 'Ya existe un atleta registrado con ese email'
+          : 'Error al crear la invitación';
+        this.error.set(msg);
         this.loading.set(false);
       },
     });
