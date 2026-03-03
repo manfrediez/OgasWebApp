@@ -1,11 +1,10 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { AuthService } from '../../../core/services/auth.service';
 import { WorkoutPlansService } from '../../../services/workout-plans.service';
 import { ActivityDataService } from '../../../services/activity-data.service';
-import { WorkoutPlan, Week, Session, UpdateSessionFeedbackRequest } from '../../../models/workout-plan.model';
+import { WorkoutPlan, Session, UpdateSessionFeedbackRequest } from '../../../models/workout-plan.model';
 import { ActivityData } from '../../../models/activity-data.model';
-import { SessionStatus } from '../../../core/models/enums';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { WeekViewComponent } from './week-view/week-view.component';
@@ -61,41 +60,16 @@ import { SessionFeedbackDialogComponent } from './session-feedback-dialog/sessio
             </div>
           </div>
 
-          <!-- Week tabs -->
-          <div class="flex gap-2 mb-5 overflow-x-auto pb-1">
+          <!-- All weeks -->
+          <div class="space-y-4">
             @for (week of plan.weeks; track week.weekNumber) {
-              <button
-                (click)="selectedWeek.set(week.weekNumber)"
-                [class]="selectedWeek() === week.weekNumber
-                  ? 'flex items-center gap-1.5 rounded-xl bg-primary-500 px-3 md:px-4 py-2.5 text-sm font-medium text-white shadow-md transition-all duration-200'
-                  : 'flex items-center gap-1.5 rounded-xl bg-white/60 backdrop-blur-sm px-3 md:px-4 py-2.5 text-sm font-medium text-primary-500 hover:bg-white/80 hover:shadow-sm transition-all duration-200'">
-                @if (weekTotal(week) > 0 && weekPercent(week) === 100) {
-                  <svg class="w-4 h-4 shrink-0" [class]="selectedWeek() === week.weekNumber ? 'text-green-300' : 'text-green-500'" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                }
-                <span>Sem {{ week.weekNumber }}</span>
-                @if (weekTotal(week) > 0) {
-                  <span [class]="weekPercent(week) >= 80
-                    ? 'rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-semibold ' + (selectedWeek() === week.weekNumber ? 'text-green-200' : 'text-green-600')
-                    : weekPercent(week) >= 50
-                      ? 'rounded-full bg-yellow-500/20 px-2 py-0.5 text-[10px] font-semibold ' + (selectedWeek() === week.weekNumber ? 'text-yellow-200' : 'text-yellow-600')
-                      : 'rounded-full bg-white/30 px-2 py-0.5 text-[10px] font-semibold ' + (selectedWeek() === week.weekNumber ? 'text-white/80' : 'text-primary-400')">
-                    {{ weekCompleted(week) }}/{{ weekTotal(week) }}
-                  </span>
-                }
-              </button>
+              <app-week-view
+                [week]="week"
+                [activityDataMap]="activityDataMap()"
+                [planId]="plan._id"
+                (sessionClick)="openFeedback($event)" />
             }
           </div>
-
-          <!-- Week content -->
-          @if (currentWeek(); as week) {
-            <app-week-view
-              [week]="week"
-              [activityDataMap]="activityDataMap()"
-              [planId]="plan._id"
-              (sessionClick)="openFeedback($event)" />
-          }
 
           <!-- Activation protocol -->
           @if (plan.activationProtocol) {
@@ -147,14 +121,7 @@ export class MyPlanComponent implements OnInit {
   plans = signal<WorkoutPlan[]>([]);
   loading = signal(true);
   selectedPlanIdx = signal(0);
-  selectedWeek = signal(1);
-
   selectedPlan = signal<WorkoutPlan | null>(null);
-  currentWeek = computed(() => {
-    const plan = this.selectedPlan();
-    if (!plan) return null;
-    return plan.weeks.find(w => w.weekNumber === this.selectedWeek()) || null;
-  });
 
   activityDataMap = signal<Map<string, ActivityData>>(new Map());
 
@@ -192,23 +159,9 @@ export class MyPlanComponent implements OnInit {
   selectPlan(idx: number) {
     this.selectedPlanIdx.set(idx);
     this.selectedPlan.set(this.plans()[idx]);
-    this.selectedWeek.set(1);
   }
 
-  weekTotal(week: Week): number {
-    return week.sessions.length;
-  }
-
-  weekCompleted(week: Week): number {
-    return week.sessions.filter(s => s.status === SessionStatus.COMPLETED).length;
-  }
-
-  weekPercent(week: Week): number {
-    const total = this.weekTotal(week);
-    return total > 0 ? Math.round((this.weekCompleted(week) / total) * 100) : 0;
-  }
-
-  openFeedback(event: { session: Session; dayOfWeek: number }) {
+  openFeedback(event: { session: Session; dayOfWeek: number; weekNumber: number }) {
     const ref = this.dialog.open(SessionFeedbackDialogComponent, {
       data: { session: event.session },
       panelClass: ['flex', 'items-center', 'justify-center', 'p-4'],
@@ -218,7 +171,7 @@ export class MyPlanComponent implements OnInit {
       const result = raw as UpdateSessionFeedbackRequest | null | undefined;
       if (!result) return;
       const plan = this.selectedPlan()!;
-      const weekNum = this.selectedWeek();
+      const weekNum = event.weekNumber;
       const week = plan.weeks.find(w => w.weekNumber === weekNum);
       if (!week) return;
       const sessionIdx = week.sessions.findIndex(s => s.dayOfWeek === event.dayOfWeek);

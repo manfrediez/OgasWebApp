@@ -99,7 +99,7 @@ export class RaceStrategiesTabComponent implements OnInit {
   openForm(strategy?: RaceStrategy) {
     const ref = this.dialog.open(RaceStrategyFormComponent, {
       data: { athleteId: this.athleteId(), strategy },
-      panelClass: 'flex items-center justify-center p-4',
+      panelClass: ['flex', 'items-center', 'justify-center', 'p-4'],
     });
     ref.closed.subscribe(result => {
       if (result) this.loadStrategies();

@@ -214,8 +214,19 @@ export class UsersService {
 
     const filter: any = { coachId: new Types.ObjectId(coachId) };
     if (search) {
-      const regex = new RegExp(search, 'i');
-      filter.$or = [{ firstName: regex }, { lastName: regex }];
+      const words = search
+        .trim()
+        .split(/\s+/)
+        .filter((w) => w.length > 0)
+        .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      if (words.length > 0) {
+        filter.$and = words.map((word) => {
+          const regex = new RegExp(word, 'i');
+          return {
+            $or: [{ firstName: regex }, { lastName: regex }, { email: regex }],
+          };
+        });
+      }
     }
 
     const [athletes, total] = await Promise.all([

@@ -145,7 +145,7 @@ export class AthleteDetailComponent implements OnInit {
   openImportDialog() {
     const ref = this.dialog.open<boolean>(ImportExcelDialogComponent, {
       data: { athleteId: this.athleteId },
-      panelClass: 'flex items-center justify-center p-4',
+      panelClass: ['flex', 'items-center', 'justify-center', 'p-4'],
     });
     ref.closed.subscribe((result) => {
       if (result) {

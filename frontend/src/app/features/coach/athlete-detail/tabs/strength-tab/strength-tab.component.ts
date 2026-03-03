@@ -92,7 +92,7 @@ export class StrengthTabComponent implements OnInit {
   openForm(circuit?: StrengthCircuit) {
     const ref = this.dialog.open(StrengthCircuitFormComponent, {
       data: { circuit },
-      panelClass: 'flex items-center justify-center p-4',
+      panelClass: ['flex', 'items-center', 'justify-center', 'p-4'],
     });
     ref.closed.subscribe(result => {
       if (result) this.loadCircuits();

@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { UsersService, AthleteGridItem } from '../../../services/users.service';
 
 @Component({
@@ -17,7 +17,7 @@ import { UsersService, AthleteGridItem } from '../../../services/users.service';
             placeholder="Buscar por nombre o apellido..."
             [ngModel]="search()"
             (ngModelChange)="onSearchChange($event)"
-            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-72 focus:outline-none focus:ring-2 focus:ring-[#2C5F7C] focus:border-transparent"
+            class="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg w-96 text-base focus:outline-none focus:ring-2 focus:ring-[#2C5F7C] focus:border-transparent"
           />
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
         </div>
@@ -42,7 +42,7 @@ import { UsersService, AthleteGridItem } from '../../../services/users.service';
               </thead>
               <tbody class="divide-y divide-gray-100">
                 @for (athlete of athletes(); track athlete._id) {
-                  <tr class="hover:bg-gray-50 transition-colors">
+                  <tr class="hover:bg-gray-50 transition-colors cursor-pointer" (click)="goToAthlete(athlete._id)">
                     <td class="px-6 py-4">
                       <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-full bg-[#2C5F7C] flex items-center justify-center text-white text-sm font-medium">
@@ -151,6 +151,7 @@ import { UsersService, AthleteGridItem } from '../../../services/users.service';
 })
 export class AthletesListComponent implements OnInit {
   private usersService = inject(UsersService);
+  private router = inject(Router);
   private searchTimeout: any;
 
   athletes = signal<AthleteGridItem[]>([]);
@@ -173,6 +174,10 @@ export class AthletesListComponent implements OnInit {
       this.page.set(1);
       this.loadAthletes();
     }, 300);
+  }
+
+  goToAthlete(id: string) {
+    this.router.navigate(['/coach/athlete', id]);
   }
 
   goToPage(p: number) {

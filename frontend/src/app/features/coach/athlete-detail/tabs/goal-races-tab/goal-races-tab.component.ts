@@ -93,7 +93,7 @@ export class GoalRacesTabComponent implements OnInit {
   openForm(race?: GoalRace) {
     const ref = this.dialog.open(GoalRaceFormComponent, {
       data: { athleteId: this.athleteId(), race },
-      panelClass: 'flex items-center justify-center p-4',
+      panelClass: ['flex', 'items-center', 'justify-center', 'p-4'],
     });
     ref.closed.subscribe(result => {
       if (result) this.loadRaces();
@@ -106,7 +106,7 @@ export class GoalRacesTabComponent implements OnInit {
         title: 'Eliminar carrera',
         message: `¿Estás seguro de eliminar "${race.name}"?`,
       } as ConfirmDialogData,
-      panelClass: 'flex items-center justify-center p-4',
+      panelClass: ['flex', 'items-center', 'justify-center', 'p-4'],
     });
     ref.closed.subscribe(confirmed => {
       if (confirmed) {

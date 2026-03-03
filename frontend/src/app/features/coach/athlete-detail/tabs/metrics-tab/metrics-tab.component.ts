@@ -153,7 +153,7 @@ export class MetricsTabComponent implements OnInit {
   openForm() {
     const ref = this.dialog.open(MetricsFormComponent, {
       data: { athleteId: this.athleteId(), metrics: this.metrics() },
-      panelClass: 'flex items-center justify-center p-4',
+      panelClass: ['flex', 'items-center', 'justify-center', 'p-4'],
     });
     ref.closed.subscribe(result => {
       if (result) this.loadMetrics();
