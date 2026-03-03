@@ -148,7 +148,8 @@ export class GeneralInfoService {
 
     return this.infoPostModel.create({
       ...dto,
-      coachId,
+      topicId: new Types.ObjectId(dto.topicId),
+      coachId: new Types.ObjectId(coachId),
       attachments,
     });
   }
