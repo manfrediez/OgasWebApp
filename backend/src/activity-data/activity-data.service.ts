@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import {
@@ -22,6 +26,9 @@ export class ActivityDataService {
     requesterId: string,
     role: string,
   ): Promise<ActivityDataDocument[]> {
+    if (!Types.ObjectId.isValid(athleteId)) {
+      throw new BadRequestException('Invalid athlete ID');
+    }
     await assertAccess(requesterId, role, athleteId, this.userModel);
     return this.activityModel
       .find({ athleteId: new Types.ObjectId(athleteId) })

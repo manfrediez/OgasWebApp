@@ -1,10 +1,9 @@
-import { Injectable, inject, signal, OnDestroy } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   Message,
   ConversationSummary,
-  SendMessageRequest,
 } from '../models/message.model';
 
 @Injectable({ providedIn: 'root' })
@@ -28,8 +27,12 @@ export class MessagesService {
     );
   }
 
-  sendMessage(data: SendMessageRequest): Observable<Message> {
+  sendMessage(data: FormData): Observable<Message> {
     return this.http.post<Message>('/api/messages', data);
+  }
+
+  getFileUrl(storedName: string): string {
+    return `/api/messages/files/${storedName}`;
   }
 
   markAsRead(userId: string): Observable<void> {

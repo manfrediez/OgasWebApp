@@ -1,8 +1,16 @@
+export interface MessageAttachment {
+  originalName: string;
+  storedName: string;
+  mimeType: string;
+  size: number;
+}
+
 export interface Message {
   _id: string;
   senderId: string;
   receiverId: string;
   content: string;
+  attachments: MessageAttachment[];
   read: boolean;
   createdAt: string;
   updatedAt: string;
@@ -17,6 +25,7 @@ export interface ConversationSummary {
   lastMessage: string | null;
   lastMessageAt: string | null;
   lastSenderId: string | null;
+  lastMessageAttachmentCount: number;
   unreadCount: number;
 }
 

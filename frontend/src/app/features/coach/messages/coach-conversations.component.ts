@@ -44,6 +44,9 @@ import { es } from 'date-fns/locale';
                   @if (conv.lastMessage) {
                     <p class="text-sm text-primary-400 truncate mt-0.5">{{ conv.lastMessage }}</p>
                     <p class="text-xs text-primary-300 mt-0.5">{{ timeAgo(conv.lastMessageAt!) }}</p>
+                  } @else if (conv.lastMessageAttachmentCount > 0) {
+                    <p class="text-sm text-primary-400 italic truncate mt-0.5">📎 Archivo adjunto</p>
+                    <p class="text-xs text-primary-300 mt-0.5">{{ timeAgo(conv.lastMessageAt!) }}</p>
                   } @else {
                     <p class="text-sm text-primary-300 italic mt-0.5">Sin mensajes</p>
                   }

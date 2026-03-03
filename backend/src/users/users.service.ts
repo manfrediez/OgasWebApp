@@ -399,6 +399,7 @@ export class UsersService {
         let total = 0;
         let completed = 0;
         for (const week of plan.weeks) {
+          if (!week.sessions) continue;
           for (const session of week.sessions) {
             if (session.type !== 'REST') {
               total++;

@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { Dialog } from '@angular/cdk/dialog';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { format, parseISO, differenceInCalendarDays, isAfter, startOfDay } from 'date-fns';
@@ -18,6 +19,8 @@ import { SessionStatus } from '../../../core/models/enums';
 
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { WorkoutTypeIconComponent } from '../../../shared/components/workout-type-icon/workout-type-icon.component';
+import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import { SessionFeedbackDialogComponent } from '../my-plan/session-feedback-dialog/session-feedback-dialog.component';
 import { WorkoutTypeLabelPipe } from '../../../shared/pipes/workout-type-label.pipe';
 import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 
@@ -46,6 +49,7 @@ interface MonthSummary {
     RouterLink,
     LoadingSpinnerComponent,
     WorkoutTypeIconComponent,
+    StatusBadgeComponent,
     WorkoutTypeLabelPipe,
     DateEsPipe,
   ],
@@ -110,6 +114,23 @@ interface MonthSummary {
                     {{ session.coachNotes }}
                   </div>
                 }
+                <!-- Feedback status + RPE + button -->
+                <div class="flex items-center flex-wrap gap-2 mt-1 pt-3 border-t border-primary-100">
+                  @if (session.status !== 'PLANNED') {
+                    <app-status-badge [status]="session.status" />
+                  }
+                  @if (session.athletePerception) {
+                    <span class="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2.5 py-0.5 text-sm font-medium text-primary-600">
+                      RPE {{ session.athletePerception }}
+                    </span>
+                  }
+                  <button (click)="openFeedback()" class="ml-auto inline-flex items-center gap-1.5 rounded-xl bg-accent-500 px-3.5 py-1.5 text-sm font-medium text-white hover:bg-accent-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/>
+                    </svg>
+                    {{ session.athletePerception ? 'Editar feedback' : 'Registrar feedback' }}
+                  </button>
+                </div>
               </div>
             } @else {
               <div class="flex items-center gap-3 py-4">
@@ -286,11 +307,13 @@ export class DashboardComponent implements OnInit {
   private plansService = inject(WorkoutPlansService);
   private racesService = inject(GoalRacesService);
   private metricsService = inject(AthleteMetricsService);
+  private dialog = inject(Dialog);
   messagesService = inject(MessagesService);
 
   loading = signal(true);
   firstName = signal('');
   todaySession = signal<Session | null>(null);
+  todaySessionMeta = signal<{ planId: string; weekNumber: number; sessionIndex: number } | null>(null);
   monthSummary = signal<MonthSummary>({ completed: 0, planned: 0, skipped: 0, total: 0, percent: 0, totalDistance: 0, totalDuration: 0 });
   upcomingRaces = signal<UpcomingRace[]>([]);
   metrics = signal<AthleteMetrics | null>(null);
@@ -331,13 +354,40 @@ export class DashboardComponent implements OnInit {
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     for (const plan of plans) {
       for (const week of plan.weeks) {
-        const session = week.sessions.find(s => s.date?.substring(0, 10) === todayStr);
-        if (session) {
-          this.todaySession.set(session);
+        const sessionIndex = week.sessions.findIndex(s => s.date?.substring(0, 10) === todayStr);
+        if (sessionIndex !== -1) {
+          this.todaySession.set(week.sessions[sessionIndex]);
+          this.todaySessionMeta.set({ planId: plan._id, weekNumber: week.weekNumber, sessionIndex });
           return;
         }
       }
     }
+  }
+
+  openFeedback() {
+    const session = this.todaySession();
+    const meta = this.todaySessionMeta();
+    if (!session || !meta) return;
+
+    const ref = this.dialog.open(SessionFeedbackDialogComponent, {
+      data: { session },
+      panelClass: ['flex', 'items-center', 'justify-center', 'p-4'],
+    });
+
+    ref.closed.subscribe((result) => {
+      if (result) {
+        this.plansService.updateSessionFeedback(
+          meta.planId, meta.weekNumber, meta.sessionIndex, result
+        ).subscribe({
+          next: (updatedPlan) => {
+            const week = updatedPlan.weeks.find(w => w.weekNumber === meta.weekNumber);
+            if (week) {
+              this.todaySession.set(week.sessions[meta.sessionIndex]);
+            }
+          },
+        });
+      }
+    });
   }
 
   private processMonthSummary(plans: WorkoutPlan[]) {

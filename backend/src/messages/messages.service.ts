@@ -1,16 +1,27 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import * as fs from 'fs';
+import * as path from 'path';
 import { Message, MessageDocument } from './schemas/message.schema';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { SendMessageDto } from './dto/send-message.dto';
+
+const UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'messages');
 
 @Injectable()
 export class MessagesService {
   constructor(
     @InjectModel(Message.name) private messageModel: Model<MessageDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-  ) {}
+  ) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
 
   private async validateRelation(
     userId1: string,
@@ -38,13 +49,38 @@ export class MessagesService {
   async send(
     dto: SendMessageDto,
     senderId: string,
+    files: Express.Multer.File[] = [],
   ): Promise<MessageDocument> {
+    const content = dto.content?.trim() || '';
+    if (!content && files.length === 0) {
+      throw new BadRequestException(
+        'El mensaje debe tener texto o al menos un archivo adjunto',
+      );
+    }
+
     await this.validateRelation(senderId, dto.receiverId);
+
+    const attachments = files.map((f) => ({
+      originalName: f.originalname,
+      storedName: f.filename,
+      mimeType: f.mimetype,
+      size: f.size,
+    }));
+
     return this.messageModel.create({
       senderId: new Types.ObjectId(senderId),
       receiverId: new Types.ObjectId(dto.receiverId),
-      content: dto.content,
+      content,
+      attachments,
     });
+  }
+
+  getFilePath(storedName: string): string {
+    const filePath = path.join(UPLOADS_DIR, storedName);
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundException('Archivo no encontrado');
+    }
+    return filePath;
   }
 
   async getConversation(
@@ -103,6 +139,9 @@ export class MessagesService {
           lastMessage: { $first: '$content' },
           lastMessageAt: { $first: '$createdAt' },
           lastSenderId: { $first: '$senderId' },
+          lastMessageAttachmentCount: {
+            $first: { $size: { $ifNull: ['$attachments', []] } },
+          },
         },
       },
     ]);
@@ -137,6 +176,7 @@ export class MessagesService {
         lastMessage: lm?.lastMessage || null,
         lastMessageAt: lm?.lastMessageAt || null,
         lastSenderId: lm?.lastSenderId?.toString() || null,
+        lastMessageAttachmentCount: lm?.lastMessageAttachmentCount || 0,
         unreadCount: unreadMap.get(aid) || 0,
       };
     });

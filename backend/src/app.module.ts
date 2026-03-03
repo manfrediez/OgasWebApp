@@ -22,7 +22,7 @@ import { ImportModule } from './import/import.module';
     ConfigModule.forRoot({ isGlobal: true }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', '..', 'frontend', 'dist', 'frontend', 'browser'),
-      exclude: ['/api/(.*)'],
+      exclude: ['/api/{*path}'],
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
