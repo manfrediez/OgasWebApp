@@ -80,14 +80,13 @@ const fileFilter = (
 };
 
 @Controller('general-info')
-@UseGuards(JwtAuthGuard)
 export class GeneralInfoController {
   constructor(private readonly service: GeneralInfoService) {}
 
   // ── topics ──
 
   @Post('topics')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.COACH)
   createTopic(
     @CurrentUser('sub') coachId: string,
@@ -97,6 +96,7 @@ export class GeneralInfoController {
   }
 
   @Get('topics')
+  @UseGuards(JwtAuthGuard)
   getTopics(
     @CurrentUser('sub') userId: string,
     @CurrentUser('role') role: Role,
@@ -105,7 +105,7 @@ export class GeneralInfoController {
   }
 
   @Patch('topics/:id')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.COACH)
   updateTopic(
     @CurrentUser('sub') coachId: string,
@@ -116,7 +116,7 @@ export class GeneralInfoController {
   }
 
   @Delete('topics/:id')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.COACH)
   deleteTopic(
     @CurrentUser('sub') coachId: string,
@@ -128,7 +128,7 @@ export class GeneralInfoController {
   // ── posts ──
 
   @Post('posts')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.COACH)
   @UseInterceptors(
     FilesInterceptor('files', 5, {
@@ -146,6 +146,7 @@ export class GeneralInfoController {
   }
 
   @Get('posts/topic/:topicId')
+  @UseGuards(JwtAuthGuard)
   getPostsByTopic(
     @CurrentUser('sub') userId: string,
     @CurrentUser('role') role: Role,
@@ -156,6 +157,7 @@ export class GeneralInfoController {
   }
 
   @Get('posts/:id')
+  @UseGuards(JwtAuthGuard)
   getPost(
     @CurrentUser('sub') userId: string,
     @CurrentUser('role') role: Role,
@@ -165,7 +167,7 @@ export class GeneralInfoController {
   }
 
   @Patch('posts/:id')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.COACH)
   @UseInterceptors(
     FilesInterceptor('files', 5, {
@@ -184,7 +186,7 @@ export class GeneralInfoController {
   }
 
   @Delete('posts/:id')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.COACH)
   deletePost(
     @CurrentUser('sub') coachId: string,
@@ -207,6 +209,7 @@ export class GeneralInfoController {
     const ext = path.extname(storedName).toLowerCase();
     const contentType = MIME_MAP[ext] || 'application/octet-stream';
     res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     res.sendFile(filePath);
   }
 }

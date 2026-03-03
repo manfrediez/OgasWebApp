@@ -10,10 +10,10 @@ import { Role } from '../../../core/models/enums';
   imports: [RouterLink],
   template: `
     <nav class="navbar-glass text-white px-4 py-3 flex items-center justify-between relative z-10">
-      <div class="flex items-center gap-2 md:gap-3">
+      <a (click)="goHome()" class="flex items-center gap-2 md:gap-3 cursor-pointer">
         <img src="assets/images/logo.jpeg" alt="Logo" class="h-10 w-10 rounded-full object-cover" />
         <span class="text-lg font-bold tracking-wide hidden md:inline">Hernan Ogas Trail Running</span>
-      </div>
+      </a>
       @if (auth.currentUser(); as user) {
         <div class="flex items-center gap-2 md:gap-4">
           <button (click)="goToMessages()" class="relative p-1.5 rounded-lg hover:bg-white/10 border border-transparent hover:border-white/20 transition-all">
@@ -41,6 +41,15 @@ export class NavbarComponent {
   auth = inject(AuthService);
   messagesService = inject(MessagesService);
   private router = inject(Router);
+
+  goHome(): void {
+    const user = this.auth.currentUser();
+    if (user?.role === Role.COACH) {
+      this.router.navigate(['/coach']);
+    } else {
+      this.router.navigate(['/athlete']);
+    }
+  }
 
   goToMessages(): void {
     const user = this.auth.currentUser();
