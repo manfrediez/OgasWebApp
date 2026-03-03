@@ -46,6 +46,11 @@ export class StravaService {
     if (missing.length) {
       this.logger.warn(`Missing env vars for Strava: ${missing.join(', ')}`);
     }
+    if (this.encryptionKey && this.encryptionKey.length !== 64) {
+      this.logger.error(
+        `ENCRYPTION_KEY must be 64 hex chars (32 bytes for AES-256). Current length: ${this.encryptionKey.length}`,
+      );
+    }
   }
 
   getAuthUrl(userId: string): string {

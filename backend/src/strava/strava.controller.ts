@@ -49,7 +49,11 @@ export class StravaController {
     @Query('state') state: string,
     @Res() res: Response,
   ) {
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    let frontendUrl = this.configService.get<string>('FRONTEND_URL', '');
+    // Ensure FRONTEND_URL has a protocol prefix
+    if (frontendUrl && !frontendUrl.startsWith('http')) {
+      frontendUrl = `https://${frontendUrl}`;
+    }
 
     if (!code || !state) {
       return res.redirect(`${frontendUrl}/profile?strava=error&reason=missing_params`);
