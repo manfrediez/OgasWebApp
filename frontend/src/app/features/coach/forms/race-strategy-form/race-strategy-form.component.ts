@@ -50,7 +50,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
             <button type="button" (click)="addSegment()" class="text-xs text-accent-500 hover:text-accent-700">+ Agregar</button>
           </div>
           @for (seg of segments; track $index) {
-            <div class="bg-white/30 rounded-lg p-3 mb-2 space-y-2">
+            <div class="bg-primary-50 rounded-lg p-3 mb-2 space-y-2">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-medium text-primary-500">Segmento {{ $index + 1 }}</span>
                 <button type="button" (click)="removeSegment($index)" class="text-xs text-danger-500">Eliminar</button>

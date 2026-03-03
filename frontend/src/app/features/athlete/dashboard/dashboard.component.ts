@@ -59,17 +59,11 @@ interface MonthSummary {
       <app-loading-spinner />
     } @else {
       <div class="max-w-4xl mx-auto space-y-6">
-        <!-- Hero Banner -->
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-700 via-primary-500 to-accent-600 px-6 py-8 md:px-8 md:py-10">
-          <svg class="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 800 200" preserveAspectRatio="none">
-            <path d="M0 200 L0 120 Q100 60 200 100 T400 80 T600 110 T800 70 L800 200Z" fill="white"/>
-            <path d="M0 200 L0 150 Q150 100 300 130 T600 100 T800 140 L800 200Z" fill="white" opacity="0.5"/>
-          </svg>
-          <div class="relative">
-            <p class="text-white/80 text-sm font-medium">{{ greeting() }}</p>
-            <h1 class="text-2xl md:text-3xl font-bold text-white mt-1">{{ firstName() }}</h1>
-            <p class="text-white/70 text-sm mt-2">Preparate para dar lo mejor hoy</p>
-          </div>
+        <!-- Greeting -->
+        <div class="rounded-2xl bg-primary-50 border border-primary-200 px-6 py-6">
+          <p class="text-primary-400 text-sm font-medium">{{ greeting() }}</p>
+          <h1 class="text-2xl font-semibold text-primary-800 mt-1">{{ firstName() }}</h1>
+          <p class="text-primary-400 text-sm mt-1">Preparate para dar lo mejor hoy</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -172,22 +166,22 @@ interface MonthSummary {
                   <span class="text-sm font-bold text-green-600">{{ monthSummary().percent }}%</span>
                 </div>
                 <div class="w-full h-3 bg-primary-100 rounded-full overflow-hidden">
-                  <div class="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all"
+                  <div class="h-full bg-green-500 rounded-full transition-all"
                        [style.width.%]="monthSummary().percent"></div>
                 </div>
               </div>
             }
 
             <div class="grid grid-cols-3 gap-2 md:gap-3 mb-4">
-              <div class="text-center p-3 bg-white/30 backdrop-blur-sm rounded-xl border border-white/30">
+              <div class="text-center p-3 bg-primary-50 rounded-xl border border-primary-200">
                 <p class="text-2xl font-bold text-green-600">{{ monthSummary().completed }}</p>
                 <p class="text-xs font-medium text-green-500">Completadas</p>
               </div>
-              <div class="text-center p-3 bg-white/30 backdrop-blur-sm rounded-xl border border-white/30">
+              <div class="text-center p-3 bg-primary-50 rounded-xl border border-primary-200">
                 <p class="text-2xl font-bold text-primary-500">{{ monthSummary().planned }}</p>
                 <p class="text-xs font-medium text-primary-400">Pendientes</p>
               </div>
-              <div class="text-center p-3 bg-white/30 backdrop-blur-sm rounded-xl border border-white/30">
+              <div class="text-center p-3 bg-primary-50 rounded-xl border border-primary-200">
                 <p class="text-2xl font-bold text-amber-500">{{ monthSummary().skipped }}</p>
                 <p class="text-xs font-medium text-amber-400">Omitidas</p>
               </div>
@@ -223,7 +217,7 @@ interface MonthSummary {
               </h2>
               <div class="space-y-3">
                 @for (race of upcomingRaces(); track race.name) {
-                  <div class="flex items-center justify-between p-4 bg-gradient-to-r from-primary-50 to-surface-alt rounded-xl border border-primary-100 hover:border-accent-300 transition-all">
+                  <div class="flex items-center justify-between p-4 bg-primary-50 rounded-xl border border-primary-200 hover:border-accent-300 transition-all">
                     <div>
                       <p class="font-semibold text-primary-700">{{ race.name }}</p>
                       <p class="text-sm text-primary-400 mt-0.5">
@@ -255,7 +249,7 @@ interface MonthSummary {
           <!-- Mensajes sin leer -->
           @if (messagesService.unreadCount() > 0) {
             <a routerLink="/athlete/messages"
-               class="group rounded-2xl bg-accent-500/80 backdrop-blur-xl p-5 md:p-6 flex items-center gap-4 hover:bg-accent-500/90 transition-all border border-accent-400/30 shadow-lg">
+               class="group rounded-2xl bg-accent-500 p-5 md:p-6 flex items-center gap-4 hover:bg-accent-600 transition-all border border-accent-600 shadow-sm">
               <div class="h-12 w-12 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
                 <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/>

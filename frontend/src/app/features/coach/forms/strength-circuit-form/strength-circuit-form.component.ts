@@ -44,7 +44,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
             <button type="button" (click)="addExercise()" class="text-xs text-accent-500 hover:text-accent-700">+ Agregar</button>
           </div>
           @for (ex of exercises; track $index) {
-            <div class="bg-white/30 rounded-lg p-3 mb-2 space-y-2">
+            <div class="bg-primary-50 rounded-lg p-3 mb-2 space-y-2">
               <div class="flex items-center justify-between">
                 <input [(ngModel)]="ex.name" [name]="'exName' + $index" placeholder="Nombre del ejercicio" class="flex-1 mr-2" />
                 <button type="button" (click)="removeExercise($index)" class="text-xs text-danger-500">X</button>

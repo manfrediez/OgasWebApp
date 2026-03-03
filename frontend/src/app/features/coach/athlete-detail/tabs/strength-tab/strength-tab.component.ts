@@ -46,7 +46,7 @@ import { StrengthCircuitFormComponent } from '../../../forms/strength-circuit-fo
               @if (circuit.exercises.length > 0) {
                 <div class="mt-3 space-y-1">
                   @for (ex of circuit.exercises; track $index) {
-                    <div class="flex items-center justify-between text-sm bg-white/30 rounded px-3 py-1.5">
+                    <div class="flex items-center justify-between text-sm bg-primary-50 rounded px-3 py-1.5">
                       <span class="text-primary-600">{{ ex.name }}</span>
                       <span class="text-primary-400 text-xs">
                         @if (ex.sets && ex.reps) {

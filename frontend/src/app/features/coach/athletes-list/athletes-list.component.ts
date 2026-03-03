@@ -10,14 +10,14 @@ import { UsersService, AthleteGridItem } from '../../../services/users.service';
   template: `
     <div class="max-w-7xl mx-auto">
       <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-[#1A3B4E]">Atletas</h1>
+        <h1 class="text-2xl font-bold text-primary-800">Atletas</h1>
         <div class="relative">
           <input
             type="text"
             placeholder="Buscar por nombre o apellido..."
             [ngModel]="search()"
             (ngModelChange)="onSearchChange($event)"
-            class="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg w-96 text-base focus:outline-none focus:ring-2 focus:ring-[#2C5F7C] focus:border-transparent"
+            class="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg w-96 text-base focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent"
           />
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
         </div>
@@ -25,7 +25,7 @@ import { UsersService, AthleteGridItem } from '../../../services/users.service';
 
       @if (loading()) {
         <div class="flex justify-center py-12">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2C5F7C]"></div>
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-700"></div>
         </div>
       } @else {
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -45,7 +45,7 @@ import { UsersService, AthleteGridItem } from '../../../services/users.service';
                   <tr class="hover:bg-gray-50 transition-colors cursor-pointer" (click)="goToAthlete(athlete._id)">
                     <td class="px-6 py-4">
                       <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-[#2C5F7C] flex items-center justify-center text-white text-sm font-medium">
+                        <div class="w-9 h-9 rounded-full bg-primary-700 flex items-center justify-center text-white text-sm font-medium">
                           {{ athlete.firstName[0] }}{{ athlete.lastName[0] }}
                         </div>
                         <div>
@@ -76,7 +76,7 @@ import { UsersService, AthleteGridItem } from '../../../services/users.service';
                         <span class="text-sm font-medium text-gray-700 w-6 text-right">{{ athlete.activeDaysLast30 }}</span>
                         <div class="w-20 bg-gray-200 rounded-full h-2">
                           <div
-                            class="bg-[#00BCD4] h-2 rounded-full transition-all"
+                            class="bg-accent-500 h-2 rounded-full transition-all"
                             [style.width.%]="(athlete.activeDaysLast30 / 30) * 100"
                           ></div>
                         </div>
@@ -97,7 +97,7 @@ import { UsersService, AthleteGridItem } from '../../../services/users.service';
                     <td class="px-4 py-4 text-center">
                       <a
                         [routerLink]="['/coach/athlete', athlete._id]"
-                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-[#2C5F7C] bg-[#E8F4F8] rounded-lg hover:bg-[#d0e8ef] transition-colors"
+                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-700 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors"
                       >
                         Ver detalle
                       </a>

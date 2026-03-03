@@ -30,25 +30,25 @@ import { MetricsFormComponent } from '../../../forms/metrics-form/metrics-form.c
           <!-- Datos principales -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             @if (metrics()!.age) {
-              <div class="bg-white/30 rounded-lg p-3">
+              <div class="bg-primary-50 rounded-lg p-3">
                 <p class="text-xs text-primary-400">Edad</p>
                 <p class="text-lg font-bold text-primary-700">{{ metrics()!.age }}</p>
               </div>
             }
             @if (metrics()!.vam) {
-              <div class="bg-white/30 rounded-lg p-3">
+              <div class="bg-primary-50 rounded-lg p-3">
                 <p class="text-xs text-primary-400">VAM</p>
                 <p class="text-lg font-bold text-primary-700">{{ metrics()!.vam }}</p>
               </div>
             }
             @if (metrics()!.vt2) {
-              <div class="bg-white/30 rounded-lg p-3">
+              <div class="bg-primary-50 rounded-lg p-3">
                 <p class="text-xs text-primary-400">VT2</p>
                 <p class="text-lg font-bold text-primary-700">{{ metrics()!.vt2 }}</p>
               </div>
             }
             @if (metrics()!.fcMax) {
-              <div class="bg-white/30 rounded-lg p-3">
+              <div class="bg-primary-50 rounded-lg p-3">
                 <p class="text-xs text-primary-400">FC Max</p>
                 <p class="text-lg font-bold text-primary-700">{{ metrics()!.fcMax }}</p>
               </div>
@@ -107,7 +107,7 @@ import { MetricsFormComponent } from '../../../forms/metrics-form/metrics-form.c
               <h3 class="text-sm font-semibold text-primary-600 mb-2">Historial de Tests</h3>
               <div class="space-y-2">
                 @for (test of metrics()!.testHistory; track $index) {
-                  <div class="bg-white/30 rounded-lg p-3 flex items-center justify-between">
+                  <div class="bg-primary-50 rounded-lg p-3 flex items-center justify-between">
                     <div>
                       <p class="text-sm font-medium text-primary-700">{{ test.type }}</p>
                       <p class="text-xs text-primary-400">{{ test.date | dateEs }}</p>

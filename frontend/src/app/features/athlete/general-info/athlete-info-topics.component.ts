@@ -11,16 +11,10 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
   imports: [RouterLink, LoadingSpinnerComponent, EmptyStateComponent],
   template: `
     <div>
-      <!-- Compact Hero Banner -->
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-700 via-primary-500 to-accent-600 px-6 py-6 md:px-8 md:py-8 mb-6">
-        <svg class="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 800 200" preserveAspectRatio="none">
-          <path d="M0 200 L0 120 Q100 60 200 100 T400 80 T600 110 T800 70 L800 200Z" fill="white"/>
-          <path d="M0 200 L0 150 Q150 100 300 130 T600 100 T800 140 L800 200Z" fill="white" opacity="0.5"/>
-        </svg>
-        <div class="relative">
-          <h1 class="text-xl md:text-2xl font-bold text-white">Info General</h1>
-          <p class="text-white/70 text-sm mt-1">Recursos e información de tu coach</p>
-        </div>
+      <!-- Header -->
+      <div class="mb-6">
+        <h1 class="text-2xl font-semibold text-primary-800 tracking-tight">Info General</h1>
+        <p class="text-primary-400 text-sm mt-1">Recursos e información de tu coach</p>
       </div>
 
       @if (loading()) {
@@ -35,7 +29,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
           @for (topic of topics(); track topic._id) {
             <a
               [routerLink]="['/athlete/info', topic._id]"
-              class="card-glass rounded-2xl p-5 border-l-4 border-accent-500 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 group">
+              class="card-glass rounded-2xl p-5 border-l-4 border-accent-500 hover:shadow-lg transition-all duration-200 group">
               <div class="flex items-start gap-3">
                 <div class="h-10 w-10 rounded-xl bg-primary-500/10 flex items-center justify-center shrink-0">
                   <svg class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">

@@ -20,7 +20,7 @@ const DAY_NAMES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
       <div class="grid grid-cols-7 gap-2">
         @for (dayIdx of dayIndices; track dayIdx) {
           <div
-            class="border border-white/30 rounded-lg p-2 min-h-[100px] cursor-pointer hover:bg-white/30 transition-colors"
+            class="border border-primary-200 rounded-lg p-2 min-h-[100px] cursor-pointer hover:bg-primary-50 transition-colors"
             [class.ring-2]="isToday(dayIdx)"
             [class.ring-accent-500]="isToday(dayIdx)"
             [style.background-color]="isToday(dayIdx) ? 'rgb(0 188 212 / 0.1)' : ''"

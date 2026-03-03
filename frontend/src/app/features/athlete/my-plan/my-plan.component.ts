@@ -23,42 +23,36 @@ import { ToastService } from '../../../shared/services/toast.service';
     } @else {
       <div>
         @if (selectedPlan(); as plan) {
-          <!-- Hero banner -->
-          <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-700 via-primary-500 to-accent-600 px-6 py-6 md:px-8 md:py-8 mb-6">
-            <svg class="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 800 200" preserveAspectRatio="none">
-              <path d="M0 200 L0 120 Q100 60 200 100 T400 80 T600 110 T800 70 L800 200Z" fill="white"/>
-              <path d="M0 200 L0 150 Q150 100 300 130 T600 100 T800 140 L800 200Z" fill="white" opacity="0.5"/>
-            </svg>
-            <div class="relative z-10">
-              <div class="flex items-center gap-3 mb-2">
-                <div class="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
-                  <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
-                  </svg>
-                </div>
-                <div>
-                  <h1 class="text-xl md:text-2xl font-bold text-white">{{ plan.name }}</h1>
-                  @if (plan.sport) {
-                    <p class="text-sm text-white/70">{{ plan.sport }}</p>
-                  }
-                </div>
+          <!-- Header -->
+          <div class="mb-6">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="h-10 w-10 rounded-xl bg-primary-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                </svg>
               </div>
-
-              <!-- Plan selector pills (inside banner) -->
-              @if (plans().length > 1) {
-                <div class="flex flex-wrap gap-2 mt-4">
-                  @for (p of plans(); track p._id; let i = $index) {
-                    <button
-                      (click)="selectPlan(i)"
-                      [class]="selectedPlanIdx() === i
-                        ? 'rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-primary-700 shadow-sm transition-all'
-                        : 'rounded-full bg-white/20 px-4 py-1.5 text-xs font-medium text-white hover:bg-white/30 transition-all'">
-                      {{ p.name }}
-                    </button>
-                  }
-                </div>
-              }
+              <div>
+                <h1 class="text-xl md:text-2xl font-semibold text-primary-800 tracking-tight">{{ plan.name }}</h1>
+                @if (plan.sport) {
+                  <p class="text-sm text-primary-400">{{ plan.sport }}</p>
+                }
+              </div>
             </div>
+
+            <!-- Plan selector pills -->
+            @if (plans().length > 1) {
+              <div class="flex flex-wrap gap-2 mt-4">
+                @for (p of plans(); track p._id; let i = $index) {
+                  <button
+                    (click)="selectPlan(i)"
+                    [class]="selectedPlanIdx() === i
+                      ? 'rounded-full bg-primary-800 px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-all'
+                      : 'rounded-full border border-primary-200 px-4 py-1.5 text-xs font-medium text-primary-600 hover:bg-primary-50 transition-all'">
+                    {{ p.name }}
+                  </button>
+                }
+              </div>
+            }
           </div>
 
           <!-- All weeks -->

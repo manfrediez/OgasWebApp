@@ -15,7 +15,7 @@ import { MessagesService } from '../../../services/messages.service';
       </main>
 
       <!-- Bottom tabs (mobile) -->
-      <nav class="fixed bottom-0 left-0 right-0 card-glass-static border-t border-white/20 flex md:hidden z-10">
+      <nav class="fixed bottom-0 left-0 right-0 card-glass-static border-t border-primary-200 flex md:hidden z-10">
         @for (tab of tabs; track tab.route) {
           <a
             [routerLink]="tab.route"
@@ -33,12 +33,12 @@ import { MessagesService } from '../../../services/messages.service';
       </nav>
 
       <!-- Sidebar (desktop) -->
-      <aside class="hidden md:flex fixed left-0 top-[52px] bottom-0 w-56 sidebar-glass text-white flex-col py-4 z-10">
+      <aside class="hidden md:flex fixed left-0 top-[52px] bottom-0 w-56 sidebar-glass text-primary-600 flex-col py-4 z-10">
         @for (tab of tabs; track tab.route) {
           <a
             [routerLink]="tab.route"
-            routerLinkActive="bg-white/15 border-l-4 border-accent-400"
-            class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/10 transition-all border-l-4 border-transparent">
+            routerLinkActive="bg-primary-50 border-l-4 border-accent-500 text-accent-600"
+            class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-primary-50 transition-all border-l-4 border-transparent">
             <span class="text-lg">{{ tab.icon }}</span>
             <span class="flex-1">{{ tab.label }}</span>
             @if (tab.badge && tab.badge() > 0) {

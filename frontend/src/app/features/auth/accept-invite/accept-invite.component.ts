@@ -58,11 +58,11 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
 
           @if (error()) {
-            <p class="text-sm text-danger-500 bg-red-500/10 backdrop-blur-sm rounded-lg p-2">{{ error() }}</p>
+            <p class="text-sm text-danger-500 bg-red-50 rounded-lg p-2">{{ error() }}</p>
           }
 
           @if (success()) {
-            <p class="text-sm text-success-500 bg-green-500/10 backdrop-blur-sm rounded-lg p-2">{{ success() }}</p>
+            <p class="text-sm text-success-500 bg-green-50 rounded-lg p-2">{{ success() }}</p>
           }
 
           <button

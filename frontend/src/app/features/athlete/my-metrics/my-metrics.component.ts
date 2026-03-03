@@ -130,7 +130,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
             <!-- Mobile cards -->
             <div class="md:hidden space-y-3">
               @for (zone of metrics()!.hrZonesDetailed; track zone.zone) {
-                <div class="bg-white/30 rounded-lg p-3 space-y-1.5">
+                <div class="bg-primary-50 rounded-lg p-3 space-y-1.5">
                   <div class="flex items-center justify-between">
                     <span class="font-semibold text-primary-700">{{ zone.zone }}</span>
                     @if (zone.rpe) {
@@ -160,7 +160,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
             <h3 class="text-sm font-semibold text-primary-600 mb-2">Historial de Tests</h3>
             <div class="space-y-2">
               @for (test of metrics()!.testHistory; track $index) {
-                <div class="bg-white/30 rounded-lg p-3 flex items-center justify-between">
+                <div class="bg-primary-50 rounded-lg p-3 flex items-center justify-between">
                   <div>
                     <p class="text-sm font-medium text-primary-700">{{ test.type }}</p>
                     <p class="text-xs text-primary-400">{{ test.date | dateEs }}</p>

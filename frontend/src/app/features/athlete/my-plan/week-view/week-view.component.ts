@@ -50,7 +50,7 @@ const DAY_NAMES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
           <div class="grid grid-cols-7 gap-2">
             @for (dayIdx of dayIndices; track dayIdx) {
               <div
-                class="min-h-[100px] border border-white/30 rounded-lg p-2 cursor-pointer hover:bg-white/30 transition-colors"
+                class="min-h-[100px] border border-primary-200 rounded-lg p-2 cursor-pointer hover:bg-primary-50 transition-colors"
                 [class.ring-2]="isToday(dayIdx)"
                 [class.ring-accent-500]="isToday(dayIdx)"
                 [class.border-l-4]="needsFeedback(dayIdx)"
@@ -119,7 +119,7 @@ export class WeekViewComponent {
     const base = 'rounded-full px-2 py-0.5 text-[10px] font-semibold';
     if (pct >= 80) return `${base} bg-green-500/20 text-green-600`;
     if (pct >= 50) return `${base} bg-yellow-500/20 text-yellow-600`;
-    return `${base} bg-white/30 text-primary-400`;
+    return `${base} bg-primary-50 text-primary-400`;
   });
 
   isToday(dayOfWeek: number): boolean {

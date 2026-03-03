@@ -40,7 +40,7 @@ import { DateEsPipe } from '../../../../../shared/pipes/date-es.pipe';
             <!-- Week stats -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               @for (week of plan.weekStats; track week.weekNumber) {
-                <div class="bg-white/30 rounded-lg p-3">
+                <div class="bg-primary-50 rounded-lg p-3">
                   <div class="flex items-center justify-between mb-2">
                     <span class="text-sm font-medium text-primary-600">Semana {{ week.weekNumber }}</span>
                     <span class="text-sm font-bold" [class]="getCompletionColor(week.completionPct)">

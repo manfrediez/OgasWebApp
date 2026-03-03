@@ -71,7 +71,7 @@ import { ToastService } from '../../shared/services/toast.service';
           <button
             type="submit"
             [disabled]="saving()"
-            class="w-full rounded-lg bg-primary-500 py-2.5 text-white font-medium hover:bg-primary-700 disabled:opacity-50">
+            class="w-full btn-primary py-2.5">
             @if (saving()) {
               Guardando...
             } @else {
@@ -107,7 +107,7 @@ import { ToastService } from '../../shared/services/toast.service';
             <button
               type="submit"
               [disabled]="savingPassword()"
-              class="w-full rounded-lg bg-primary-500 py-2.5 text-white font-medium hover:bg-primary-700 disabled:opacity-50">
+              class="w-full btn-primary py-2.5">
               @if (savingPassword()) {
                 Cambiando...
               } @else {

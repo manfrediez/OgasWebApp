@@ -18,7 +18,7 @@ const DAY_LABELS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
-            <tr class="bg-white/30">
+            <tr class="bg-primary-50">
               <th class="text-left px-2 py-1 font-medium text-primary-600">Actividad</th>
               @for (day of dayLabels; track $index) {
                 <th class="text-center px-2 py-1 font-medium text-primary-600 w-8">{{ day }}</th>

@@ -12,20 +12,16 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
   imports: [RouterLink, FormsModule, LoadingSpinnerComponent, EmptyStateComponent, DateEsPipe],
   template: `
     <div class="max-w-6xl mx-auto">
-      <!-- Hero Banner -->
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-700 via-primary-500 to-accent-600 px-6 py-8 md:px-8 md:py-10 mb-6">
-        <svg class="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 800 200" preserveAspectRatio="none">
-          <path d="M0 200 L0 120 Q100 60 200 100 T400 80 T600 110 T800 70 L800 200Z" fill="white"/>
-          <path d="M0 200 L0 150 Q150 100 300 130 T600 100 T800 140 L800 200Z" fill="white" opacity="0.5"/>
-        </svg>
-        <div class="relative flex items-center justify-between flex-wrap gap-4">
+      <!-- Header -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 class="text-2xl md:text-3xl font-bold text-white">Mis Atletas</h1>
-            <p class="text-white/70 text-sm mt-1">Panel de seguimiento de tu equipo</p>
+            <h1 class="text-2xl font-semibold text-primary-800 tracking-tight">Mis Atletas</h1>
+            <p class="text-primary-400 text-sm mt-1">Panel de seguimiento de tu equipo</p>
           </div>
           <a
             routerLink="/coach/invite"
-            class="rounded-xl bg-white/20 backdrop-blur-sm border border-white/10 px-5 py-2.5 text-sm font-medium text-white hover:bg-white/30 transition-colors flex items-center gap-2">
+            class="btn-primary flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"/>
             </svg>
@@ -116,7 +112,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
               <!-- Header: Avatar + Name + Unread Badge -->
               <div class="flex items-center gap-3 mb-3">
                 <div class="relative shrink-0">
-                  <div class="h-11 w-11 rounded-full bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center text-white font-bold text-sm">
+                  <div class="h-11 w-11 rounded-full bg-accent-500 flex items-center justify-center text-white font-bold text-sm">
                     {{ athlete.firstName[0] }}{{ athlete.lastName[0] }}
                   </div>
                   @if (athlete.unreadMessages > 0) {
@@ -136,7 +132,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 
               <!-- Current Plan + Progress -->
               @if (athlete.currentPlan) {
-                <div class="mb-3 bg-white/30 rounded-xl px-3 py-2.5">
+                <div class="mb-3 bg-primary-50 rounded-xl px-3 py-2.5">
                   <div class="flex items-center justify-between mb-1.5">
                     <p class="text-xs font-medium text-primary-500 truncate">{{ athlete.currentPlan.name }}</p>
                     <span class="text-xs font-semibold ml-2 shrink-0" [class]="getCompletionColor(athlete.completionPct)">
@@ -152,7 +148,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
                   </div>
                 </div>
               } @else {
-                <div class="mb-3 bg-white/30 rounded-xl px-3 py-2.5">
+                <div class="mb-3 bg-primary-50 rounded-xl px-3 py-2.5">
                   <p class="text-xs text-primary-300 italic">Sin plan activo</p>
                 </div>
               }

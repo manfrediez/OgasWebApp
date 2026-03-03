@@ -55,7 +55,7 @@ import { ToastService } from '../../../../../shared/services/toast.service';
                   <p class="text-xs font-medium text-primary-500 mb-1">Segmentos:</p>
                   <div class="flex flex-wrap gap-2">
                     @for (seg of s.segments; track $index) {
-                      <span class="text-xs bg-white/30 rounded px-2 py-1 text-primary-500">
+                      <span class="text-xs bg-primary-50 rounded px-2 py-1 text-primary-500">
                         Km {{ seg.fromKm }}-{{ seg.toKm }}
                         @if (seg.paceZone) { ({{ seg.paceZone }}) }
                       </span>

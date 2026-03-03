@@ -69,7 +69,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
                   <div class="mt-3">
                     <p class="text-xs font-medium text-primary-500 mb-1">Segmentos:</p>
                     @for (seg of s.segments; track $index) {
-                      <div class="bg-white/30 rounded-lg p-2 mb-1 text-sm">
+                      <div class="bg-primary-50 rounded-lg p-2 mb-1 text-sm">
                         <span class="font-medium text-primary-600">Km {{ seg.fromKm }}-{{ seg.toKm }}:</span>
                         @if (seg.objective) {
                           <span class="text-primary-500"> {{ seg.objective }}</span>

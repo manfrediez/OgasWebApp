@@ -40,7 +40,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
               @if (circuit.exercises.length > 0) {
                 <div class="space-y-1">
                   @for (ex of circuit.exercises; track $index; let i = $index) {
-                    <div class="flex items-center justify-between bg-white/30 rounded-lg px-3 py-2">
+                    <div class="flex items-center justify-between bg-primary-50 rounded-lg px-3 py-2">
                       <div class="flex items-center gap-2">
                         <span class="text-xs text-primary-400 w-5">{{ i + 1 }}.</span>
                         <span class="text-sm font-medium text-primary-700">{{ ex.name }}</span>

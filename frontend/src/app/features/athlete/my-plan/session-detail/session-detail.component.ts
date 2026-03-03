@@ -52,7 +52,7 @@ import { HrZoneLabelPipe } from '../../../../shared/pipes/hr-zone-label.pipe';
       </div>
 
       @if (session().coachNotes) {
-        <div class="bg-white/30 rounded-lg p-3">
+        <div class="bg-primary-50 rounded-lg p-3">
           <p class="text-xs font-medium text-primary-500">Notas del coach:</p>
           <p class="text-sm text-primary-600">{{ session().coachNotes }}</p>
         </div>
