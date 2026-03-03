@@ -1,0 +1,78 @@
+import { Component, inject, signal, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { MessagesService } from '../../../services/messages.service';
+import { ConversationSummary } from '../../../models/message.model';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+
+@Component({
+  selector: 'app-coach-conversations',
+  standalone: true,
+  imports: [RouterLink, LoadingSpinnerComponent, EmptyStateComponent],
+  template: `
+    <div>
+      <h1 class="text-2xl font-bold text-primary-700 mb-6">Mensajes</h1>
+
+      @if (loading()) {
+        <app-loading-spinner />
+      } @else if (conversations().length === 0) {
+        <app-empty-state
+          icon="💬"
+          message="No tenés atletas aún"
+          submessage="Invitá a tu primer atleta para comenzar a chatear" />
+      } @else {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (conv of conversations(); track conv.athleteId) {
+            <a
+              [routerLink]="['/coach/messages', conv.athleteId]"
+              class="bg-surface rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-primary-50">
+              <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-full bg-accent-400 flex items-center justify-center text-white font-bold shrink-0">
+                  {{ conv.firstName[0] }}{{ conv.lastName[0] }}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center justify-between gap-2">
+                    <h3 class="font-semibold text-primary-700 truncate">{{ conv.firstName }} {{ conv.lastName }}</h3>
+                    @if (conv.unreadCount > 0) {
+                      <span class="shrink-0 inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-accent-500 text-white text-xs font-bold">
+                        {{ conv.unreadCount }}
+                      </span>
+                    }
+                  </div>
+                  @if (conv.lastMessage) {
+                    <p class="text-sm text-primary-400 truncate mt-0.5">{{ conv.lastMessage }}</p>
+                    <p class="text-xs text-primary-300 mt-0.5">{{ timeAgo(conv.lastMessageAt!) }}</p>
+                  } @else {
+                    <p class="text-sm text-primary-300 italic mt-0.5">Sin mensajes</p>
+                  }
+                </div>
+              </div>
+            </a>
+          }
+        </div>
+      }
+    </div>
+  `,
+})
+export class CoachConversationsComponent implements OnInit {
+  private messagesService = inject(MessagesService);
+
+  conversations = signal<ConversationSummary[]>([]);
+  loading = signal(true);
+
+  ngOnInit() {
+    this.messagesService.getConversations().subscribe({
+      next: (convs) => {
+        this.conversations.set(convs);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+  }
+
+  timeAgo(date: string): string {
+    return formatDistanceToNow(new Date(date), { addSuffix: true, locale: es });
+  }
+}

@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #E8F4F8;
+  --color-primary-100: #D1E9F1;
+  --color-primary-200: #A3D3E3;
+  --color-primary-300: #75BDD5;
+  --color-primary-400: #47A7C7;
+  --color-primary-500: #2C5F7C;
+  --color-primary-600: #234D65;
+  --color-primary-700: #1A3B4E;
+  --color-primary-800: #112937;
+  --color-primary-900: #081720;
+
+  --color-accent-300: #80DEEA;
+  --color-accent-400: #4DD0E1;
+  --color-accent-500: #00BCD4;
+  --color-accent-600: #00ACC1;
+  --color-accent-700: #0097A7;
+
+  --color-bg: #E8F4F8;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F0F7FA;
+
+  --color-danger-500: #EF4444;
+  --color-danger-600: #DC2626;
+  --color-warning-500: #F59E0B;
+  --color-success-500: #10B981;
+  --color-success-600: #059669;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  @apply bg-bg font-sans text-primary-700 antialiased;
+  margin: 0;
+}
+
+input, select, textarea {
+  @apply rounded-lg border border-primary-200 px-3 py-2 text-sm outline-none transition-colors focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20;
+}
+
+button {
+  @apply cursor-pointer transition-colors;
+}
