@@ -20,7 +20,7 @@ import { ActivityDataModule } from './activity-data/activity-data.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', 'frontend', 'dist', 'frontend', 'browser'),
+      rootPath: join(__dirname, '..', '..', '..', 'frontend', 'dist', 'frontend', 'browser'),
       exclude: ['/api/(.*)'],
     }),
     MongooseModule.forRootAsync({

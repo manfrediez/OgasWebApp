@@ -4,8 +4,8 @@
   "private": true,
   "description": "OgasWeb - Trail Running Coaching Platform",
   "scripts": {
-    "build": "cd frontend && rm -rf node_modules package-lock.json && npm install --include=dev && npm run build && cd ../backend && npm install --legacy-peer-deps --include=dev && npm run build",
-    "start": "node backend/dist/main"
+    "build": "cd frontend && rm -rf node_modules package-lock.json && npm install --include=dev && npm run build && cd ../backend && npm install --legacy-peer-deps --include=dev && npx -y tsc -p tsconfig.build.json",
+    "start": "node backend/dist/src/main"
   },
   "engines": {
     "node": "20.x"
