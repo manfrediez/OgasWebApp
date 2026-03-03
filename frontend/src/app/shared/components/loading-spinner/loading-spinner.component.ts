@@ -5,7 +5,9 @@ import { Component } from '@angular/core';
   standalone: true,
   template: `
     <div class="flex items-center justify-center py-12">
-      <div class="h-10 w-10 animate-spin rounded-full border-4 border-primary-200 border-t-accent-500"></div>
+      <div class="h-14 w-14 rounded-full card-glass-static flex items-center justify-center">
+        <div class="h-10 w-10 animate-spin rounded-full border-4 border-primary-200/50 border-t-accent-500"></div>
+      </div>
     </div>
   `,
 })

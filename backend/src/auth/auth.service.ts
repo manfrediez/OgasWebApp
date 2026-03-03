@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersService } from '../users/users.service';
+import { EmailService } from '../common/services/email.service';
 import { LoginDto } from './dto/login.dto';
 import { InviteAthleteDto } from './dto/invite-athlete.dto';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
@@ -20,6 +21,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private emailService: EmailService,
   ) {}
 
   async login(dto: LoginDto) {
@@ -56,7 +58,13 @@ export class AuthService {
     const frontendUrl = this.configService.get<string>('FRONTEND_URL');
     const inviteLink = `${frontendUrl}/accept-invite?token=${inviteToken}`;
 
-    return { inviteLink, athleteId: user.id };
+    const emailSent = await this.emailService.sendInviteEmail(
+      dto.email,
+      dto.firstName,
+      inviteLink,
+    );
+
+    return { inviteLink, athleteId: user.id, emailSent };
   }
 
   async acceptInvite(dto: AcceptInviteDto) {

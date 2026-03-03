@@ -27,7 +27,7 @@ import { es } from 'date-fns/locale';
           @for (conv of conversations(); track conv.athleteId) {
             <a
               [routerLink]="['/coach/messages', conv.athleteId]"
-              class="bg-surface rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-primary-50">
+              class="card-glass rounded-xl p-5 hover:shadow-md transition-shadow">
               <div class="flex items-center gap-3">
                 <div class="h-10 w-10 rounded-full bg-accent-400 flex items-center justify-center text-white font-bold shrink-0">
                   {{ conv.firstName[0] }}{{ conv.lastName[0] }}

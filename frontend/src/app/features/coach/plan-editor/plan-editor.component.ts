@@ -27,7 +27,7 @@ import { ToastService } from '../../../shared/services/toast.service';
 
         <!-- Template selector (only for new plans) -->
         @if (!isEdit && templates().length > 0) {
-          <div class="bg-surface rounded-xl p-4 shadow-sm border border-accent-400/30 mb-6">
+          <div class="card-glass rounded-xl p-4 border border-accent-400/30 mb-6">
             <label class="block text-sm font-medium text-primary-600 mb-2">Crear desde plantilla (opcional)</label>
             <div class="flex gap-3">
               <select (change)="onTemplateSelect($event)" class="flex-1">
@@ -42,7 +42,7 @@ import { ToastService } from '../../../shared/services/toast.service';
 
         <form (ngSubmit)="onSubmit()" class="space-y-6">
           <!-- Header -->
-          <div class="bg-surface rounded-xl p-6 shadow-sm space-y-4">
+          <div class="card-glass rounded-xl p-6 space-y-4">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div class="col-span-2">
                 <label class="block text-sm font-medium text-primary-600 mb-1">Nombre del plan</label>
@@ -100,7 +100,7 @@ import { ToastService } from '../../../shared/services/toast.service';
           </div>
 
           <!-- Notes -->
-          <div class="bg-surface rounded-xl p-6 shadow-sm space-y-4">
+          <div class="card-glass rounded-xl p-6 space-y-4">
             <div>
               <label class="block text-sm font-medium text-primary-600 mb-1">Protocolo de activación</label>
               <textarea [(ngModel)]="form.activationProtocol" name="activationProtocol" class="w-full" rows="2"></textarea>

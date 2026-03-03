@@ -37,7 +37,7 @@ import { ToastService } from '../../../../../shared/services/toast.service';
       } @else {
         <div class="space-y-3">
           @for (plan of plans(); track plan._id) {
-            <div class="bg-surface rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-primary-50">
+            <div class="card-glass rounded-xl p-4 hover:shadow-md transition-shadow">
               <div class="flex items-center justify-between">
                 <a
                   [routerLink]="['/coach/athlete', athleteId(), 'plan', plan._id]"

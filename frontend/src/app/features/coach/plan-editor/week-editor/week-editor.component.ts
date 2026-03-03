@@ -13,13 +13,13 @@ const DAY_NAMES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   standalone: true,
   imports: [WorkoutTypeIconComponent, StatusBadgeComponent],
   template: `
-    <div class="bg-surface rounded-xl p-4 shadow-sm">
+    <div class="card-glass rounded-xl p-4">
       <h3 class="text-sm font-semibold text-primary-600 mb-3">Semana {{ week().weekNumber }}</h3>
 
       <div class="grid grid-cols-7 gap-2">
         @for (dayIdx of dayIndices; track dayIdx) {
           <div
-            class="border border-primary-100 rounded-lg p-2 min-h-[100px] cursor-pointer hover:bg-surface-alt transition-colors"
+            class="border border-white/30 rounded-lg p-2 min-h-[100px] cursor-pointer hover:bg-white/30 transition-colors"
             (click)="editSession(dayIdx)">
             <p class="text-xs font-medium text-primary-500 mb-1">{{ dayNames[dayIdx] }}</p>
             @if (getSession(dayIdx); as session) {

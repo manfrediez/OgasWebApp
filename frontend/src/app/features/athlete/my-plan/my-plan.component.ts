@@ -49,7 +49,7 @@ import { SessionFeedbackDialogComponent } from './session-feedback-dialog/sessio
                 (click)="selectedWeek.set(week.weekNumber)"
                 [class]="selectedWeek() === week.weekNumber
                   ? 'rounded-lg bg-primary-500 px-3 md:px-4 py-2 text-sm font-medium text-white'
-                  : 'rounded-lg bg-surface px-3 md:px-4 py-2 text-sm font-medium text-primary-500 hover:bg-surface-alt'">
+                  : 'rounded-lg bg-white/40 backdrop-blur-sm px-3 md:px-4 py-2 text-sm font-medium text-primary-500 hover:bg-white/60'">
                 <span>Semana {{ week.weekNumber }}</span>
                 @if (weekTotal(week) > 0) {
                   <span class="ml-1 md:ml-1.5 text-xs opacity-80">
@@ -72,7 +72,7 @@ import { SessionFeedbackDialogComponent } from './session-feedback-dialog/sessio
 
           <!-- Activation protocol -->
           @if (plan.activationProtocol) {
-            <div class="mt-6 bg-surface rounded-xl p-4 shadow-sm">
+            <div class="mt-6 card-glass rounded-xl p-4">
               <h3 class="text-sm font-semibold text-primary-600 mb-2">Protocolo de Activación</h3>
               <p class="text-sm text-primary-500 whitespace-pre-wrap">{{ plan.activationProtocol }}</p>
             </div>
@@ -80,7 +80,7 @@ import { SessionFeedbackDialogComponent } from './session-feedback-dialog/sessio
 
           <!-- General notes -->
           @if (plan.generalNotes && plan.generalNotes.length > 0) {
-            <div class="mt-4 bg-surface rounded-xl p-4 shadow-sm">
+            <div class="mt-4 card-glass rounded-xl p-4">
               <h3 class="text-sm font-semibold text-primary-600 mb-2">Notas Generales</h3>
               @for (note of plan.generalNotes; track $index) {
                 <p class="text-sm text-primary-500">• {{ note }}</p>

@@ -26,29 +26,29 @@ import { MetricsFormComponent } from '../../../forms/metrics-form/metrics-form.c
       } @else if (!metrics()) {
         <app-empty-state icon="📈" message="Sin métricas" submessage="Cargá las métricas del atleta" />
       } @else {
-        <div class="bg-surface rounded-xl p-6 shadow-sm space-y-6">
+        <div class="card-glass rounded-xl p-6 space-y-6">
           <!-- Datos principales -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             @if (metrics()!.age) {
-              <div class="bg-surface-alt rounded-lg p-3">
+              <div class="bg-white/30 rounded-lg p-3">
                 <p class="text-xs text-primary-400">Edad</p>
                 <p class="text-lg font-bold text-primary-700">{{ metrics()!.age }}</p>
               </div>
             }
             @if (metrics()!.vam) {
-              <div class="bg-surface-alt rounded-lg p-3">
+              <div class="bg-white/30 rounded-lg p-3">
                 <p class="text-xs text-primary-400">VAM</p>
                 <p class="text-lg font-bold text-primary-700">{{ metrics()!.vam }}</p>
               </div>
             }
             @if (metrics()!.vt2) {
-              <div class="bg-surface-alt rounded-lg p-3">
+              <div class="bg-white/30 rounded-lg p-3">
                 <p class="text-xs text-primary-400">VT2</p>
                 <p class="text-lg font-bold text-primary-700">{{ metrics()!.vt2 }}</p>
               </div>
             }
             @if (metrics()!.fcMax) {
-              <div class="bg-surface-alt rounded-lg p-3">
+              <div class="bg-white/30 rounded-lg p-3">
                 <p class="text-xs text-primary-400">FC Max</p>
                 <p class="text-lg font-bold text-primary-700">{{ metrics()!.fcMax }}</p>
               </div>
@@ -107,7 +107,7 @@ import { MetricsFormComponent } from '../../../forms/metrics-form/metrics-form.c
               <h3 class="text-sm font-semibold text-primary-600 mb-2">Historial de Tests</h3>
               <div class="space-y-2">
                 @for (test of metrics()!.testHistory; track $index) {
-                  <div class="bg-surface-alt rounded-lg p-3 flex items-center justify-between">
+                  <div class="bg-white/30 rounded-lg p-3 flex items-center justify-between">
                     <div>
                       <p class="text-sm font-medium text-primary-700">{{ test.type }}</p>
                       <p class="text-xs text-primary-400">{{ test.date | dateEs }}</p>

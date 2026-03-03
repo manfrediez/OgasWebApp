@@ -30,7 +30,7 @@ import { ToastService } from '../../../../../shared/services/toast.service';
       } @else {
         <div class="space-y-3">
           @for (race of races(); track race._id) {
-            <div class="bg-surface rounded-xl p-4 shadow-sm border border-primary-50">
+            <div class="card-glass rounded-xl p-4">
               <div class="flex items-start justify-between">
                 <div>
                   <h3 class="font-semibold text-primary-700">{{ race.name }}</h3>

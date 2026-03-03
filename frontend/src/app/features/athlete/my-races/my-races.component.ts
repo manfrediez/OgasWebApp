@@ -26,7 +26,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
         } @else {
           <div class="space-y-3 mb-8">
             @for (race of races(); track race._id) {
-              <div class="bg-surface rounded-xl p-4 shadow-sm border border-primary-50">
+              <div class="card-glass rounded-xl p-4">
                 <h3 class="font-semibold text-primary-700">{{ race.name }}</h3>
                 <p class="text-sm text-primary-400">{{ race.distance }} - {{ race.date | dateEs }}</p>
                 @if (race.location) {
@@ -54,7 +54,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
         } @else {
           <div class="space-y-3">
             @for (s of publishedStrategies(); track s._id) {
-              <div class="bg-surface rounded-xl p-4 shadow-sm border border-primary-50">
+              <div class="card-glass rounded-xl p-4">
                 <h3 class="font-semibold text-primary-700">{{ s.raceName }}</h3>
                 <p class="text-sm text-primary-400">{{ s.raceDate | dateEs }} - {{ s.totalDistance }} km</p>
 
@@ -69,7 +69,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
                   <div class="mt-3">
                     <p class="text-xs font-medium text-primary-500 mb-1">Segmentos:</p>
                     @for (seg of s.segments; track $index) {
-                      <div class="bg-surface-alt rounded-lg p-2 mb-1 text-sm">
+                      <div class="bg-white/30 rounded-lg p-2 mb-1 text-sm">
                         <span class="font-medium text-primary-600">Km {{ seg.fromKm }}-{{ seg.toKm }}:</span>
                         @if (seg.objective) {
                           <span class="text-primary-500"> {{ seg.objective }}</span>

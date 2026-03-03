@@ -13,7 +13,7 @@ import { MessagesService } from '../../../services/messages.service';
       <app-navbar />
       <div class="flex flex-1 overflow-hidden">
         <app-sidebar [items]="menuItems" />
-        <main class="flex-1 overflow-y-auto bg-bg p-6">
+        <main class="flex-1 overflow-y-auto p-6 relative z-[1]">
           <router-outlet />
         </main>
       </div>

@@ -8,8 +8,8 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="min-h-screen bg-bg flex items-center justify-center p-4">
-      <div class="bg-surface rounded-2xl shadow-xl p-8 w-full max-w-sm">
+    <div class="min-h-screen flex items-center justify-center p-4">
+      <div class="dialog-glass rounded-2xl p-8 w-full max-w-sm">
         <div class="flex flex-col items-center mb-8">
           <img src="assets/images/logo.jpeg" alt="Logo" class="h-24 w-24 rounded-full object-cover mb-4 shadow-lg" />
           <h1 class="text-xl font-bold text-primary-700">Hernan Ogas</h1>
@@ -42,13 +42,13 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
 
           @if (error()) {
-            <p class="text-sm text-danger-500 bg-red-50 rounded-lg p-2">{{ error() }}</p>
+            <p class="text-sm text-danger-500 bg-red-500/10 backdrop-blur-sm rounded-lg p-2">{{ error() }}</p>
           }
 
           <button
             type="submit"
             [disabled]="loading()"
-            class="w-full rounded-lg bg-primary-500 py-2.5 text-white font-medium hover:bg-primary-700 disabled:opacity-50">
+            class="w-full btn-primary py-2.5">
             @if (loading()) {
               Ingresando...
             } @else {

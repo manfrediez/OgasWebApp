@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Dialog } from '@angular/cdk/dialog';
 import { UsersService } from '../../../services/users.service';
 import { User } from '../../../core/models/user.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -9,6 +10,7 @@ import { GoalRacesTabComponent } from './tabs/goal-races-tab/goal-races-tab.comp
 import { RaceStrategiesTabComponent } from './tabs/race-strategies-tab/race-strategies-tab.component';
 import { StrengthTabComponent } from './tabs/strength-tab/strength-tab.component';
 import { SummaryTabComponent } from './tabs/summary-tab/summary-tab.component';
+import { ImportExcelDialogComponent } from '../forms/import-excel-dialog/import-excel-dialog.component';
 
 @Component({
   selector: 'app-athlete-detail',
@@ -31,7 +33,7 @@ import { SummaryTabComponent } from './tabs/summary-tab/summary-tab.component';
           <button (click)="goBack()" class="text-primary-400 hover:text-primary-700">
             ← Volver
           </button>
-          <div>
+          <div class="flex-1">
             <h1 class="text-2xl font-bold text-primary-700">
               {{ athlete()!.firstName }} {{ athlete()!.lastName }}
             </h1>
@@ -48,6 +50,11 @@ import { SummaryTabComponent } from './tabs/summary-tab/summary-tab.component';
               }
             </div>
           </div>
+          <button
+            (click)="openImportDialog()"
+            class="rounded-lg border border-accent-500 text-accent-500 px-4 py-2 text-sm font-medium hover:bg-accent-500 hover:text-white transition-colors">
+            Importar Excel
+          </button>
         </div>
 
         <!-- Tabs -->
@@ -93,6 +100,7 @@ import { SummaryTabComponent } from './tabs/summary-tab/summary-tab.component';
 export class AthleteDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private dialog = inject(Dialog);
   private usersService = inject(UsersService);
 
   athleteId = '';
@@ -132,5 +140,20 @@ export class AthleteDetailComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/coach/dashboard']);
+  }
+
+  openImportDialog() {
+    const ref = this.dialog.open<boolean>(ImportExcelDialogComponent, {
+      data: { athleteId: this.athleteId },
+      panelClass: 'flex items-center justify-center p-4',
+    });
+    ref.closed.subscribe((result) => {
+      if (result) {
+        // Reload current tab data by toggling the tab
+        const current = this.activeTab();
+        this.activeTab.set('');
+        setTimeout(() => this.activeTab.set(current), 0);
+      }
+    });
   }
 }

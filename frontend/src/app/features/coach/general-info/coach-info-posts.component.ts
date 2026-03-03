@@ -32,7 +32,7 @@ import { ToastService } from '../../../shared/services/toast.service';
 
       <!-- Form -->
       @if (showForm()) {
-        <div class="bg-surface rounded-xl p-5 shadow-sm border border-primary-100 mb-6">
+        <div class="card-glass rounded-xl p-5 mb-6">
           <h3 class="text-sm font-semibold text-primary-700 mb-4">
             {{ editingPost() ? 'Editar publicación' : 'Nueva publicación' }}
           </h3>
@@ -95,13 +95,13 @@ import { ToastService } from '../../../shared/services/toast.service';
               <button
                 type="button"
                 (click)="cancelForm()"
-                class="rounded-lg border border-primary-200 px-4 py-2 text-sm text-primary-600 hover:bg-surface-alt">
+                class="btn-secondary">
                 Cancelar
               </button>
               <button
                 type="submit"
                 [disabled]="saving()"
-                class="rounded-lg bg-primary-500 px-4 py-2 text-sm text-white hover:bg-primary-700 disabled:opacity-50">
+                class="btn-primary disabled:opacity-50">
                 {{ saving() ? 'Guardando...' : 'Guardar' }}
               </button>
             </div>
@@ -119,7 +119,7 @@ import { ToastService } from '../../../shared/services/toast.service';
       } @else {
         <div class="space-y-4">
           @for (post of posts(); track post._id) {
-            <div class="bg-surface rounded-xl p-5 shadow-sm border border-primary-50">
+            <div class="card-glass rounded-xl p-5">
               <div class="flex items-start justify-between mb-2">
                 <h3 class="font-semibold text-primary-700">{{ post.title }}</h3>
                 <span class="text-xs text-primary-400 shrink-0 ml-3">{{ post.createdAt | dateEs:'d MMM yyyy' }}</span>

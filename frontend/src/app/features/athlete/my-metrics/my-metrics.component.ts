@@ -22,25 +22,25 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
         <!-- Key values -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           @if (metrics()!.age) {
-            <div class="bg-surface rounded-xl p-4 shadow-sm text-center">
+            <div class="card-glass rounded-xl p-4 text-center">
               <p class="text-xs text-primary-400">Edad</p>
               <p class="text-2xl font-bold text-primary-700">{{ metrics()!.age }}</p>
             </div>
           }
           @if (metrics()!.vam) {
-            <div class="bg-surface rounded-xl p-4 shadow-sm text-center">
+            <div class="card-glass rounded-xl p-4 text-center">
               <p class="text-xs text-primary-400">VAM</p>
               <p class="text-2xl font-bold text-accent-500">{{ metrics()!.vam }}</p>
             </div>
           }
           @if (metrics()!.vt2) {
-            <div class="bg-surface rounded-xl p-4 shadow-sm text-center">
+            <div class="card-glass rounded-xl p-4 text-center">
               <p class="text-xs text-primary-400">VT2</p>
               <p class="text-2xl font-bold text-accent-500">{{ metrics()!.vt2 }}</p>
             </div>
           }
           @if (metrics()!.fcMax) {
-            <div class="bg-surface rounded-xl p-4 shadow-sm text-center">
+            <div class="card-glass rounded-xl p-4 text-center">
               <p class="text-xs text-primary-400">FC Max</p>
               <p class="text-2xl font-bold text-danger-500">{{ metrics()!.fcMax }}</p>
             </div>
@@ -49,7 +49,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 
         <!-- Objectives -->
         @if (metrics()!.objectivesShortTerm || metrics()!.objectivesMediumTerm) {
-          <div class="bg-surface rounded-xl p-4 shadow-sm mb-4">
+          <div class="card-glass rounded-xl p-4 mb-4">
             <h3 class="text-sm font-semibold text-primary-600 mb-2">Objetivos</h3>
             @if (metrics()!.objectivesShortTerm) {
               <p class="text-sm text-primary-500 mb-1"><span class="font-medium">Corto plazo:</span> {{ metrics()!.objectivesShortTerm }}</p>
@@ -61,7 +61,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
         }
 
         <!-- Personal info -->
-        <div class="bg-surface rounded-xl p-4 shadow-sm mb-4">
+        <div class="card-glass rounded-xl p-4 mb-4">
           <h3 class="text-sm font-semibold text-primary-600 mb-2">Datos Personales</h3>
           <div class="grid grid-cols-2 gap-3 text-sm">
             @if (metrics()!.residence) {
@@ -78,7 +78,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 
         <!-- Equipment -->
         @if (metrics()!.equipment) {
-          <div class="bg-surface rounded-xl p-4 shadow-sm mb-4">
+          <div class="card-glass rounded-xl p-4 mb-4">
             <h3 class="text-sm font-semibold text-primary-600 mb-2">Equipamiento</h3>
             <div class="grid grid-cols-3 gap-3 text-sm">
               @if (metrics()!.equipment!.watch) {
@@ -96,7 +96,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 
         <!-- HR Zones -->
         @if (metrics()!.hrZonesDetailed && metrics()!.hrZonesDetailed!.length > 0) {
-          <div class="bg-surface rounded-xl p-4 shadow-sm mb-4">
+          <div class="card-glass rounded-xl p-4 mb-4">
             <h3 class="text-sm font-semibold text-primary-600 mb-2">Zonas de Frecuencia Cardíaca</h3>
             <div class="overflow-x-auto">
               <table class="w-full text-sm">
@@ -129,11 +129,11 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 
         <!-- Test history -->
         @if (metrics()!.testHistory && metrics()!.testHistory!.length > 0) {
-          <div class="bg-surface rounded-xl p-4 shadow-sm">
+          <div class="card-glass rounded-xl p-4">
             <h3 class="text-sm font-semibold text-primary-600 mb-2">Historial de Tests</h3>
             <div class="space-y-2">
               @for (test of metrics()!.testHistory; track $index) {
-                <div class="bg-surface-alt rounded-lg p-3 flex items-center justify-between">
+                <div class="bg-white/30 rounded-lg p-3 flex items-center justify-between">
                   <div>
                     <p class="text-sm font-medium text-primary-700">{{ test.type }}</p>
                     <p class="text-xs text-primary-400">{{ test.date | dateEs }}</p>

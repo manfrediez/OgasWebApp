@@ -10,12 +10,12 @@ import { MessagesService } from '../../../services/messages.service';
   template: `
     <div class="flex flex-col h-screen">
       <app-navbar />
-      <main class="flex-1 overflow-y-auto bg-bg p-4 md:p-6 pb-20 md:pb-6">
+      <main class="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6 relative z-[1]">
         <router-outlet />
       </main>
 
       <!-- Bottom tabs (mobile) -->
-      <nav class="fixed bottom-0 left-0 right-0 bg-surface border-t border-primary-100 flex md:hidden">
+      <nav class="fixed bottom-0 left-0 right-0 card-glass-static border-t border-white/20 flex md:hidden z-10">
         @for (tab of tabs; track tab.route) {
           <a
             [routerLink]="tab.route"
@@ -33,12 +33,12 @@ import { MessagesService } from '../../../services/messages.service';
       </nav>
 
       <!-- Sidebar (desktop) -->
-      <aside class="hidden md:flex fixed left-0 top-[52px] bottom-0 w-56 bg-primary-700 text-white flex-col py-4">
+      <aside class="hidden md:flex fixed left-0 top-[52px] bottom-0 w-56 sidebar-glass text-white flex-col py-4 z-10">
         @for (tab of tabs; track tab.route) {
           <a
             [routerLink]="tab.route"
-            routerLinkActive="bg-primary-500 border-l-4 border-accent-400"
-            class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-primary-600 transition-colors border-l-4 border-transparent">
+            routerLinkActive="bg-white/15 border-l-4 border-accent-400"
+            class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/10 transition-all border-l-4 border-transparent">
             <span class="text-lg">{{ tab.icon }}</span>
             <span class="flex-1">{{ tab.label }}</span>
             @if (tab.badge && tab.badge() > 0) {

@@ -20,7 +20,7 @@ import { ToastService } from '../../shared/services/toast.service';
           <h1 class="text-2xl font-bold text-primary-700">Mi Perfil</h1>
         </div>
 
-        <form (ngSubmit)="onSubmit()" class="bg-surface rounded-xl p-6 shadow-sm space-y-4">
+        <form (ngSubmit)="onSubmit()" class="card-glass rounded-xl p-6 space-y-4">
           <div>
             <label class="block text-sm font-medium text-primary-600 mb-1">Email</label>
             <input [value]="email" disabled class="w-full bg-surface-alt" />
@@ -81,7 +81,7 @@ import { ToastService } from '../../shared/services/toast.service';
 
         <!-- Strava Connection Card (only for athletes) -->
         @if (isAthlete) {
-          <div class="mt-6 bg-surface rounded-xl p-6 shadow-sm">
+          <div class="mt-6 card-glass rounded-xl p-6">
             <div class="flex items-center gap-3 mb-4">
               <svg viewBox="0 0 24 24" class="w-7 h-7" fill="#FC4C02">
                 <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />

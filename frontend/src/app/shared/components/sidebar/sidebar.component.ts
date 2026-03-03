@@ -13,13 +13,13 @@ export interface SidebarItem {
   standalone: true,
   imports: [RouterLink, RouterLinkActive],
   template: `
-    <aside class="w-60 bg-primary-700 text-white min-h-full flex flex-col">
+    <aside class="w-60 sidebar-glass text-white min-h-full flex flex-col">
       <nav class="flex-1 py-4">
         @for (item of items(); track item.route) {
           <a
             [routerLink]="item.route"
-            routerLinkActive="bg-primary-500 border-l-4 border-accent-400"
-            class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-primary-600 transition-colors border-l-4 border-transparent">
+            routerLinkActive="bg-white/15 border-l-4 border-accent-400"
+            class="flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/10 transition-all border-l-4 border-transparent">
             <span class="text-lg">{{ item.icon }}</span>
             <span class="flex-1">{{ item.label }}</span>
             @if (item.badge && item.badge() > 0) {

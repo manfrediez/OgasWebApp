@@ -12,7 +12,7 @@ import { HrZoneLabelPipe } from '../../../../shared/pipes/hr-zone-label.pipe';
   standalone: true,
   imports: [WorkoutTypeIconComponent, StatusBadgeComponent, WorkoutTypeLabelPipe, HrZoneLabelPipe],
   template: `
-    <div class="bg-surface rounded-xl p-4 shadow-sm border border-primary-50 space-y-3"
+    <div class="card-glass rounded-xl p-4 space-y-3"
          [class.border-l-4]="needsFeedback()"
          [class.border-l-amber-400]="needsFeedback()">
       <div class="flex items-center justify-between">
@@ -52,7 +52,7 @@ import { HrZoneLabelPipe } from '../../../../shared/pipes/hr-zone-label.pipe';
       </div>
 
       @if (session().coachNotes) {
-        <div class="bg-surface-alt rounded-lg p-3">
+        <div class="bg-white/30 rounded-lg p-3">
           <p class="text-xs font-medium text-primary-500">Notas del coach:</p>
           <p class="text-sm text-primary-600">{{ session().coachNotes }}</p>
         </div>

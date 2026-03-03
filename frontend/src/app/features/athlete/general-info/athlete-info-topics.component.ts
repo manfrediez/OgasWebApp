@@ -25,7 +25,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
           @for (topic of topics(); track topic._id) {
             <a
               [routerLink]="['/athlete/info', topic._id]"
-              class="bg-surface rounded-xl p-5 shadow-sm border border-primary-50 hover:shadow-md transition-shadow">
+              class="card-glass rounded-xl p-5 hover:shadow-md transition-shadow">
               <h3 class="font-semibold text-primary-700 text-lg">{{ topic.name }}</h3>
               <p class="text-sm text-primary-400 mt-1">
                 {{ topic.postCount }} {{ topic.postCount === 1 ? 'publicación' : 'publicaciones' }}

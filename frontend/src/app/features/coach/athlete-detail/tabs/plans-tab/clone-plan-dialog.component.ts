@@ -14,7 +14,7 @@ export interface ClonePlanDialogData {
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="bg-surface rounded-xl p-6 shadow-xl max-w-md w-full">
+    <div class="dialog-glass rounded-2xl p-6 max-w-md w-full">
       <h3 class="text-lg font-semibold text-primary-700 mb-2">Clonar Plan</h3>
       <p class="text-sm text-primary-400 mb-4">
         Clonar "{{ data.planName }}" a otro atleta. Se resetearán los feedbacks y estados.
@@ -37,13 +37,13 @@ export interface ClonePlanDialogData {
       <div class="flex justify-end gap-3">
         <button
           (click)="dialogRef.close(null)"
-          class="rounded-lg border border-primary-200 px-4 py-2 text-sm text-primary-600 hover:bg-surface-alt">
+          class="btn-secondary">
           Cancelar
         </button>
         <button
           (click)="confirm()"
           [disabled]="!selectedAthleteId"
-          class="rounded-lg bg-accent-500 px-4 py-2 text-sm text-white hover:bg-accent-600 disabled:opacity-50">
+          class="btn-accent">
           Clonar
         </button>
       </div>

@@ -8,7 +8,7 @@ import { ToastService } from '../../services/toast.service';
     <div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm">
       @for (toast of toastService.toasts(); track toast.id) {
         <div
-          class="rounded-lg px-4 py-3 text-sm font-medium shadow-lg animate-fade-in flex items-center justify-between gap-3"
+          class="toast-glass rounded-xl px-4 py-3 text-sm font-medium animate-fade-in flex items-center justify-between gap-3"
           [class]="getClasses(toast.type)">
           <span>{{ toast.message }}</span>
           <button
@@ -36,13 +36,13 @@ export class ToastContainerComponent {
   getClasses(type: string): string {
     switch (type) {
       case 'success':
-        return 'bg-green-600 text-white';
+        return 'border-l-4 border-l-green-500 text-green-800';
       case 'error':
-        return 'bg-red-600 text-white';
+        return 'border-l-4 border-l-red-500 text-red-800';
       case 'info':
-        return 'bg-sky-600 text-white';
+        return 'border-l-4 border-l-sky-500 text-sky-800';
       default:
-        return 'bg-gray-700 text-white';
+        return 'border-l-4 border-l-gray-500 text-gray-800';
     }
   }
 }

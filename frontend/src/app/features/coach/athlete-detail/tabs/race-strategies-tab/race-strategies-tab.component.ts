@@ -29,7 +29,7 @@ import { ToastService } from '../../../../../shared/services/toast.service';
       } @else {
         <div class="space-y-3">
           @for (s of strategies(); track s._id) {
-            <div class="bg-surface rounded-xl p-4 shadow-sm border border-primary-50">
+            <div class="card-glass rounded-xl p-4">
               <div class="flex items-start justify-between">
                 <div>
                   <div class="flex items-center gap-2">
@@ -55,7 +55,7 @@ import { ToastService } from '../../../../../shared/services/toast.service';
                   <p class="text-xs font-medium text-primary-500 mb-1">Segmentos:</p>
                   <div class="flex flex-wrap gap-2">
                     @for (seg of s.segments; track $index) {
-                      <span class="text-xs bg-surface-alt rounded px-2 py-1 text-primary-500">
+                      <span class="text-xs bg-white/30 rounded px-2 py-1 text-primary-500">
                         Km {{ seg.fromKm }}-{{ seg.toKm }}
                         @if (seg.paceZone) { ({{ seg.paceZone }}) }
                       </span>

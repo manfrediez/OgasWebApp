@@ -30,7 +30,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
       } @else {
         <div class="space-y-4">
           @for (post of posts(); track post._id) {
-            <div class="bg-surface rounded-xl p-5 shadow-sm border border-primary-50">
+            <div class="card-glass rounded-xl p-5">
               <div class="flex items-start justify-between mb-2">
                 <h3 class="font-semibold text-primary-700 text-lg">{{ post.title }}</h3>
                 <span class="text-xs text-primary-400 shrink-0 ml-3">{{ post.createdAt | dateEs:'d MMM yyyy' }}</span>

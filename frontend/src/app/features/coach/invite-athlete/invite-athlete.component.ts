@@ -10,7 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
     <div class="max-w-lg">
       <h1 class="text-2xl font-bold text-primary-700 mb-6">Invitar Atleta</h1>
 
-      <form (ngSubmit)="onSubmit()" class="bg-surface rounded-xl p-6 shadow-sm space-y-4">
+      <form (ngSubmit)="onSubmit()" class="card-glass rounded-xl p-6 space-y-4">
         <div>
           <label class="block text-sm font-medium text-primary-600 mb-1">Nombre</label>
           <input [(ngModel)]="firstName" name="firstName" required class="w-full" placeholder="Nombre" />
@@ -29,9 +29,32 @@ import { AuthService } from '../../../core/services/auth.service';
         }
 
         @if (inviteLink()) {
-          <div class="bg-green-50 rounded-lg p-4">
-            <p class="text-sm font-medium text-green-800 mb-2">Invitación creada exitosamente</p>
-            <p class="text-xs text-green-700 break-all">{{ inviteLink() }}</p>
+          <div class="bg-green-50 rounded-lg p-4 space-y-3">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p class="text-sm font-medium text-green-800">
+                @if (emailSent()) {
+                  Invitación enviada por email exitosamente
+                } @else {
+                  Invitación creada (email no configurado, compartí el link manualmente)
+                }
+              </p>
+            </div>
+            <div class="flex gap-2">
+              <input
+                readonly
+                [value]="inviteLink()"
+                class="flex-1 text-xs bg-white border border-green-200 rounded-lg px-3 py-2 text-green-700 cursor-text" />
+              <button
+                type="button"
+                (click)="copyLink()"
+                class="shrink-0 px-3 py-2 text-xs font-medium rounded-lg transition-colors"
+                [class]="copied() ? 'bg-green-600 text-white' : 'bg-white border border-green-300 text-green-700 hover:bg-green-100'">
+                {{ copied() ? 'Copiado!' : 'Copiar' }}
+              </button>
+            </div>
           </div>
         }
 
@@ -58,11 +81,15 @@ export class InviteAthleteComponent {
   loading = signal(false);
   error = signal('');
   inviteLink = signal('');
+  emailSent = signal(false);
+  copied = signal(false);
 
   onSubmit() {
     this.loading.set(true);
     this.error.set('');
     this.inviteLink.set('');
+    this.emailSent.set(false);
+    this.copied.set(false);
 
     this.authService.inviteAthlete({
       email: this.email,
@@ -71,12 +98,20 @@ export class InviteAthleteComponent {
     }).subscribe({
       next: res => {
         this.inviteLink.set(res.inviteLink);
+        this.emailSent.set(res.emailSent);
         this.loading.set(false);
       },
       error: () => {
         this.error.set('Error al crear la invitación');
         this.loading.set(false);
       },
+    });
+  }
+
+  copyLink() {
+    navigator.clipboard.writeText(this.inviteLink()).then(() => {
+      this.copied.set(true);
+      setTimeout(() => this.copied.set(false), 2000);
     });
   }
 }

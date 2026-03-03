@@ -51,7 +51,7 @@ import { es } from 'date-fns/locale';
             <div [class]="msg.senderId === currentUserId() ? 'flex justify-end' : 'flex justify-start'">
               <div [class]="msg.senderId === currentUserId()
                 ? 'bg-accent-400 text-white rounded-2xl rounded-br-md px-4 py-2 max-w-[75%]'
-                : 'bg-surface border border-primary-100 text-primary-700 rounded-2xl rounded-bl-md px-4 py-2 max-w-[75%]'">
+                : 'card-glass-static text-primary-700 rounded-2xl rounded-bl-md px-4 py-2 max-w-[75%]'">
                 <p class="text-sm whitespace-pre-wrap">{{ msg.content }}</p>
                 <p [class]="msg.senderId === currentUserId()
                   ? 'text-xs text-white/70 mt-1'

@@ -12,18 +12,18 @@ export interface ConfirmDialogData {
   selector: 'app-confirm-dialog',
   standalone: true,
   template: `
-    <div class="bg-surface rounded-xl p-6 shadow-xl max-w-md w-full">
+    <div class="dialog-glass rounded-2xl p-6 max-w-md w-full">
       <h3 class="text-lg font-semibold text-primary-700 mb-2">{{ data.title }}</h3>
       <p class="text-sm text-primary-500 mb-6">{{ data.message }}</p>
       <div class="flex justify-end gap-3">
         <button
           (click)="dialogRef.close(false)"
-          class="rounded-lg border border-primary-200 px-4 py-2 text-sm text-primary-600 hover:bg-surface-alt">
+          class="btn-secondary">
           {{ data.cancelText || 'Cancelar' }}
         </button>
         <button
           (click)="dialogRef.close(true)"
-          class="rounded-lg bg-danger-500 px-4 py-2 text-sm text-white hover:bg-danger-600">
+          class="btn-danger">
           {{ data.confirmText || 'Eliminar' }}
         </button>
       </div>

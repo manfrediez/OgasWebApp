@@ -44,6 +44,7 @@ export interface InviteAthleteRequest {
 export interface InviteAthleteResponse {
   inviteLink: string;
   athleteId: string;
+  emailSent: boolean;
 }
 
 export interface AcceptInviteRequest {

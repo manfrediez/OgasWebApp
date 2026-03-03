@@ -9,7 +9,7 @@ const DAY_LABELS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="bg-surface rounded-xl p-4 shadow-sm">
+    <div class="card-glass rounded-xl p-4">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-sm font-semibold text-primary-600">Estímulos Semanales</h3>
         <button type="button" (click)="addRow()" class="text-xs text-accent-500 hover:text-accent-700">+ Actividad</button>
@@ -18,7 +18,7 @@ const DAY_LABELS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
-            <tr class="bg-surface-alt">
+            <tr class="bg-white/30">
               <th class="text-left px-2 py-1 font-medium text-primary-600">Actividad</th>
               @for (day of dayLabels; track $index) {
                 <th class="text-center px-2 py-1 font-medium text-primary-600 w-8">{{ day }}</th>

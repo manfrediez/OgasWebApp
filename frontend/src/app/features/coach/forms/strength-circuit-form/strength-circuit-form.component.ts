@@ -10,7 +10,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="bg-surface rounded-xl p-6 shadow-xl w-full max-w-lg max-h-[80vh] overflow-y-auto">
+    <div class="dialog-glass rounded-2xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto">
       <h2 class="text-lg font-bold text-primary-700 mb-4">
         {{ isEdit ? 'Editar Circuito' : 'Nuevo Circuito de Fuerza' }}
       </h2>
@@ -44,7 +44,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
             <button type="button" (click)="addExercise()" class="text-xs text-accent-500 hover:text-accent-700">+ Agregar</button>
           </div>
           @for (ex of exercises; track $index) {
-            <div class="bg-surface-alt rounded-lg p-3 mb-2 space-y-2">
+            <div class="bg-white/30 rounded-lg p-3 mb-2 space-y-2">
               <div class="flex items-center justify-between">
                 <input [(ngModel)]="ex.name" [name]="'exName' + $index" placeholder="Nombre del ejercicio" class="flex-1 mr-2" />
                 <button type="button" (click)="removeExercise($index)" class="text-xs text-danger-500">X</button>
@@ -68,10 +68,10 @@ import { ToastService } from '../../../../shared/services/toast.service';
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
-          <button type="button" (click)="dialogRef.close()" class="rounded-lg border border-primary-200 px-4 py-2 text-sm text-primary-600 hover:bg-surface-alt">
+          <button type="button" (click)="dialogRef.close()" class="btn-secondary">
             Cancelar
           </button>
-          <button type="submit" class="rounded-lg bg-primary-500 px-4 py-2 text-sm text-white hover:bg-primary-700">
+          <button type="submit" class="btn-primary">
             Guardar
           </button>
         </div>

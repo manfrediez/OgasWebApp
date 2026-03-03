@@ -6,6 +6,6 @@ import { ToastContainerComponent } from './shared/components/toast-container/toa
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, ToastContainerComponent],
-  template: `<router-outlet /><app-toast-container />`,
+  template: `<div class="bg-animated-gradient min-h-screen relative"><router-outlet /><app-toast-container /></div>`,
 })
 export class AppComponent {}

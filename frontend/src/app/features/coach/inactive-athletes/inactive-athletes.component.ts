@@ -25,7 +25,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
           @for (athlete of athletes(); track athlete._id) {
             <a
               [routerLink]="['/coach/athlete', athlete._id]"
-              class="flex items-center gap-4 bg-surface rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-primary-50">
+              class="flex items-center gap-4 card-glass rounded-xl p-4 hover:shadow-md transition-shadow">
               <!-- Avatar with severity color -->
               <div
                 class="h-11 w-11 rounded-full flex items-center justify-center text-white font-bold shrink-0"

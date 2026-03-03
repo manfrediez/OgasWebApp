@@ -15,6 +15,7 @@ import { MessagesModule } from './messages/messages.module';
 import { GeneralInfoModule } from './general-info/general-info.module';
 import { StravaModule } from './strava/strava.module';
 import { ActivityDataModule } from './activity-data/activity-data.module';
+import { ImportModule } from './import/import.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { ActivityDataModule } from './activity-data/activity-data.module';
     GeneralInfoModule,
     StravaModule,
     ActivityDataModule,
+    ImportModule,
   ],
 })
 export class AppModule {}

@@ -21,7 +21,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 
         <div class="space-y-4">
           @for (circuit of circuits(); track circuit._id) {
-            <div class="bg-surface rounded-xl p-4 shadow-sm border border-primary-50">
+            <div class="card-glass rounded-xl p-4">
               <div class="flex items-center justify-between mb-3">
                 <h3 class="font-semibold text-primary-700">
                   Circuito {{ circuit.circuitNumber }}: {{ circuit.name }}
@@ -40,7 +40,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
               @if (circuit.exercises.length > 0) {
                 <div class="space-y-1">
                   @for (ex of circuit.exercises; track $index; let i = $index) {
-                    <div class="flex items-center justify-between bg-surface-alt rounded-lg px-3 py-2">
+                    <div class="flex items-center justify-between bg-white/30 rounded-lg px-3 py-2">
                       <div class="flex items-center gap-2">
                         <span class="text-xs text-primary-400 w-5">{{ i + 1 }}.</span>
                         <span class="text-sm font-medium text-primary-700">{{ ex.name }}</span>

@@ -10,7 +10,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="bg-surface rounded-xl p-6 shadow-xl w-full max-w-md">
+    <div class="dialog-glass rounded-2xl p-6 w-full max-w-md">
       <h2 class="text-lg font-bold text-primary-700 mb-4">
         {{ isEdit ? 'Editar Carrera Objetivo' : 'Nueva Carrera Objetivo' }}
       </h2>
@@ -66,10 +66,10 @@ import { ToastService } from '../../../../shared/services/toast.service';
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
-          <button type="button" (click)="dialogRef.close()" class="rounded-lg border border-primary-200 px-4 py-2 text-sm text-primary-600 hover:bg-surface-alt">
+          <button type="button" (click)="dialogRef.close()" class="btn-secondary">
             Cancelar
           </button>
-          <button type="submit" class="rounded-lg bg-primary-500 px-4 py-2 text-sm text-white hover:bg-primary-700">
+          <button type="submit" class="btn-primary">
             Guardar
           </button>
         </div>

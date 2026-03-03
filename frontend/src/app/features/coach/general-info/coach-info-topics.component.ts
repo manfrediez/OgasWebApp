@@ -25,7 +25,7 @@ import { ToastService } from '../../../shared/services/toast.service';
       </div>
 
       @if (showForm()) {
-        <div class="bg-surface rounded-xl p-4 shadow-sm border border-primary-100 mb-6">
+        <div class="card-glass rounded-xl p-4 mb-6">
           <h3 class="text-sm font-semibold text-primary-700 mb-3">
             {{ editingTopic() ? 'Editar tema' : 'Nuevo tema' }}
           </h3>
@@ -41,13 +41,13 @@ import { ToastService } from '../../../shared/services/toast.service';
             <button
               type="submit"
               [disabled]="saving()"
-              class="rounded-lg bg-primary-500 px-4 py-2 text-sm text-white hover:bg-primary-700 disabled:opacity-50">
+              class="btn-primary disabled:opacity-50">
               {{ saving() ? 'Guardando...' : 'Guardar' }}
             </button>
             <button
               type="button"
               (click)="cancelForm()"
-              class="rounded-lg border border-primary-200 px-4 py-2 text-sm text-primary-600 hover:bg-surface-alt">
+              class="btn-secondary">
               Cancelar
             </button>
           </form>
@@ -64,7 +64,7 @@ import { ToastService } from '../../../shared/services/toast.service';
       } @else {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           @for (topic of topics(); track topic._id) {
-            <div class="bg-surface rounded-xl p-5 shadow-sm border border-primary-50 hover:shadow-md transition-shadow">
+            <div class="card-glass rounded-xl p-5 hover:shadow-md transition-shadow">
               <a [routerLink]="['/coach/info', topic._id]" class="block mb-3">
                 <h3 class="font-semibold text-primary-700 text-lg">{{ topic.name }}</h3>
                 <p class="text-sm text-primary-400 mt-1">

@@ -13,7 +13,7 @@ const DAY_NAMES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábad
   imports: [SessionDetailComponent, DateEsPipe],
   template: `
     @if (hasPendingFeedback()) {
-      <div class="mb-3 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+      <div class="mb-3 rounded-lg bg-amber-50/60 backdrop-blur-sm border border-amber-200/50 px-3 py-2">
         <p class="text-xs font-medium text-amber-700">
           Tenés {{ pendingCount() }} sesión{{ pendingCount() > 1 ? 'es' : '' }} completada{{ pendingCount() > 1 ? 's' : '' }} sin feedback
         </p>
