@@ -353,7 +353,9 @@ export class DashboardComponent implements OnInit {
   private processTodaySession(plans: WorkoutPlan[]) {
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     for (const plan of plans) {
+      if (!plan.weeks) continue;
       for (const week of plan.weeks) {
+        if (!week.sessions) continue;
         const sessionIndex = week.sessions.findIndex(s => s.date?.substring(0, 10) === todayStr);
         if (sessionIndex !== -1) {
           this.todaySession.set(week.sessions[sessionIndex]);
@@ -398,7 +400,9 @@ export class DashboardComponent implements OnInit {
     let completed = 0, planned = 0, skipped = 0, totalDistance = 0, totalDuration = 0;
 
     for (const plan of plans) {
+      if (!plan.weeks) continue;
       for (const week of plan.weeks) {
+        if (!week.sessions) continue;
         for (const session of week.sessions) {
           if (!session.date) continue;
           const sessionDate = parseISO(session.date);
