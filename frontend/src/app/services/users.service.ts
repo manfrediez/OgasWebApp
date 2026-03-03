@@ -23,6 +23,24 @@ export interface AthleteSummary extends User {
   unreadMessages: number;
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface AthleteGridItem {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  isActive: boolean;
+  daysSinceLastActivity: number | null;
+  activeDaysLast30: number;
+  nextRace: { name: string; date: string; distance: string } | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   private http = inject(HttpClient);
@@ -37,6 +55,12 @@ export class UsersService {
 
   getInactiveAthletes(): Observable<InactiveAthlete[]> {
     return this.http.get<InactiveAthlete[]>('/api/users/athletes/inactive');
+  }
+
+  getAthletesGrid(page: number, limit: number, search?: string): Observable<PaginatedResponse<AthleteGridItem>> {
+    let params = `?page=${page}&limit=${limit}`;
+    if (search) params += `&search=${encodeURIComponent(search)}`;
+    return this.http.get<PaginatedResponse<AthleteGridItem>>(`/api/users/athletes/grid${params}`);
   }
 
   getById(id: string): Observable<User> {

@@ -25,6 +25,7 @@ export class CoachLayoutComponent implements OnInit, OnDestroy {
 
   menuItems: SidebarItem[] = [
     { label: 'Dashboard', route: '/coach/dashboard', icon: '📊' },
+    { label: 'Atletas', route: '/coach/athletes', icon: '🏃' },
     { label: 'Inactivos', route: '/coach/inactive', icon: '⏸️' },
     { label: 'Mensajes', route: '/coach/messages', icon: '💬', badge: () => this.messagesService.unreadCount() },
     { label: 'Info General', route: '/coach/info', icon: '📚' },

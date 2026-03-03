@@ -12,6 +12,11 @@ export const COACH_ROUTES: Routes = [
           import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
+        path: 'athletes',
+        loadComponent: () =>
+          import('./athletes-list/athletes-list.component').then(m => m.AthletesListComponent),
+      },
+      {
         path: 'messages',
         loadComponent: () =>
           import('./messages/coach-conversations.component').then(m => m.CoachConversationsComponent),

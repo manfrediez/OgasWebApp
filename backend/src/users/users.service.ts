@@ -15,6 +15,10 @@ import {
   MessageDocument,
 } from '../messages/schemas/message.schema';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  PaginationQueryDto,
+  PaginatedResult,
+} from '../common/dto/pagination-query.dto';
 
 @Injectable()
 export class UsersService {
@@ -197,6 +201,128 @@ export class UsersService {
     });
 
     return result;
+  }
+
+  async getAthletesGrid(
+    coachId: string,
+    pagination: PaginationQueryDto,
+    search?: string,
+  ): Promise<PaginatedResult<any>> {
+    const page = pagination?.page ?? 1;
+    const limit = pagination?.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const filter: any = { coachId: new Types.ObjectId(coachId) };
+    if (search) {
+      const regex = new RegExp(search, 'i');
+      filter.$or = [{ firstName: regex }, { lastName: regex }];
+    }
+
+    const [athletes, total] = await Promise.all([
+      this.userModel
+        .find(filter)
+        .select('-password')
+        .sort({ lastName: 1, firstName: 1 })
+        .skip(skip)
+        .limit(limit)
+        .lean()
+        .exec(),
+      this.userModel.countDocuments(filter),
+    ]);
+
+    if (athletes.length === 0) return { data: [], total, page, limit };
+
+    const athleteIds = athletes.map((a) => a._id);
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    // Last completed session per athlete (for inactivity days)
+    const lastActivity = await this.workoutPlanModel.aggregate([
+      { $match: { athleteId: { $in: athleteIds } } },
+      { $unwind: '$weeks' },
+      { $unwind: '$weeks.sessions' },
+      { $match: { 'weeks.sessions.status': 'COMPLETED' } },
+      {
+        $group: {
+          _id: '$athleteId',
+          lastActivityDate: { $max: '$weeks.sessions.date' },
+        },
+      },
+    ]);
+
+    // Distinct active days in last 30 days per athlete
+    const activeDays = await this.workoutPlanModel.aggregate([
+      { $match: { athleteId: { $in: athleteIds } } },
+      { $unwind: '$weeks' },
+      { $unwind: '$weeks.sessions' },
+      {
+        $match: {
+          'weeks.sessions.status': 'COMPLETED',
+          'weeks.sessions.date': { $gte: thirtyDaysAgo },
+        },
+      },
+      {
+        $group: {
+          _id: '$athleteId',
+          dates: { $addToSet: { $dateToString: { format: '%Y-%m-%d', date: '$weeks.sessions.date' } } },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          activeDaysCount: { $size: '$dates' },
+        },
+      },
+    ]);
+
+    // Next race per athlete (closest future race)
+    const nextRaces = await this.goalRaceModel.aggregate([
+      { $match: { athleteId: { $in: athleteIds }, date: { $gte: now } } },
+      { $sort: { date: 1 } },
+      {
+        $group: {
+          _id: '$athleteId',
+          raceName: { $first: '$name' },
+          raceDate: { $first: '$date' },
+          raceDistance: { $first: '$distance' },
+        },
+      },
+    ]);
+
+    const activityMap = new Map(
+      lastActivity.map((a) => [a._id.toString(), a.lastActivityDate]),
+    );
+    const activeDaysMap = new Map(
+      activeDays.map((a) => [a._id.toString(), a.activeDaysCount]),
+    );
+    const raceMap = new Map(
+      nextRaces.map((r) => [r._id.toString(), r]),
+    );
+
+    const data = athletes.map((athlete) => {
+      const aid = athlete._id.toString();
+      const lastDate = activityMap.get(aid);
+      let daysSinceLastActivity: number | null = null;
+      if (lastDate) {
+        const diffMs = now.getTime() - new Date(lastDate).getTime();
+        daysSinceLastActivity = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      }
+      const race = raceMap.get(aid);
+      return {
+        _id: athlete._id,
+        firstName: athlete.firstName,
+        lastName: athlete.lastName,
+        email: athlete.email,
+        isActive: athlete.isActive,
+        daysSinceLastActivity,
+        activeDaysLast30: activeDaysMap.get(aid) || 0,
+        nextRace: race
+          ? { name: race.raceName, date: race.raceDate, distance: race.raceDistance }
+          : null,
+      };
+    });
+
+    return { data, total, page, limit };
   }
 
   async getAthletesSummary(coachId: string) {
