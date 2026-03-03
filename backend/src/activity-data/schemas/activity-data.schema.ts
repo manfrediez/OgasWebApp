@@ -41,10 +41,10 @@ export class ActivityData {
   @Prop({ type: Types.ObjectId, ref: 'WorkoutPlan', default: null })
   planId: Types.ObjectId | null;
 
-  @Prop({ default: null })
+  @Prop({ type: Number, default: null })
   weekNumber: number | null;
 
-  @Prop({ default: null })
+  @Prop({ type: Number, default: null })
   sessionIndex: number | null;
 
   @Prop({ required: true, enum: ['strava'] })
@@ -81,7 +81,7 @@ export class ActivityData {
   @Prop({ default: false })
   matched: boolean;
 
-  @Prop({ default: null })
+  @Prop({ type: Date, default: null })
   matchedAt: Date | null;
 }
 
