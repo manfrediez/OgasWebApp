@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import {
   WorkoutPlan,
   CreateWorkoutPlanRequest,
@@ -9,12 +9,21 @@ import {
   PlanSummary,
 } from '../models/workout-plan.model';
 
+interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class WorkoutPlansService {
   private http = inject(HttpClient);
 
   getByAthlete(athleteId: string): Observable<WorkoutPlan[]> {
-    return this.http.get<WorkoutPlan[]>(`/api/workout-plans/athlete/${athleteId}`);
+    return this.http.get<PaginatedResponse<WorkoutPlan>>(`/api/workout-plans/athlete/${athleteId}?limit=100`).pipe(
+      map(res => res.data),
+    );
   }
 
   getById(id: string): Observable<WorkoutPlan> {
