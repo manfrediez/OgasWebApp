@@ -34,8 +34,20 @@ import { ImportExcelDialogComponent } from '../forms/import-excel-dialog/import-
             ← Volver
           </button>
           <div class="flex-1">
-            <h1 class="text-2xl font-bold text-primary-700">
+            <h1 class="text-2xl font-bold text-primary-700 flex items-center gap-2">
               {{ athlete()!.firstName }} {{ athlete()!.lastName }}
+              @if (athlete()!.strava?.athleteId) {
+                <a
+                  [href]="'https://www.strava.com/athletes/' + athlete()!.strava!.athleteId"
+                  target="_blank"
+                  rel="noopener"
+                  title="Ver perfil en Strava"
+                  class="inline-flex items-center text-[#FC4C02] hover:opacity-80">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/>
+                  </svg>
+                </a>
+              }
             </h1>
             <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-primary-400">
               <span>{{ athlete()!.email }}</span>

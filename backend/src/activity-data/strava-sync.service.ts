@@ -12,7 +12,7 @@ import {
   AthleteMetrics,
   AthleteMetricsDocument,
 } from '../athlete-metrics/schemas/athlete-metrics.schema';
-import { WorkoutType } from '../common/enums';
+import { WorkoutType, SessionStatus } from '../common/enums';
 
 const STRAVA_TYPE_MAP: Record<string, WorkoutType[]> = {
   Run: [
@@ -188,8 +188,13 @@ export class StravaSyncService {
               week.weekNumber,
               i,
             );
+
+            // Mark session as completed
+            session.status = SessionStatus.COMPLETED;
+            await plan.save();
+
             this.logger.log(
-              `Auto-matched activity ${activityId} to plan ${plan._id} week ${week.weekNumber} session ${i}`,
+              `Auto-matched and completed activity ${activityId} to plan ${plan._id} week ${week.weekNumber} session ${i}`,
             );
             return;
           }

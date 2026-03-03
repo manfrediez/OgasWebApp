@@ -66,6 +66,13 @@ export class UsersController {
       }
     }
     const { password, ...result } = user.toObject();
+    // Strip sensitive Strava tokens, only expose public fields
+    if (result.strava) {
+      (result as any).strava = {
+        athleteId: result.strava.athleteId,
+        connectedAt: result.strava.connectedAt,
+      };
+    }
     return result;
   }
 

@@ -59,3 +59,4 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.index({ coachId: 1 });
+UserSchema.index({ 'strava.athleteId': 1 }, { sparse: true });
