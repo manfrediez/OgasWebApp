@@ -64,11 +64,11 @@ export class AthleteLayoutComponent implements OnInit, OnDestroy {
   tabs = [
     { label: 'Inicio', route: '/athlete/dashboard', icon: '🏠', badge: undefined as (() => number) | undefined },
     { label: 'Mi Plan', route: '/athlete/plan', icon: '📋', badge: undefined as (() => number) | undefined },
-    { label: 'Mensajes', route: '/athlete/messages', icon: '💬', badge: () => this.messagesService.unreadCount() },
-    { label: 'Métricas', route: '/athlete/metrics', icon: '📈', badge: undefined as (() => number) | undefined },
-    { label: 'Carreras', route: '/athlete/races', icon: '🏁', badge: undefined as (() => number) | undefined },
-    { label: 'Fuerza', route: '/athlete/strength', icon: '💪', badge: undefined as (() => number) | undefined },
     { label: 'Info', route: '/athlete/info', icon: '📚', badge: undefined as (() => number) | undefined },
+    { label: 'Fuerza', route: '/athlete/strength', icon: '💪', badge: undefined as (() => number) | undefined },
+    { label: 'Carreras', route: '/athlete/races', icon: '🏁', badge: undefined as (() => number) | undefined },
+    { label: 'Métricas', route: '/athlete/metrics', icon: '📈', badge: undefined as (() => number) | undefined },
+    { label: 'Mensajes', route: '/athlete/messages', icon: '💬', badge: () => this.messagesService.unreadCount() },
   ];
 
   ngOnInit() {

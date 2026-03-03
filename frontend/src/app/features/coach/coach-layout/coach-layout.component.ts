@@ -63,10 +63,10 @@ export class CoachLayoutComponent implements OnInit, OnDestroy {
 
   tabs = [
     { label: 'Dashboard', route: '/coach/dashboard', icon: '📊', badge: undefined as (() => number) | undefined },
+    { label: 'Info', route: '/coach/info', icon: '📚', badge: undefined as (() => number) | undefined },
     { label: 'Atletas', route: '/coach/athletes', icon: '🏃', badge: undefined as (() => number) | undefined },
     { label: 'Inactivos', route: '/coach/inactive', icon: '⏸️', badge: undefined as (() => number) | undefined },
     { label: 'Mensajes', route: '/coach/messages', icon: '💬', badge: () => this.messagesService.unreadCount() },
-    { label: 'Info', route: '/coach/info', icon: '📚', badge: undefined as (() => number) | undefined },
     { label: 'Invitar', route: '/coach/invite', icon: '✉️', badge: undefined as (() => number) | undefined },
   ];
 

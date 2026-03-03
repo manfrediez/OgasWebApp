@@ -395,7 +395,7 @@ export class ImportService {
 
       if (nameCell || distCell) {
         races.push({
-          distance: distCell || '',
+          distance: distCell || nameCell || '-',
           date: date || new Date(),
           name: nameCell || distCell || '',
           location: locationCell || '',
