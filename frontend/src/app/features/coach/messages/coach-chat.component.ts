@@ -202,7 +202,10 @@ export class CoachChatComponent implements OnInit, OnDestroy {
             this.scrollToBottom();
           }
         },
-        error: () => this.loading.set(false),
+        error: () => {
+          this.toast.error('Error al cargar mensajes');
+          this.loading.set(false);
+        },
       });
   }
 
@@ -277,6 +280,7 @@ export class CoachChatComponent implements OnInit, OnDestroy {
             this.messagesService.markAsRead(this.athleteId).subscribe();
           }
         },
+        error: () => {},
       });
   }
 

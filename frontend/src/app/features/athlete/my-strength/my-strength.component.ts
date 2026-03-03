@@ -94,14 +94,7 @@ export class MyStrengthComponent implements OnInit {
             error: () => this.loading.set(false),
           });
         } else {
-          // Try to get all circuits as fallback
-          this.circuitsService.getAll().subscribe({
-            next: c => {
-              this.circuits.set(c);
-              this.loading.set(false);
-            },
-            error: () => this.loading.set(false),
-          });
+          this.loading.set(false);
         }
       },
       error: () => this.loading.set(false),

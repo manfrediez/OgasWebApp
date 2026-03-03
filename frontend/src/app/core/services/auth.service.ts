@@ -66,6 +66,10 @@ export class AuthService {
     );
   }
 
+  changePassword(currentPassword: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>('/api/auth/change-password', { currentPassword, newPassword });
+  }
+
   inviteAthlete(data: InviteAthleteRequest): Observable<InviteAthleteResponse> {
     return this.http.post<InviteAthleteResponse>('/api/auth/invite', data);
   }

@@ -13,6 +13,7 @@ import { EmailService } from '../common/services/email.service';
 import { LoginDto } from './dto/login.dto';
 import { InviteAthleteDto } from './dto/invite-athlete.dto';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { Role } from '../common/enums';
 
 @Injectable()
@@ -78,6 +79,16 @@ export class AuthService {
     await user.save();
 
     return this.generateTokens(user.id, user.email, user.role);
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.usersService.findById(userId);
+    const passwordValid = await bcrypt.compare(dto.currentPassword, user.password);
+    if (!passwordValid) throw new UnauthorizedException('Contraseña actual incorrecta');
+
+    user.password = await bcrypt.hash(dto.newPassword, 10);
+    await user.save();
+    return { message: 'Contraseña actualizada' };
   }
 
   async refresh(refreshToken: string) {

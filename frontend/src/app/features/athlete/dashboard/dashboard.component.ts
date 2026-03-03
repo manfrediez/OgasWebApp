@@ -16,6 +16,7 @@ import { WorkoutPlan, Session } from '../../../models/workout-plan.model';
 import { GoalRace } from '../../../models/goal-race.model';
 import { AthleteMetrics } from '../../../models/athlete-metrics.model';
 import { SessionStatus } from '../../../core/models/enums';
+import { ToastService } from '../../../shared/services/toast.service';
 
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { WorkoutTypeIconComponent } from '../../../shared/components/workout-type-icon/workout-type-icon.component';
@@ -308,6 +309,7 @@ export class DashboardComponent implements OnInit {
   private racesService = inject(GoalRacesService);
   private metricsService = inject(AthleteMetricsService);
   private dialog = inject(Dialog);
+  private toast = inject(ToastService);
   messagesService = inject(MessagesService);
 
   loading = signal(true);
@@ -328,8 +330,8 @@ export class DashboardComponent implements OnInit {
     this.greeting.set(this.getGreeting());
 
     forkJoin({
-      plans: this.plansService.getByAthlete(user._id),
-      races: this.racesService.getByAthlete(user._id),
+      plans: this.plansService.getByAthlete(user._id).pipe(catchError(() => of([]))),
+      races: this.racesService.getByAthlete(user._id).pipe(catchError(() => of([]))),
       metrics: this.metricsService.getByAthlete(user._id).pipe(catchError(() => of(null))),
     }).subscribe({
       next: ({ plans, races, metrics }) => {
@@ -339,7 +341,10 @@ export class DashboardComponent implements OnInit {
         this.metrics.set(metrics);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.toast.error('Error al cargar el dashboard');
+        this.loading.set(false);
+      },
     });
   }
 

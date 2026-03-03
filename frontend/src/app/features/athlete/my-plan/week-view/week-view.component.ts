@@ -1,4 +1,5 @@
 import { Component, input, output, computed } from '@angular/core';
+import { format } from 'date-fns';
 import { Week, Session } from '../../../../models/workout-plan.model';
 import { ActivityData } from '../../../../models/activity-data.model';
 import { SessionStatus } from '../../../../core/models/enums';
@@ -35,8 +36,13 @@ const DAY_NAMES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
         <div class="min-w-[640px]">
           <!-- Day headers -->
           <div class="grid grid-cols-7 gap-2 mb-2">
-            @for (day of dayNames; track day) {
-              <p class="text-xs font-medium text-primary-400 text-center">{{ day }}</p>
+            @for (dayIdx of dayIndices; track dayIdx) {
+              <p class="text-xs font-medium text-primary-400 text-center">
+                {{ dayNames[dayIdx] }}
+                @if (isToday(dayIdx)) {
+                  <span class="text-[10px] font-bold text-accent-500 ml-0.5">HOY</span>
+                }
+              </p>
             }
           </div>
 
@@ -45,8 +51,11 @@ const DAY_NAMES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
             @for (dayIdx of dayIndices; track dayIdx) {
               <div
                 class="min-h-[100px] border border-white/30 rounded-lg p-2 cursor-pointer hover:bg-white/30 transition-colors"
+                [class.ring-2]="isToday(dayIdx)"
+                [class.ring-accent-500]="isToday(dayIdx)"
                 [class.border-l-4]="needsFeedback(dayIdx)"
                 [class.border-l-amber-400]="needsFeedback(dayIdx)"
+                [style.background-color]="isToday(dayIdx) ? 'rgb(0 188 212 / 0.1)' : ''"
                 (click)="onCellClick(dayIdx)">
                 @if (getSession(dayIdx); as session) {
                   <div class="space-y-1">
@@ -96,6 +105,7 @@ export class WeekViewComponent {
 
   dayIndices = [0, 1, 2, 3, 4, 5, 6];
   dayNames = DAY_NAMES;
+  todayStr = format(new Date(), 'yyyy-MM-dd');
 
   weekTotal = computed(() => this.week().sessions.length);
 
@@ -111,6 +121,11 @@ export class WeekViewComponent {
     if (pct >= 50) return `${base} bg-yellow-500/20 text-yellow-600`;
     return `${base} bg-white/30 text-primary-400`;
   });
+
+  isToday(dayOfWeek: number): boolean {
+    const session = this.getSession(dayOfWeek);
+    return !!session && session.date?.substring(0, 10) === this.todayStr;
+  }
 
   getSession(dayOfWeek: number): Session | undefined {
     return this.week().sessions.find(s => s.dayOfWeek === dayOfWeek);

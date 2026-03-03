@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { switchMap } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -73,17 +74,11 @@ export class LoginComponent {
     this.loading.set(true);
     this.error.set('');
 
-    this.authService.login({ email: this.email, password: this.password }).subscribe({
+    this.authService.login({ email: this.email, password: this.password }).pipe(
+      switchMap(() => this.authService.fetchCurrentUser()),
+    ).subscribe({
       next: () => {
-        this.authService.fetchCurrentUser().subscribe({
-          next: () => {
-            this.router.navigateByUrl(this.authService.getRedirectUrl());
-          },
-          error: () => {
-            this.error.set('Error al obtener datos del usuario');
-            this.loading.set(false);
-          },
-        });
+        this.router.navigateByUrl(this.authService.getRedirectUrl());
       },
       error: () => {
         this.error.set('Email o contraseña incorrectos');

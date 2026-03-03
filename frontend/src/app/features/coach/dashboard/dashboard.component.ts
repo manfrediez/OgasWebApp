@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { UsersService, AthleteSummary } from '../../../services/users.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
@@ -8,7 +9,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, LoadingSpinnerComponent, EmptyStateComponent, DateEsPipe],
+  imports: [RouterLink, FormsModule, LoadingSpinnerComponent, EmptyStateComponent, DateEsPipe],
   template: `
     <div class="max-w-6xl mx-auto">
       <!-- Hero Banner -->
@@ -91,15 +92,24 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
           </div>
         </div>
 
-        <!-- Section Header -->
+        <!-- Section Header + Search -->
         <div class="flex items-center gap-3 mb-5">
           <h2 class="text-lg font-semibold text-primary-700">Equipo</h2>
           <div class="flex-1 h-px bg-primary-100"></div>
+          <div class="relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-300" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+            </svg>
+            <input
+              [(ngModel)]="searchTerm"
+              placeholder="Buscar atleta..."
+              class="pl-9 pr-3 py-2 rounded-lg border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent-400 w-48" />
+          </div>
         </div>
 
         <!-- Athlete Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          @for (athlete of athletes(); track athlete._id) {
+          @for (athlete of filteredAthletes(); track athlete._id) {
             <a
               [routerLink]="['/coach/athlete', athlete._id]"
               class="group card-glass rounded-2xl p-5 hover:border-accent-300/50">
@@ -186,6 +196,15 @@ export class DashboardComponent implements OnInit {
 
   athletes = signal<AthleteSummary[]>([]);
   loading = signal(true);
+  searchTerm = signal('');
+
+  filteredAthletes = computed(() => {
+    const term = this.searchTerm().toLowerCase().trim();
+    if (!term) return this.athletes();
+    return this.athletes().filter(a =>
+      `${a.firstName} ${a.lastName}`.toLowerCase().includes(term)
+    );
+  });
 
   totalAthletes = computed(() => this.athletes().length);
   activePlans = computed(() => this.athletes().filter(a => a.currentPlan).length);

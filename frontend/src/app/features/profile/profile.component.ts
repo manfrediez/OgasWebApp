@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
 import { UsersService } from '../../services/users.service';
 import { StravaService, StravaStatus } from '../../services/strava.service';
@@ -78,6 +79,43 @@ import { ToastService } from '../../shared/services/toast.service';
             }
           </button>
         </form>
+
+        <!-- Change Password -->
+        <div class="mt-6 card-glass rounded-xl p-6">
+          <h2 class="text-lg font-semibold text-primary-700 mb-4">Cambiar contraseña</h2>
+          <form (ngSubmit)="onChangePassword()" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-primary-600 mb-1">Contraseña actual</label>
+              <input [(ngModel)]="currentPassword" name="currentPassword" type="password" required class="w-full"
+                     placeholder="Tu contraseña actual" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-primary-600 mb-1">Nueva contraseña</label>
+              <input [(ngModel)]="newPassword" name="newPassword" type="password" required minlength="6" class="w-full"
+                     placeholder="Mínimo 6 caracteres" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-primary-600 mb-1">Confirmar nueva contraseña</label>
+              <input [(ngModel)]="confirmNewPassword" name="confirmNewPassword" type="password" required class="w-full"
+                     placeholder="Repetí la nueva contraseña" />
+            </div>
+
+            @if (passwordError()) {
+              <p class="text-sm text-danger-500 bg-red-50 rounded-lg p-2">{{ passwordError() }}</p>
+            }
+
+            <button
+              type="submit"
+              [disabled]="savingPassword()"
+              class="w-full rounded-lg bg-primary-500 py-2.5 text-white font-medium hover:bg-primary-700 disabled:opacity-50">
+              @if (savingPassword()) {
+                Cambiando...
+              } @else {
+                Cambiar contraseña
+              }
+            </button>
+          </form>
+        </div>
 
         <!-- Strava Connection Card (only for athletes) -->
         @if (isAthlete) {
@@ -161,10 +199,25 @@ export class ProfileComponent implements OnInit {
   success = signal(false);
   error = signal('');
 
+  currentPassword = '';
+  newPassword = '';
+  confirmNewPassword = '';
+  savingPassword = signal(false);
+  passwordError = signal('');
+
   isAthlete = false;
   stravaStatus = signal<StravaStatus | null>(null);
   stravaLoading = signal(false);
   stravaSuccess = signal(false);
+
+  constructor() {
+    this.route.queryParams.pipe(takeUntilDestroyed()).subscribe(params => {
+      if (params['strava'] === 'connected') {
+        this.stravaSuccess.set(true);
+        this.authService.fetchCurrentUser().subscribe();
+      }
+    });
+  }
 
   ngOnInit() {
     const user = this.authService.currentUser();
@@ -180,13 +233,6 @@ export class ProfileComponent implements OnInit {
 
     if (this.isAthlete) {
       this.loadStravaStatus();
-
-      this.route.queryParams.subscribe(params => {
-        if (params['strava'] === 'connected') {
-          this.stravaSuccess.set(true);
-          this.authService.fetchCurrentUser().subscribe();
-        }
-      });
     }
   }
 
@@ -242,6 +288,34 @@ export class ProfileComponent implements OnInit {
     const m = today.getMonth() - birth.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
     return age;
+  }
+
+  onChangePassword() {
+    this.passwordError.set('');
+
+    if (this.newPassword.length < 6) {
+      this.passwordError.set('La nueva contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    if (this.newPassword !== this.confirmNewPassword) {
+      this.passwordError.set('Las contraseñas no coinciden');
+      return;
+    }
+
+    this.savingPassword.set(true);
+    this.authService.changePassword(this.currentPassword, this.newPassword).subscribe({
+      next: () => {
+        this.toast.success('Contraseña actualizada');
+        this.currentPassword = '';
+        this.newPassword = '';
+        this.confirmNewPassword = '';
+        this.savingPassword.set(false);
+      },
+      error: () => {
+        this.passwordError.set('Contraseña actual incorrecta');
+        this.savingPassword.set(false);
+      },
+    });
   }
 
   goBack() {

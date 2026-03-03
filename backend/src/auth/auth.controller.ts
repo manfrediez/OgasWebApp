@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { InviteAthleteDto } from './dto/invite-athlete.dto';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -35,6 +36,15 @@ export class AuthController {
   @UseGuards(ThrottlerGuard)
   acceptInvite(@Body() dto: AcceptInviteDto) {
     return this.authService.acceptInvite(dto);
+  }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  changePassword(
+    @Body() dto: ChangePasswordDto,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return this.authService.changePassword(userId, dto);
   }
 
   @Post('refresh')

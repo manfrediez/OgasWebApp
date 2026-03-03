@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { switchMap } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -111,13 +112,11 @@ export class AcceptInviteComponent implements OnInit {
     this.loading.set(true);
     this.error.set('');
 
-    this.authService.acceptInvite({ inviteToken: this.inviteToken, password: this.password }).subscribe({
+    this.authService.acceptInvite({ inviteToken: this.inviteToken, password: this.password }).pipe(
+      switchMap(() => this.authService.fetchCurrentUser()),
+    ).subscribe({
       next: () => {
-        this.authService.fetchCurrentUser().subscribe({
-          next: () => {
-            this.router.navigateByUrl(this.authService.getRedirectUrl());
-          },
-        });
+        this.router.navigateByUrl(this.authService.getRedirectUrl());
       },
       error: () => {
         this.error.set('Token inválido o expirado');

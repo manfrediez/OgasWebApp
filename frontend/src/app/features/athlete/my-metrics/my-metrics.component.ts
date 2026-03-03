@@ -98,7 +98,9 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
         @if (metrics()!.hrZonesDetailed && metrics()!.hrZonesDetailed!.length > 0) {
           <div class="card-glass rounded-xl p-4 mb-4">
             <h3 class="text-sm font-semibold text-primary-600 mb-2">Zonas de Frecuencia Cardíaca</h3>
-            <div class="overflow-x-auto">
+
+            <!-- Desktop table -->
+            <div class="hidden md:block overflow-x-auto">
               <table class="w-full text-sm">
                 <thead>
                   <tr class="bg-surface-alt">
@@ -123,6 +125,31 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
                   }
                 </tbody>
               </table>
+            </div>
+
+            <!-- Mobile cards -->
+            <div class="md:hidden space-y-3">
+              @for (zone of metrics()!.hrZonesDetailed; track zone.zone) {
+                <div class="bg-white/30 rounded-lg p-3 space-y-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="font-semibold text-primary-700">{{ zone.zone }}</span>
+                    @if (zone.rpe) {
+                      <span class="text-xs bg-accent-400/10 text-accent-700 rounded-full px-2 py-0.5">RPE {{ zone.rpe }}</span>
+                    }
+                  </div>
+                  <div class="grid grid-cols-2 gap-1 text-sm">
+                    @if (zone.percentRange) {
+                      <p class="text-primary-500"><span class="text-primary-400 text-xs">% FC:</span> {{ zone.percentRange }}</p>
+                    }
+                    @if (zone.fcRange) {
+                      <p class="text-primary-500"><span class="text-primary-400 text-xs">Rango:</span> {{ zone.fcRange.min }} - {{ zone.fcRange.max }}</p>
+                    }
+                  </div>
+                  @if (zone.sensation) {
+                    <p class="text-xs text-primary-400">{{ zone.sensation }}</p>
+                  }
+                </div>
+              }
             </div>
           </div>
         }

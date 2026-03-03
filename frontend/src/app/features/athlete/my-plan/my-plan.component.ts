@@ -9,6 +9,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { WeekViewComponent } from './week-view/week-view.component';
 import { SessionFeedbackDialogComponent } from './session-feedback-dialog/session-feedback-dialog.component';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-my-plan',
@@ -117,6 +118,7 @@ export class MyPlanComponent implements OnInit {
   private plansService = inject(WorkoutPlansService);
   private activityDataService = inject(ActivityDataService);
   private dialog = inject(Dialog);
+  private toast = inject(ToastService);
 
   plans = signal<WorkoutPlan[]>([]);
   loading = signal(true);
@@ -137,7 +139,10 @@ export class MyPlanComponent implements OnInit {
         }
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.toast.error('Error al cargar el plan');
+        this.loading.set(false);
+      },
     });
 
     // Load activity data for this athlete
