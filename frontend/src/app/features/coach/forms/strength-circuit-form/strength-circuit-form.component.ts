@@ -10,8 +10,8 @@ import { ToastService } from '../../../../shared/services/toast.service';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="dialog-glass rounded-2xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto">
-      <h2 class="text-lg font-bold text-primary-700 mb-4">
+    <div role="dialog" aria-modal="true" aria-labelledby="dialog-title" class="dialog-glass rounded-2xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto">
+      <h2 id="dialog-title" class="text-lg font-bold text-primary-700 mb-4">
         {{ isEdit ? 'Editar Circuito' : 'Nuevo Circuito de Fuerza' }}
       </h2>
 
@@ -47,7 +47,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
             <div class="bg-primary-50 rounded-lg p-3 mb-2 space-y-2">
               <div class="flex items-center justify-between">
                 <input [(ngModel)]="ex.name" [name]="'exName' + $index" placeholder="Nombre del ejercicio" class="flex-1 mr-2" />
-                <button type="button" (click)="removeExercise($index)" class="text-xs text-danger-500">X</button>
+                <button type="button" (click)="removeExercise($index)" aria-label="Eliminar ejercicio" class="text-xs text-danger-500">X</button>
               </div>
               <div class="grid grid-cols-3 gap-2">
                 <div>

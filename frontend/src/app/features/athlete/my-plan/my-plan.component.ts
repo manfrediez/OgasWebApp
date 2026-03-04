@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
 import { AuthService } from '../../../core/services/auth.service';
 import { WorkoutPlansService } from '../../../services/workout-plans.service';
@@ -9,7 +10,6 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { WeekViewComponent } from './week-view/week-view.component';
 import { SessionFeedbackDialogComponent } from './session-feedback-dialog/session-feedback-dialog.component';
-import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-my-plan',
@@ -112,7 +112,7 @@ export class MyPlanComponent implements OnInit {
   private plansService = inject(WorkoutPlansService);
   private activityDataService = inject(ActivityDataService);
   private dialog = inject(Dialog);
-  private toast = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   plans = signal<WorkoutPlan[]>([]);
   loading = signal(true);
@@ -125,7 +125,7 @@ export class MyPlanComponent implements OnInit {
     const user = this.authService.currentUser();
     if (!user) return;
 
-    this.plansService.getByAthlete(user._id).subscribe({
+    this.plansService.getByAthlete(user._id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: plans => {
         this.plans.set(plans);
         if (plans.length > 0) {
@@ -133,14 +133,11 @@ export class MyPlanComponent implements OnInit {
         }
         this.loading.set(false);
       },
-      error: () => {
-        this.toast.error('Error al cargar el plan');
-        this.loading.set(false);
-      },
+      error: () => this.loading.set(false),
     });
 
     // Load activity data for this athlete
-    this.activityDataService.getByAthlete(user._id).subscribe({
+    this.activityDataService.getByAthlete(user._id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: activities => {
         const map = new Map<string, ActivityData>();
         for (const activity of activities) {

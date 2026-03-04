@@ -14,7 +14,7 @@ export interface SidebarItem {
   imports: [RouterLink, RouterLinkActive],
   template: `
     <aside class="w-60 sidebar-glass text-primary-600 min-h-full flex flex-col">
-      <nav class="flex-1 py-4">
+      <nav aria-label="Menú lateral" class="flex-1 py-4">
         @for (item of items(); track item.route) {
           <a
             [routerLink]="item.route"

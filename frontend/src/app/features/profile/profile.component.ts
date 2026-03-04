@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -43,7 +43,7 @@ import { PlanSummary } from '../../models/workout-plan.model';
         @if (isAthlete) {
           <div class="card-glass rounded-xl p-6 mb-6">
             <h2 class="text-lg font-semibold text-primary-700 mb-4 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
               Resumen de actividad
@@ -82,7 +82,7 @@ import { PlanSummary } from '../../models/workout-plan.model';
         <!-- Personal Data -->
         <div class="card-glass rounded-xl p-6 mb-6">
           <h2 class="text-lg font-semibold text-primary-700 mb-4 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
             Datos personales
@@ -91,17 +91,21 @@ import { PlanSummary } from '../../models/workout-plan.model';
             <div>
               <label class="block text-sm font-medium text-primary-600 mb-1">Nombre</label>
               <input [(ngModel)]="firstName" #fnInput="ngModel" name="firstName" required class="w-full"
-                     [class.border-danger-500]="fnInput.invalid && fnInput.touched" />
+                     [class.border-danger-500]="fnInput.invalid && fnInput.touched"
+                     [attr.aria-invalid]="fnInput.invalid && fnInput.touched"
+                     [attr.aria-describedby]="(fnInput.invalid && fnInput.touched) ? 'fn-error' : null" />
               @if (fnInput.invalid && fnInput.touched) {
-                <p class="text-xs text-danger-500 mt-1">El nombre es obligatorio</p>
+                <p id="fn-error" class="text-xs text-danger-500 mt-1">El nombre es obligatorio</p>
               }
             </div>
             <div>
               <label class="block text-sm font-medium text-primary-600 mb-1">Apellido</label>
               <input [(ngModel)]="lastName" #lnInput="ngModel" name="lastName" required class="w-full"
-                     [class.border-danger-500]="lnInput.invalid && lnInput.touched" />
+                     [class.border-danger-500]="lnInput.invalid && lnInput.touched"
+                     [attr.aria-invalid]="lnInput.invalid && lnInput.touched"
+                     [attr.aria-describedby]="(lnInput.invalid && lnInput.touched) ? 'ln-error' : null" />
               @if (lnInput.invalid && lnInput.touched) {
-                <p class="text-xs text-danger-500 mt-1">El apellido es obligatorio</p>
+                <p id="ln-error" class="text-xs text-danger-500 mt-1">El apellido es obligatorio</p>
               }
             </div>
             <div>
@@ -148,9 +152,10 @@ import { PlanSummary } from '../../models/workout-plan.model';
           <button
             type="button"
             (click)="passwordOpen.set(!passwordOpen())"
+            [attr.aria-expanded]="passwordOpen()"
             class="w-full flex items-center justify-between p-6 text-left">
             <h2 class="text-lg font-semibold text-primary-700 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               Cambiar contraseña
@@ -206,7 +211,7 @@ import { PlanSummary } from '../../models/workout-plan.model';
         @if (isAthlete) {
           <div class="card-glass rounded-xl p-6">
             <div class="flex items-center gap-3 mb-4">
-              <svg viewBox="0 0 24 24" class="w-7 h-7" fill="#FC4C02">
+              <svg aria-hidden="true" viewBox="0 0 24 24" class="w-7 h-7" fill="#FC4C02">
                 <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
               </svg>
               <h2 class="text-lg font-semibold text-primary-700">Strava</h2>
@@ -274,6 +279,7 @@ export class ProfileComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private toast = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   email = '';
   firstName = '';
@@ -374,7 +380,9 @@ export class ProfileComponent implements OnInit {
 
   loadStats(athleteId: string) {
     this.statsLoading.set(true);
-    this.workoutPlansService.getAthleteSummary(athleteId).subscribe({
+    this.workoutPlansService.getAthleteSummary(athleteId).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: summaries => {
         this.planSummaries.set(summaries);
         this.statsLoading.set(false);
@@ -385,7 +393,9 @@ export class ProfileComponent implements OnInit {
 
   loadStravaStatus() {
     this.stravaLoading.set(true);
-    this.stravaService.getStatus().subscribe({
+    this.stravaService.getStatus().pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: status => {
         this.stravaStatus.set(status);
         this.stravaLoading.set(false);

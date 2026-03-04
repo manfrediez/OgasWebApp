@@ -1,4 +1,5 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UsersService, AthleteSummary } from '../../../services/users.service';
@@ -189,6 +190,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 })
 export class DashboardComponent implements OnInit {
   private usersService = inject(UsersService);
+  private destroyRef = inject(DestroyRef);
 
   athletes = signal<AthleteSummary[]>([]);
   loading = signal(true);
@@ -208,7 +210,9 @@ export class DashboardComponent implements OnInit {
   totalUnread = computed(() => this.athletes().reduce((sum, a) => sum + a.unreadMessages, 0));
 
   ngOnInit() {
-    this.usersService.getAthletesSummary().subscribe({
+    this.usersService.getAthletesSummary().pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: athletes => {
         this.athletes.set(athletes);
         this.loading.set(false);

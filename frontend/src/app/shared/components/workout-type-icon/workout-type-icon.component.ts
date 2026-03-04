@@ -5,7 +5,7 @@ import { WorkoutType } from '../../../core/models/enums';
   selector: 'app-workout-type-icon',
   standalone: true,
   template: `
-    <span [title]="label()" class="text-lg">{{ icon() }}</span>
+    <span [title]="label()" role="img" [attr.aria-label]="label()" class="text-lg">{{ icon() }}</span>
   `,
 })
 export class WorkoutTypeIconComponent {

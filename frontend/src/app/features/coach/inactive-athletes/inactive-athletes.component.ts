@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { UsersService, InactiveAthlete } from '../../../services/users.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -74,12 +75,15 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 })
 export class InactiveAthletesComponent implements OnInit {
   private usersService = inject(UsersService);
+  private destroyRef = inject(DestroyRef);
 
   athletes = signal<InactiveAthlete[]>([]);
   loading = signal(true);
 
   ngOnInit() {
-    this.usersService.getInactiveAthletes().subscribe({
+    this.usersService.getInactiveAthletes().pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: athletes => {
         this.athletes.set(athletes);
         this.loading.set(false);

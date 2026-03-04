@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SlicePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -215,6 +216,7 @@ export class CoachInfoPostsComponent implements OnInit {
   infoService = inject(GeneralInfoService);
   private dialog = inject(Dialog);
   private toast = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   topicId = '';
   topicName = signal('');
@@ -233,22 +235,19 @@ export class CoachInfoPostsComponent implements OnInit {
   ngOnInit() {
     this.topicId = this.route.snapshot.params['topicId'];
     this.loadPosts();
-    this.infoService.getTopics().subscribe((topics) => {
+    this.infoService.getTopics().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((topics) => {
       const topic = topics.find((t) => t._id === this.topicId);
       if (topic) this.topicName.set(topic.name);
     });
   }
 
   loadPosts() {
-    this.infoService.getPostsByTopic(this.topicId).subscribe({
+    this.infoService.getPostsByTopic(this.topicId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (posts) => {
         this.posts.set(posts);
         this.loading.set(false);
       },
-      error: () => {
-        this.toast.error('Error al cargar publicaciones');
-        this.loading.set(false);
-      },
+      error: () => this.loading.set(false),
     });
   }
 

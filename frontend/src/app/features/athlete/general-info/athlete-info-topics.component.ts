@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { GeneralInfoService } from '../../../services/general-info.service';
 import { Topic } from '../../../models/general-info.model';
@@ -58,12 +59,13 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 })
 export class AthleteInfoTopicsComponent implements OnInit {
   private infoService = inject(GeneralInfoService);
+  private destroyRef = inject(DestroyRef);
 
   topics = signal<Topic[]>([]);
   loading = signal(true);
 
   ngOnInit() {
-    this.infoService.getTopics().subscribe({
+    this.infoService.getTopics().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (topics) => {
         this.topics.set(topics);
         this.loading.set(false);

@@ -11,8 +11,8 @@ import { HrZoneLabelPipe } from '../../../../shared/pipes/hr-zone-label.pipe';
   standalone: true,
   imports: [FormsModule, WorkoutTypeLabelPipe, HrZoneLabelPipe],
   template: `
-    <div class="dialog-glass rounded-2xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto">
-      <h2 class="text-lg font-bold text-primary-700 mb-4">Editar Sesión</h2>
+    <div role="dialog" aria-modal="true" aria-labelledby="dialog-title" class="dialog-glass rounded-2xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto">
+      <h2 id="dialog-title" class="text-lg font-bold text-primary-700 mb-4">Editar Sesión</h2>
 
       <form (ngSubmit)="onSubmit()" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">

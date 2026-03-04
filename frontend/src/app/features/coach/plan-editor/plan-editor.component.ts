@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WorkoutPlansService } from '../../../services/workout-plans.service';
@@ -141,6 +142,7 @@ export class PlanEditorComponent implements OnInit {
   private router = inject(Router);
   private plansService = inject(WorkoutPlansService);
   private toast = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   isEdit = false;
   athleteId = '';
@@ -166,7 +168,7 @@ export class PlanEditorComponent implements OnInit {
 
     if (this.planId) {
       this.isEdit = true;
-      this.plansService.getById(this.planId).subscribe({
+      this.plansService.getById(this.planId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: plan => {
           this.form = {
             name: plan.name,
@@ -185,7 +187,7 @@ export class PlanEditorComponent implements OnInit {
         error: () => this.loading.set(false),
       });
     } else {
-      this.plansService.getTemplates().subscribe({
+      this.plansService.getTemplates().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: templates => this.templates.set(templates),
       });
       this.loading.set(false);

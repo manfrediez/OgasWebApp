@@ -1,4 +1,5 @@
-import { Component, inject, input, signal, OnInit } from '@angular/core';
+import { Component, inject, input, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
 import { GoalRacesService } from '../../../../../services/goal-races.service';
 import { GoalRace } from '../../../../../models/goal-race.model';
@@ -68,6 +69,7 @@ export class GoalRacesTabComponent implements OnInit {
   private racesService = inject(GoalRacesService);
   private dialog = inject(Dialog);
   private toast = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   athleteId = input.required<string>();
   races = signal<GoalRace[]>([]);
@@ -78,15 +80,14 @@ export class GoalRacesTabComponent implements OnInit {
   }
 
   loadRaces() {
-    this.racesService.getByAthlete(this.athleteId()).subscribe({
+    this.racesService.getByAthlete(this.athleteId()).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: races => {
         this.races.set(races);
         this.loading.set(false);
       },
-      error: () => {
-        this.toast.error('Error al cargar carreras');
-        this.loading.set(false);
-      },
+      error: () => this.loading.set(false),
     });
   }
 

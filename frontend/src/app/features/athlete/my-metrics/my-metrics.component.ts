@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/services/auth.service';
 import { AthleteMetricsService } from '../../../services/athlete-metrics.service';
 import { AthleteMetrics } from '../../../models/athlete-metrics.model';
@@ -183,6 +184,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 export class MyMetricsComponent implements OnInit {
   private authService = inject(AuthService);
   private metricsService = inject(AthleteMetricsService);
+  private destroyRef = inject(DestroyRef);
 
   metrics = signal<AthleteMetrics | null>(null);
   loading = signal(true);
@@ -191,7 +193,7 @@ export class MyMetricsComponent implements OnInit {
     const user = this.authService.currentUser();
     if (!user) return;
 
-    this.metricsService.getByAthlete(user._id).subscribe({
+    this.metricsService.getByAthlete(user._id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: m => {
         this.metrics.set(m);
         this.loading.set(false);

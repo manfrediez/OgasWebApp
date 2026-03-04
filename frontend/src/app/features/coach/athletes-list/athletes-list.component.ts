@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UsersService, AthleteGridItem } from '../../../services/users.service';
@@ -152,6 +153,7 @@ import { UsersService, AthleteGridItem } from '../../../services/users.service';
 export class AthletesListComponent implements OnInit {
   private usersService = inject(UsersService);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
   private searchTimeout: any;
 
   athletes = signal<AthleteGridItem[]>([]);
@@ -200,7 +202,7 @@ export class AthletesListComponent implements OnInit {
   private loadAthletes() {
     this.loading.set(true);
     const searchVal = this.search().trim() || undefined;
-    this.usersService.getAthletesGrid(this.page(), this.LIMIT, searchVal).subscribe({
+    this.usersService.getAthletesGrid(this.page(), this.LIMIT, searchVal).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.athletes.set(res.data);
         this.total.set(res.total);

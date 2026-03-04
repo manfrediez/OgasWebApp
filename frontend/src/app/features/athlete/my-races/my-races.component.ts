@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/services/auth.service';
 import { GoalRacesService } from '../../../services/goal-races.service';
 import { RaceStrategiesService } from '../../../services/race-strategies.service';
@@ -100,6 +101,7 @@ export class MyRacesComponent implements OnInit {
   private authService = inject(AuthService);
   private racesService = inject(GoalRacesService);
   private strategiesService = inject(RaceStrategiesService);
+  private destroyRef = inject(DestroyRef);
 
   races = signal<GoalRace[]>([]);
   publishedStrategies = signal<RaceStrategy[]>([]);
@@ -112,12 +114,12 @@ export class MyRacesComponent implements OnInit {
     let loaded = 0;
     const checkDone = () => { loaded++; if (loaded >= 2) this.loading.set(false); };
 
-    this.racesService.getByAthlete(user._id).subscribe({
+    this.racesService.getByAthlete(user._id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: r => { this.races.set(r); checkDone(); },
       error: () => checkDone(),
     });
 
-    this.strategiesService.getByAthlete(user._id).subscribe({
+    this.strategiesService.getByAthlete(user._id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: s => {
         this.publishedStrategies.set(s.filter(st => st.isPublished));
         checkDone();

@@ -12,8 +12,8 @@ export interface ConfirmDialogData {
   selector: 'app-confirm-dialog',
   standalone: true,
   template: `
-    <div class="dialog-glass rounded-2xl p-6 max-w-md w-full">
-      <h3 class="text-lg font-semibold text-primary-700 mb-2">{{ data.title }}</h3>
+    <div role="dialog" aria-modal="true" aria-labelledby="dialog-title" class="dialog-glass rounded-2xl p-6 max-w-md w-full">
+      <h3 id="dialog-title" class="text-lg font-semibold text-primary-700 mb-2">{{ data.title }}</h3>
       <p class="text-sm text-primary-500 mb-6">{{ data.message }}</p>
       <div class="flex justify-end gap-3">
         <button

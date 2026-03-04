@@ -6,7 +6,9 @@ import {
   OnDestroy,
   ElementRef,
   viewChild,
+  DestroyRef,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MessagesService } from '../../../services/messages.service';
 import { UsersService } from '../../../services/users.service';
@@ -96,7 +98,7 @@ import { ToastService } from '../../../shared/services/toast.service';
             @for (file of selectedFiles(); track $index) {
               <div class="flex items-center gap-1 bg-primary-50 rounded-lg px-2 py-1 text-xs text-primary-600">
                 <span class="truncate max-w-[150px]">{{ file.name }}</span>
-                <button (click)="removeFile($index)" class="text-primary-400 hover:text-red-500 font-bold ml-1">×</button>
+                <button (click)="removeFile($index)" aria-label="Eliminar archivo" class="text-primary-400 hover:text-red-500 font-bold ml-1">×</button>
               </div>
             }
           </div>
@@ -114,6 +116,7 @@ import { ToastService } from '../../../shared/services/toast.service';
           <button
             (click)="fileInput.click()"
             [disabled]="selectedFiles().length >= 3"
+            aria-label="Adjuntar archivo"
             class="rounded-lg border border-primary-200 px-3 py-2 text-sm text-primary-500 hover:bg-primary-50 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Adjuntar archivo">
             📎
@@ -139,6 +142,7 @@ export class AthleteChatComponent implements OnInit, OnDestroy {
   private usersService = inject(UsersService);
   private authService = inject(AuthService);
   private toast = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   private scrollContainer = viewChild<ElementRef>('scrollContainer');
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
@@ -166,14 +170,14 @@ export class AthleteChatComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.usersService.getById(this.coachId).subscribe({
+    this.usersService.getById(this.coachId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (coach) => {
         this.coachName.set(`${coach.firstName} ${coach.lastName}`);
       },
     });
 
     this.loadMessages(true);
-    this.messagesService.markAsRead(this.coachId).subscribe();
+    this.messagesService.markAsRead(this.coachId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
 
     this.pollingInterval = setInterval(() => {
       this.pollNewMessages();
@@ -189,6 +193,7 @@ export class AthleteChatComponent implements OnInit, OnDestroy {
   loadMessages(initial = false) {
     this.messagesService
       .getConversation(this.coachId, this.limit, this.skip)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (msgs) => {
           if (msgs.length < this.limit) {
@@ -206,10 +211,7 @@ export class AthleteChatComponent implements OnInit, OnDestroy {
             this.scrollToBottom();
           }
         },
-        error: () => {
-          this.toast.error('Error al cargar mensajes');
-          this.loading.set(false);
-        },
+        error: () => this.loading.set(false),
       });
   }
 

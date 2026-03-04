@@ -1,4 +1,5 @@
-import { Component, inject, input, signal, OnInit } from '@angular/core';
+import { Component, inject, input, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Dialog } from '@angular/cdk/dialog';
 import { WorkoutPlansService } from '../../../../../services/workout-plans.service';
@@ -91,6 +92,7 @@ export class PlansTabComponent implements OnInit {
   private plansService = inject(WorkoutPlansService);
   private dialog = inject(Dialog);
   private toast = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   athleteId = input.required<string>();
   plans = signal<WorkoutPlan[]>([]);
@@ -101,15 +103,14 @@ export class PlansTabComponent implements OnInit {
   }
 
   private loadPlans() {
-    this.plansService.getByAthlete(this.athleteId()).subscribe({
+    this.plansService.getByAthlete(this.athleteId()).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: (res: any) => {
         this.plans.set(res.data ?? res);
         this.loading.set(false);
       },
-      error: () => {
-        this.toast.error('Error al cargar planes');
-        this.loading.set(false);
-      },
+      error: () => this.loading.set(false),
     });
   }
 

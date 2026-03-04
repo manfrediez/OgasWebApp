@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Dialog } from '@angular/cdk/dialog';
@@ -127,6 +128,7 @@ export class CoachInfoTopicsComponent implements OnInit {
   private infoService = inject(GeneralInfoService);
   private dialog = inject(Dialog);
   private toast = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   topics = signal<Topic[]>([]);
   loading = signal(true);
@@ -140,15 +142,12 @@ export class CoachInfoTopicsComponent implements OnInit {
   }
 
   loadTopics() {
-    this.infoService.getTopics().subscribe({
+    this.infoService.getTopics().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (topics) => {
         this.topics.set(topics);
         this.loading.set(false);
       },
-      error: () => {
-        this.toast.error('Error al cargar temas');
-        this.loading.set(false);
-      },
+      error: () => this.loading.set(false),
     });
   }
 

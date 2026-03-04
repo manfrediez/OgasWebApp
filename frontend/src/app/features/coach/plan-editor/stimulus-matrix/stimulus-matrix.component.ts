@@ -46,7 +46,7 @@ const DAY_LABELS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
                   </td>
                 }
                 <td class="px-1">
-                  <button type="button" (click)="removeRow($index)" class="text-xs text-danger-500">X</button>
+                  <button type="button" (click)="removeRow($index)" aria-label="Eliminar fila" class="text-xs text-danger-500">X</button>
                 </td>
               </tr>
             }

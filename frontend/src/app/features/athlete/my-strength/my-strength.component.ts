@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/services/auth.service';
 import { WorkoutPlansService } from '../../../services/workout-plans.service';
 import { StrengthCircuitsService } from '../../../services/strength-circuits.service';
@@ -73,6 +74,7 @@ export class MyStrengthComponent implements OnInit {
   private authService = inject(AuthService);
   private plansService = inject(WorkoutPlansService);
   private circuitsService = inject(StrengthCircuitsService);
+  private destroyRef = inject(DestroyRef);
 
   circuits = signal<StrengthCircuit[]>([]);
   loading = signal(true);
@@ -82,11 +84,11 @@ export class MyStrengthComponent implements OnInit {
     if (!user) return;
 
     // Get athlete's plans to find strength routines
-    this.plansService.getByAthlete(user._id).subscribe({
+    this.plansService.getByAthlete(user._id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: plans => {
         if (plans.length > 0 && plans[0].strengthRoutines && plans[0].strengthRoutines.length > 0) {
           // Load circuits for the most recent plan
-          this.circuitsService.getByPlan(plans[0]._id).subscribe({
+          this.circuitsService.getByPlan(plans[0]._id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
             next: c => {
               this.circuits.set(c);
               this.loading.set(false);

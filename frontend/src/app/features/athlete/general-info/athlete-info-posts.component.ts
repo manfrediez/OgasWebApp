@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { GeneralInfoService } from '../../../services/general-info.service';
 import { InfoPost } from '../../../models/general-info.model';
@@ -93,6 +94,7 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 export class AthleteInfoPostsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   infoService = inject(GeneralInfoService);
+  private destroyRef = inject(DestroyRef);
 
   topicId = '';
   topicName = signal('');
@@ -101,14 +103,14 @@ export class AthleteInfoPostsComponent implements OnInit {
 
   ngOnInit() {
     this.topicId = this.route.snapshot.params['topicId'];
-    this.infoService.getPostsByTopic(this.topicId).subscribe({
+    this.infoService.getPostsByTopic(this.topicId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (posts) => {
         this.posts.set(posts);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
     });
-    this.infoService.getTopics().subscribe((topics) => {
+    this.infoService.getTopics().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((topics) => {
       const topic = topics.find((t) => t._id === this.topicId);
       if (topic) this.topicName.set(topic.name);
     });

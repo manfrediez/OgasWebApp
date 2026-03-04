@@ -1,4 +1,5 @@
-import { Component, inject, input, signal, OnInit } from '@angular/core';
+import { Component, inject, input, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WorkoutPlansService } from '../../../../../services/workout-plans.service';
 import { PlanSummary, WeekStats } from '../../../../../models/workout-plan.model';
 import { LoadingSpinnerComponent } from '../../../../../shared/components/loading-spinner/loading-spinner.component';
@@ -86,13 +87,14 @@ import { DateEsPipe } from '../../../../../shared/pipes/date-es.pipe';
 })
 export class SummaryTabComponent implements OnInit {
   private plansService = inject(WorkoutPlansService);
+  private destroyRef = inject(DestroyRef);
 
   athleteId = input.required<string>();
   summaries = signal<PlanSummary[]>([]);
   loading = signal(true);
 
   ngOnInit() {
-    this.plansService.getAthleteSummary(this.athleteId()).subscribe({
+    this.plansService.getAthleteSummary(this.athleteId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: data => {
         this.summaries.set(data);
         this.loading.set(false);

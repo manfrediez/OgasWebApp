@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Dialog } from '@angular/cdk/dialog';
@@ -16,7 +17,6 @@ import { WorkoutPlan, Session } from '../../../models/workout-plan.model';
 import { GoalRace } from '../../../models/goal-race.model';
 import { AthleteMetrics } from '../../../models/athlete-metrics.model';
 import { SessionStatus } from '../../../core/models/enums';
-import { ToastService } from '../../../shared/services/toast.service';
 
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { WorkoutTypeIconComponent } from '../../../shared/components/workout-type-icon/workout-type-icon.component';
@@ -303,7 +303,7 @@ export class DashboardComponent implements OnInit {
   private racesService = inject(GoalRacesService);
   private metricsService = inject(AthleteMetricsService);
   private dialog = inject(Dialog);
-  private toast = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
   messagesService = inject(MessagesService);
 
   loading = signal(true);
@@ -327,7 +327,9 @@ export class DashboardComponent implements OnInit {
       plans: this.plansService.getByAthlete(user._id).pipe(catchError(() => of([]))),
       races: this.racesService.getByAthlete(user._id).pipe(catchError(() => of([]))),
       metrics: this.metricsService.getByAthlete(user._id).pipe(catchError(() => of(null))),
-    }).subscribe({
+    }).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: ({ plans, races, metrics }) => {
         this.processTodaySession(plans);
         this.processMonthSummary(plans);
@@ -335,10 +337,7 @@ export class DashboardComponent implements OnInit {
         this.metrics.set(metrics);
         this.loading.set(false);
       },
-      error: () => {
-        this.toast.error('Error al cargar el dashboard');
-        this.loading.set(false);
-      },
+      error: () => this.loading.set(false),
     });
   }
 

@@ -11,8 +11,8 @@ export interface ImportExcelDialogData {
   selector: 'app-import-excel-dialog',
   standalone: true,
   template: `
-    <div class="dialog-glass rounded-2xl p-6 w-full max-w-md">
-      <h2 class="text-lg font-bold text-primary-700 mb-4">Importar Excel</h2>
+    <div role="dialog" aria-modal="true" aria-labelledby="dialog-title" class="dialog-glass rounded-2xl p-6 w-full max-w-md">
+      <h2 id="dialog-title" class="text-lg font-bold text-primary-700 mb-4">Importar Excel</h2>
 
       @if (!result()) {
         <div class="space-y-4">

@@ -1,4 +1,5 @@
-import { Component, inject, input, signal, OnInit } from '@angular/core';
+import { Component, inject, input, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
 import { StrengthCircuitsService } from '../../../../../services/strength-circuits.service';
 import { StrengthCircuit } from '../../../../../models/strength-circuit.model';
@@ -70,6 +71,7 @@ import { StrengthCircuitFormComponent } from '../../../forms/strength-circuit-fo
 export class StrengthTabComponent implements OnInit {
   private circuitsService = inject(StrengthCircuitsService);
   private dialog = inject(Dialog);
+  private destroyRef = inject(DestroyRef);
 
   athleteId = input.required<string>();
   circuits = signal<StrengthCircuit[]>([]);
@@ -80,7 +82,7 @@ export class StrengthTabComponent implements OnInit {
   }
 
   loadCircuits() {
-    this.circuitsService.getAll().subscribe({
+    this.circuitsService.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: c => {
         this.circuits.set(c);
         this.loading.set(false);

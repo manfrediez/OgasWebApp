@@ -1,4 +1,5 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dialog } from '@angular/cdk/dialog';
 import { UsersService } from '../../../services/users.service';
@@ -43,7 +44,7 @@ import { ImportExcelDialogComponent } from '../forms/import-excel-dialog/import-
                   rel="noopener"
                   title="Ver perfil en Strava"
                   class="inline-flex items-center text-[#FC4C02] hover:opacity-80">
-                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <svg aria-hidden="true" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/>
                   </svg>
                 </a>
@@ -114,6 +115,7 @@ export class AthleteDetailComponent implements OnInit {
   private router = inject(Router);
   private dialog = inject(Dialog);
   private usersService = inject(UsersService);
+  private destroyRef = inject(DestroyRef);
 
   athleteId = '';
   athlete = signal<User | null>(null);
@@ -141,7 +143,7 @@ export class AthleteDetailComponent implements OnInit {
 
   ngOnInit() {
     this.athleteId = this.route.snapshot.paramMap.get('athleteId')!;
-    this.usersService.getById(this.athleteId).subscribe({
+    this.usersService.getById(this.athleteId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: user => {
         this.athlete.set(user);
         this.loading.set(false);

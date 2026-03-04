@@ -1,4 +1,5 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MessagesService } from '../../../services/messages.service';
@@ -75,6 +76,7 @@ import { es } from 'date-fns/locale';
 })
 export class CoachConversationsComponent implements OnInit {
   private messagesService = inject(MessagesService);
+  private destroyRef = inject(DestroyRef);
 
   conversations = signal<ConversationSummary[]>([]);
   loading = signal(true);
@@ -95,7 +97,7 @@ export class CoachConversationsComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.messagesService.getConversations().subscribe({
+    this.messagesService.getConversations().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (convs) => {
         this.conversations.set(convs);
         this.loading.set(false);

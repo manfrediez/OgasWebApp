@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { UsersService } from '../../../../../services/users.service';
@@ -14,8 +15,8 @@ export interface ClonePlanDialogData {
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="dialog-glass rounded-2xl p-6 max-w-md w-full">
-      <h3 class="text-lg font-semibold text-primary-700 mb-2">Clonar Plan</h3>
+    <div role="dialog" aria-modal="true" aria-labelledby="dialog-title" class="dialog-glass rounded-2xl p-6 max-w-md w-full">
+      <h3 id="dialog-title" class="text-lg font-semibold text-primary-700 mb-2">Clonar Plan</h3>
       <p class="text-sm text-primary-400 mb-4">
         Clonar "{{ data.planName }}" a otro atleta. Se resetearán los feedbacks y estados.
       </p>
@@ -54,13 +55,16 @@ export class ClonePlanDialogComponent implements OnInit {
   dialogRef = inject(DialogRef<string | null>);
   data: ClonePlanDialogData = inject(DIALOG_DATA);
   private usersService = inject(UsersService);
+  private destroyRef = inject(DestroyRef);
 
   athletes = signal<User[]>([]);
   loading = signal(true);
   selectedAthleteId = '';
 
   ngOnInit() {
-    this.usersService.getAthletes().subscribe({
+    this.usersService.getAthletes().pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: (athletes) => {
         this.athletes.set(
           athletes.filter((a) => a._id !== this.data.currentAthleteId && a.isActive),

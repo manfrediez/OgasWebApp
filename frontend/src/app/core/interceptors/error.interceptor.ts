@@ -3,10 +3,12 @@ import { inject } from '@angular/core';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { TokenService } from '../services/token.service';
+import { ToastService } from '../../shared/services/toast.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const tokenService = inject(TokenService);
+  const toast = inject(ToastService);
 
   return next(req).pipe(
     catchError(error => {
@@ -28,6 +30,19 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           })
         );
       }
+
+      // Global error toasts
+      if (error.status === 0) {
+        toast.error('Sin conexión a internet');
+        error._toasted = true;
+      } else if (error.status === 403) {
+        toast.error('No tenés permiso para esta acción');
+        error._toasted = true;
+      } else if (error.status >= 500) {
+        toast.error('Error del servidor, intentá de nuevo');
+        error._toasted = true;
+      }
+
       return throwError(() => error);
     })
   );

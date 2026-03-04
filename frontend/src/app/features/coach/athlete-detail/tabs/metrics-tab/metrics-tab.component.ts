@@ -1,4 +1,5 @@
-import { Component, inject, input, signal, OnInit } from '@angular/core';
+import { Component, inject, input, signal, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
 import { AthleteMetricsService } from '../../../../../services/athlete-metrics.service';
 import { AthleteMetrics } from '../../../../../models/athlete-metrics.model';
@@ -131,6 +132,7 @@ import { MetricsFormComponent } from '../../../forms/metrics-form/metrics-form.c
 export class MetricsTabComponent implements OnInit {
   private metricsService = inject(AthleteMetricsService);
   private dialog = inject(Dialog);
+  private destroyRef = inject(DestroyRef);
 
   athleteId = input.required<string>();
   metrics = signal<AthleteMetrics | null>(null);
@@ -141,7 +143,7 @@ export class MetricsTabComponent implements OnInit {
   }
 
   loadMetrics() {
-    this.metricsService.getByAthlete(this.athleteId()).subscribe({
+    this.metricsService.getByAthlete(this.athleteId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: m => {
         this.metrics.set(m);
         this.loading.set(false);
