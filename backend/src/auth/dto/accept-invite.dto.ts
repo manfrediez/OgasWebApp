@@ -5,6 +5,6 @@ export class AcceptInviteDto {
   inviteToken: string;
 
   @IsString()
-  @MinLength(6)
+  @MinLength(8)
   password: string;
 }

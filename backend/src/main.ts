@@ -10,24 +10,39 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
 
-  // Validate critical secrets are not default/weak values
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  // Validate critical secrets
   const jwtSecret = configService.get<string>('JWT_SECRET', '');
   if (!jwtSecret || jwtSecret.startsWith('dev-') || jwtSecret.length < 32) {
-    logger.warn(
-      'JWT_SECRET is weak or using default value. Use a strong random secret in production.',
-    );
+    const msg = 'JWT_SECRET is weak or using default value. Use a strong random secret in production.';
+    if (isProduction) throw new Error(msg);
+    logger.warn(msg);
   }
   const encryptionKey = configService.get<string>('ENCRYPTION_KEY', '');
   if (!encryptionKey || encryptionKey.length !== 64) {
-    logger.warn(
-      'ENCRYPTION_KEY is missing or invalid. Must be 64 hex characters (32 bytes).',
-    );
+    const msg = 'ENCRYPTION_KEY is missing or invalid. Must be 64 hex characters (32 bytes).';
+    if (isProduction) throw new Error(msg);
+    logger.warn(msg);
+  }
+  const frontendUrl = configService.get<string>('FRONTEND_URL');
+  if (!frontendUrl && isProduction) {
+    throw new Error('FRONTEND_URL must be set in production.');
   }
 
+  const frontendOrigin = frontendUrl || 'http://localhost:4200';
   app.use(
     helmet({
-      contentSecurityPolicy: false,
-      crossOriginEmbedderPolicy: false,
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+          fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          connectSrc: ["'self'", frontendOrigin],
+        },
+      },
     }),
   );
   app.setGlobalPrefix('api');
@@ -39,9 +54,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  const frontendUrl = configService.get<string>('FRONTEND_URL');
   app.enableCors({
-    origin: frontendUrl || 'http://localhost:4200',
+    origin: frontendOrigin,
     credentials: true,
   });
 

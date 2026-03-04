@@ -215,6 +215,7 @@ export class UsersService {
     const filter: any = { coachId: new Types.ObjectId(coachId) };
     if (search) {
       const words = search
+        .slice(0, 100)
         .trim()
         .split(/\s+/)
         .filter((w) => w.length > 0)

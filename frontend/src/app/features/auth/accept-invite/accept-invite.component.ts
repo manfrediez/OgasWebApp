@@ -27,14 +27,14 @@ import { AuthService } from '../../../core/services/auth.service';
               #passwordInput="ngModel"
               name="password"
               required
-              minlength="6"
+              minlength="8"
               class="w-full"
               [class.border-danger-500]="passwordInput.invalid && passwordInput.touched"
-              placeholder="Mínimo 6 caracteres" />
+              placeholder="Mínimo 8 caracteres" />
             @if (passwordInput.touched && passwordInput.errors?.['required']) {
               <p class="text-xs text-danger-500 mt-1">La contraseña es obligatoria</p>
             } @else if (passwordInput.touched && passwordInput.errors?.['minlength']) {
-              <p class="text-xs text-danger-500 mt-1">Mínimo 6 caracteres</p>
+              <p class="text-xs text-danger-500 mt-1">Mínimo 8 caracteres</p>
             }
           </div>
 

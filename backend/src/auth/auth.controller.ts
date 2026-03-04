@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
-import { ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { InviteAthleteDto } from './dto/invite-athlete.dto';
@@ -18,6 +18,7 @@ export class AuthController {
 
   @Post('login')
   @UseGuards(ThrottlerGuard)
+  @Throttle({ login: { ttl: 60000, limit: 3 } })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
@@ -45,6 +46,12 @@ export class AuthController {
     @CurrentUser('sub') userId: string,
   ) {
     return this.authService.changePassword(userId, dto);
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  logout(@Body() dto: RefreshTokenDto) {
+    return this.authService.logout(dto.refreshToken);
   }
 
   @Post('refresh')

@@ -31,7 +31,10 @@ import { ImportModule } from './import/import.module';
         uri: configService.get<string>('MONGODB_URI'),
       }),
     }),
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }]),
+    ThrottlerModule.forRoot([
+      { name: 'default', ttl: 60000, limit: 10 },
+      { name: 'login', ttl: 60000, limit: 3 },
+    ]),
     AuthModule,
     UsersModule,
     WorkoutPlansModule,

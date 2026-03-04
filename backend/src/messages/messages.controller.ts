@@ -19,6 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import 'multer';
 
+import { FileMagicValidationPipe } from '../common/pipes/file-magic-validation.pipe';
 import { MessagesService } from './messages.service';
 import { SendMessageDto } from './dto/send-message.dto';
 import { GetMessagesQueryDto } from './dto/get-messages-query.dto';
@@ -91,13 +92,14 @@ export class MessagesController {
   )
   send(
     @Body() dto: SendMessageDto,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles(new FileMagicValidationPipe()) files: Express.Multer.File[],
     @CurrentUser('sub') userId: string,
   ) {
     return this.messagesService.send(dto, userId, files || []);
   }
 
   @Get('files/:storedName')
+  @UseGuards(JwtAuthGuard)
   serveFile(
     @Param('storedName') storedName: string,
     @Res() res: Response,

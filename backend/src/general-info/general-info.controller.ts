@@ -36,6 +36,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Role } from '../common/enums';
 
+import { FileMagicValidationPipe } from '../common/pipes/file-magic-validation.pipe';
 import { GeneralInfoService } from './general-info.service';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
@@ -140,7 +141,7 @@ export class GeneralInfoController {
   createPost(
     @CurrentUser('sub') coachId: string,
     @Body() dto: CreateInfoPostDto,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles(new FileMagicValidationPipe()) files: Express.Multer.File[],
   ) {
     return this.service.createPost(coachId, dto, files || []);
   }
@@ -180,7 +181,7 @@ export class GeneralInfoController {
     @CurrentUser('sub') coachId: string,
     @Param('id') postId: string,
     @Body() dto: UpdateInfoPostDto,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles(new FileMagicValidationPipe()) files: Express.Multer.File[],
   ) {
     return this.service.updatePost(coachId, postId, dto, files || []);
   }
@@ -198,6 +199,7 @@ export class GeneralInfoController {
   // ── files ──
 
   @Get('files/:storedName')
+  @UseGuards(JwtAuthGuard)
   serveFile(
     @Param('storedName') storedName: string,
     @Res() res: Response,

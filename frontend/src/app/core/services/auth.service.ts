@@ -75,6 +75,12 @@ export class AuthService {
   }
 
   logout(): void {
+    const refreshToken = this.tokenService.getRefreshToken();
+    if (refreshToken) {
+      this.http
+        .post('/api/auth/logout', { refreshToken })
+        .subscribe({ error: () => {} });
+    }
     this.tokenService.clearTokens();
     this._currentUser.set(null);
     this.router.navigate(['/login']);

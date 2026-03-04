@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -237,7 +238,10 @@ export class GeneralInfoService {
   // ── files ──
 
   getFilePath(storedName: string): string {
-    const filePath = path.join(UPLOADS_DIR, storedName);
+    const filePath = path.resolve(UPLOADS_DIR, storedName);
+    if (!filePath.startsWith(UPLOADS_DIR + path.sep)) {
+      throw new BadRequestException('Nombre de archivo inválido');
+    }
     if (!fs.existsSync(filePath)) {
       throw new NotFoundException('Archivo no encontrado');
     }

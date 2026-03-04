@@ -1,12 +1,14 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
 import { UsersService } from '../../services/users.service';
+import { WorkoutPlansService } from '../../services/workout-plans.service';
 import { StravaService, StravaStatus } from '../../services/strava.service';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { ToastService } from '../../shared/services/toast.service';
+import { PlanSummary } from '../../models/workout-plan.model';
 
 @Component({
   selector: 'app-profile',
@@ -21,105 +23,188 @@ import { ToastService } from '../../shared/services/toast.service';
           <h1 class="text-2xl font-bold text-primary-700">Mi Perfil</h1>
         </div>
 
-        <form (ngSubmit)="onSubmit()" class="card-glass rounded-xl p-6 space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-primary-600 mb-1">Email</label>
-            <input [value]="email" disabled class="w-full bg-surface-alt" />
+        <!-- Avatar Header -->
+        <div class="card-glass rounded-xl p-6 mb-6 flex items-center gap-5">
+          <div class="w-20 h-20 rounded-full bg-primary-500 flex items-center justify-center text-white text-2xl font-bold shrink-0">
+            {{ initials() }}
           </div>
-          <div>
-            <label class="block text-sm font-medium text-primary-600 mb-1">Nombre</label>
-            <input [(ngModel)]="firstName" #fnInput="ngModel" name="firstName" required class="w-full"
-                   [class.border-danger-500]="fnInput.invalid && fnInput.touched" />
-            @if (fnInput.invalid && fnInput.touched) {
-              <p class="text-xs text-danger-500 mt-1">El nombre es obligatorio</p>
-            }
+          <div class="min-w-0">
+            <p class="text-xl font-bold text-primary-700 truncate">{{ firstName }} {{ lastName }}</p>
+            <p class="text-sm text-primary-400 truncate">{{ email }}</p>
+            <span
+              class="inline-block mt-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full"
+              [class]="isAthlete ? 'bg-accent-100 text-accent-700' : 'bg-primary-100 text-primary-700'">
+              {{ isAthlete ? 'ATLETA' : 'ENTRENADOR' }}
+            </span>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-primary-600 mb-1">Apellido</label>
-            <input [(ngModel)]="lastName" #lnInput="ngModel" name="lastName" required class="w-full"
-                   [class.border-danger-500]="lnInput.invalid && lnInput.touched" />
-            @if (lnInput.invalid && lnInput.touched) {
-              <p class="text-xs text-danger-500 mt-1">El apellido es obligatorio</p>
-            }
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-primary-600 mb-1">
-              Fecha de nacimiento
-              @if (birthDate && calculatedAge() !== null) {
-                <span class="text-primary-400 font-normal">({{ calculatedAge() }} años)</span>
-              }
-            </label>
-            <input [(ngModel)]="birthDate" name="birthDate" type="date" class="w-full" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-primary-600 mb-1">Teléfono</label>
-            <input [(ngModel)]="phone" name="phone" type="tel" class="w-full" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-primary-600 mb-1">Dirección</label>
-            <input [(ngModel)]="address" name="address" class="w-full" />
-          </div>
+        </div>
 
-          @if (success()) {
-            <p class="text-sm text-success-500 bg-green-50 rounded-lg p-2">Perfil actualizado</p>
-          }
-
-          @if (error()) {
-            <p class="text-sm text-danger-500 bg-red-50 rounded-lg p-2">{{ error() }}</p>
-          }
-
-          <button
-            type="submit"
-            [disabled]="saving()"
-            class="w-full btn-primary py-2.5">
-            @if (saving()) {
-              Guardando...
+        <!-- Stats Card (athletes only) -->
+        @if (isAthlete) {
+          <div class="card-glass rounded-xl p-6 mb-6">
+            <h2 class="text-lg font-semibold text-primary-700 mb-4 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Resumen de actividad
+            </h2>
+            @if (statsLoading()) {
+              <p class="text-sm text-primary-400">Cargando estadísticas...</p>
             } @else {
-              Guardar Cambios
+              <div class="grid grid-cols-3 gap-3 mb-3">
+                <div class="text-center bg-bg rounded-lg p-3">
+                  <p class="text-2xl font-bold text-primary-700">{{ totalSessions() }}</p>
+                  <p class="text-xs text-primary-400">sesiones</p>
+                </div>
+                <div class="text-center bg-bg rounded-lg p-3">
+                  <p class="text-2xl font-bold text-primary-700">{{ totalKm() }}</p>
+                  <p class="text-xs text-primary-400">km total</p>
+                </div>
+                <div class="text-center bg-bg rounded-lg p-3">
+                  <p class="text-2xl font-bold text-primary-700">{{ avgCompletion() }}%</p>
+                  <p class="text-xs text-primary-400">cumplimiento</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="text-center bg-bg rounded-lg p-3">
+                  <p class="text-2xl font-bold text-primary-700">{{ totalMinutes() }}</p>
+                  <p class="text-xs text-primary-400">minutos</p>
+                </div>
+                <div class="text-center bg-bg rounded-lg p-3">
+                  <p class="text-2xl font-bold text-primary-700">{{ avgRpe() }}</p>
+                  <p class="text-xs text-primary-400">RPE prom.</p>
+                </div>
+              </div>
             }
-          </button>
-        </form>
+          </div>
+        }
 
-        <!-- Change Password -->
-        <div class="mt-6 card-glass rounded-xl p-6">
-          <h2 class="text-lg font-semibold text-primary-700 mb-4">Cambiar contraseña</h2>
-          <form (ngSubmit)="onChangePassword()" class="space-y-4">
+        <!-- Personal Data -->
+        <div class="card-glass rounded-xl p-6 mb-6">
+          <h2 class="text-lg font-semibold text-primary-700 mb-4 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            Datos personales
+          </h2>
+          <form (ngSubmit)="onSubmit()" class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-primary-600 mb-1">Contraseña actual</label>
-              <input [(ngModel)]="currentPassword" name="currentPassword" type="password" required class="w-full"
-                     placeholder="Tu contraseña actual" />
+              <label class="block text-sm font-medium text-primary-600 mb-1">Nombre</label>
+              <input [(ngModel)]="firstName" #fnInput="ngModel" name="firstName" required class="w-full"
+                     [class.border-danger-500]="fnInput.invalid && fnInput.touched" />
+              @if (fnInput.invalid && fnInput.touched) {
+                <p class="text-xs text-danger-500 mt-1">El nombre es obligatorio</p>
+              }
             </div>
             <div>
-              <label class="block text-sm font-medium text-primary-600 mb-1">Nueva contraseña</label>
-              <input [(ngModel)]="newPassword" name="newPassword" type="password" required minlength="6" class="w-full"
-                     placeholder="Mínimo 6 caracteres" />
+              <label class="block text-sm font-medium text-primary-600 mb-1">Apellido</label>
+              <input [(ngModel)]="lastName" #lnInput="ngModel" name="lastName" required class="w-full"
+                     [class.border-danger-500]="lnInput.invalid && lnInput.touched" />
+              @if (lnInput.invalid && lnInput.touched) {
+                <p class="text-xs text-danger-500 mt-1">El apellido es obligatorio</p>
+              }
             </div>
             <div>
-              <label class="block text-sm font-medium text-primary-600 mb-1">Confirmar nueva contraseña</label>
-              <input [(ngModel)]="confirmNewPassword" name="confirmNewPassword" type="password" required class="w-full"
-                     placeholder="Repetí la nueva contraseña" />
+              <label class="block text-sm font-medium text-primary-600 mb-1">
+                Fecha de nacimiento
+                @if (birthDate && calculatedAge() !== null) {
+                  <span class="text-primary-400 font-normal">({{ calculatedAge() }} años)</span>
+                }
+              </label>
+              <input [(ngModel)]="birthDate" name="birthDate" type="date" class="w-full" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-primary-600 mb-1">Teléfono</label>
+              <input [(ngModel)]="phone" name="phone" type="tel" class="w-full" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-primary-600 mb-1">Dirección</label>
+              <input [(ngModel)]="address" name="address" class="w-full" />
             </div>
 
-            @if (passwordError()) {
-              <p class="text-sm text-danger-500 bg-red-50 rounded-lg p-2">{{ passwordError() }}</p>
+            @if (success()) {
+              <p class="text-sm text-success-500 bg-green-50 rounded-lg p-2">Perfil actualizado</p>
+            }
+
+            @if (error()) {
+              <p class="text-sm text-danger-500 bg-red-50 rounded-lg p-2">{{ error() }}</p>
             }
 
             <button
               type="submit"
-              [disabled]="savingPassword()"
+              [disabled]="saving()"
               class="w-full btn-primary py-2.5">
-              @if (savingPassword()) {
-                Cambiando...
+              @if (saving()) {
+                Guardando...
               } @else {
-                Cambiar contraseña
+                Guardar Cambios
               }
             </button>
           </form>
         </div>
 
+        <!-- Change Password (collapsible) -->
+        <div class="card-glass rounded-xl mb-6">
+          <button
+            type="button"
+            (click)="passwordOpen.set(!passwordOpen())"
+            class="w-full flex items-center justify-between p-6 text-left">
+            <h2 class="text-lg font-semibold text-primary-700 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Cambiar contraseña
+            </h2>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5 text-primary-400 transition-transform duration-200"
+              [class.rotate-180]="passwordOpen()"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          @if (passwordOpen()) {
+            <div class="px-6 pb-6">
+              <form (ngSubmit)="onChangePassword()" class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-primary-600 mb-1">Contraseña actual</label>
+                  <input [(ngModel)]="currentPassword" name="currentPassword" type="password" required class="w-full"
+                         placeholder="Tu contraseña actual" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-primary-600 mb-1">Nueva contraseña</label>
+                  <input [(ngModel)]="newPassword" name="newPassword" type="password" required minlength="8" class="w-full"
+                         placeholder="Mínimo 8 caracteres" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-primary-600 mb-1">Confirmar nueva contraseña</label>
+                  <input [(ngModel)]="confirmNewPassword" name="confirmNewPassword" type="password" required class="w-full"
+                         placeholder="Repetí la nueva contraseña" />
+                </div>
+
+                @if (passwordError()) {
+                  <p class="text-sm text-danger-500 bg-red-50 rounded-lg p-2">{{ passwordError() }}</p>
+                }
+
+                <button
+                  type="submit"
+                  [disabled]="savingPassword()"
+                  class="w-full btn-primary py-2.5">
+                  @if (savingPassword()) {
+                    Cambiando...
+                  } @else {
+                    Cambiar contraseña
+                  }
+                </button>
+              </form>
+            </div>
+          }
+        </div>
+
         <!-- Strava Connection Card (only for athletes) -->
         @if (isAthlete) {
-          <div class="mt-6 card-glass rounded-xl p-6">
+          <div class="card-glass rounded-xl p-6">
             <div class="flex items-center gap-3 mb-4">
               <svg viewBox="0 0 24 24" class="w-7 h-7" fill="#FC4C02">
                 <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
@@ -184,6 +269,7 @@ import { ToastService } from '../../shared/services/toast.service';
 export class ProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private usersService = inject(UsersService);
+  private workoutPlansService = inject(WorkoutPlansService);
   private stravaService = inject(StravaService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -204,11 +290,60 @@ export class ProfileComponent implements OnInit {
   confirmNewPassword = '';
   savingPassword = signal(false);
   passwordError = signal('');
+  passwordOpen = signal(false);
 
   isAthlete = false;
   stravaStatus = signal<StravaStatus | null>(null);
   stravaLoading = signal(false);
   stravaSuccess = signal(false);
+
+  // Stats
+  statsLoading = signal(false);
+  private planSummaries = signal<PlanSummary[]>([]);
+
+  initials = computed(() => {
+    const f = this.firstName?.charAt(0) ?? '';
+    const l = this.lastName?.charAt(0) ?? '';
+    return (f + l).toUpperCase() || '?';
+  });
+
+  totalSessions = computed(() => {
+    return this.planSummaries().reduce((sum, p) =>
+      sum + p.weekStats.reduce((ws, w) => ws + w.completed, 0), 0);
+  });
+
+  totalKm = computed(() => {
+    const km = this.planSummaries().reduce((sum, p) =>
+      sum + p.weekStats.reduce((ws, w) => ws + w.totalDistance, 0), 0);
+    return Math.round(km);
+  });
+
+  avgCompletion = computed(() => {
+    const plans = this.planSummaries();
+    if (!plans.length) return 0;
+    const avg = plans.reduce((sum, p) => sum + p.overallCompletionPct, 0) / plans.length;
+    return Math.round(avg);
+  });
+
+  totalMinutes = computed(() => {
+    return this.planSummaries().reduce((sum, p) =>
+      sum + p.weekStats.reduce((ws, w) => ws + w.totalDuration, 0), 0);
+  });
+
+  avgRpe = computed(() => {
+    const plans = this.planSummaries();
+    let totalRpe = 0;
+    let count = 0;
+    for (const p of plans) {
+      for (const w of p.weekStats) {
+        if (w.avgRpe !== null) {
+          totalRpe += w.avgRpe * w.completed;
+          count += w.completed;
+        }
+      }
+    }
+    return count > 0 ? (totalRpe / count).toFixed(1) : '-';
+  });
 
   constructor() {
     this.route.queryParams.pipe(takeUntilDestroyed()).subscribe(params => {
@@ -231,9 +366,21 @@ export class ProfileComponent implements OnInit {
       this.isAthlete = this.authService.isAthlete();
     }
 
-    if (this.isAthlete) {
+    if (this.isAthlete && user) {
       this.loadStravaStatus();
+      this.loadStats(user._id);
     }
+  }
+
+  loadStats(athleteId: string) {
+    this.statsLoading.set(true);
+    this.workoutPlansService.getAthleteSummary(athleteId).subscribe({
+      next: summaries => {
+        this.planSummaries.set(summaries);
+        this.statsLoading.set(false);
+      },
+      error: () => this.statsLoading.set(false),
+    });
   }
 
   loadStravaStatus() {

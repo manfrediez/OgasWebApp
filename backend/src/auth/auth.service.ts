@@ -4,6 +4,8 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -15,6 +17,10 @@ import { InviteAthleteDto } from './dto/invite-athlete.dto';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { Role } from '../common/enums';
+import {
+  RevokedToken,
+  RevokedTokenDocument,
+} from './schemas/revoked-token.schema';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +29,8 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private emailService: EmailService,
+    @InjectModel(RevokedToken.name)
+    private revokedTokenModel: Model<RevokedTokenDocument>,
   ) {}
 
   async login(dto: LoginDto) {
@@ -88,7 +96,26 @@ export class AuthService {
 
     user.password = await bcrypt.hash(dto.newPassword, 10);
     await user.save();
+
+    await this.revokeAllUserTokens(userId);
+
     return { message: 'Contraseña actualizada' };
+  }
+
+  async logout(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      });
+      await this.revokedTokenModel.create({
+        jti: payload.jti,
+        userId: payload.sub,
+        expiresAt: new Date(payload.exp * 1000),
+      });
+    } catch {
+      // Token already expired or invalid — logout succeeds regardless
+    }
+    return { message: 'Sesión cerrada' };
   }
 
   async refresh(refreshToken: string) {
@@ -96,9 +123,26 @@ export class AuthService {
       const payload = this.jwtService.verify(refreshToken, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       });
+
+      const isRevoked = await this.revokedTokenModel.exists({
+        jti: payload.jti,
+      });
+      if (isRevoked) {
+        throw new UnauthorizedException('Token revocado');
+      }
+
       const user = await this.usersService.findById(payload.sub);
+
+      // Revoke the old refresh token (rotation)
+      await this.revokedTokenModel.create({
+        jti: payload.jti,
+        userId: payload.sub,
+        expiresAt: new Date(payload.exp * 1000),
+      });
+
       return this.generateTokens(user.id, user.email, user.role);
-    } catch {
+    } catch (e) {
+      if (e instanceof UnauthorizedException) throw e;
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
@@ -114,18 +158,31 @@ export class AuthService {
     return result;
   }
 
+  private async revokeAllUserTokens(userId: string): Promise<void> {
+    // Insert a "revoke-all" marker: any refresh token issued before now is invalid
+    await this.revokedTokenModel.create({
+      jti: `revoke-all:${userId}:${Date.now()}`,
+      userId,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    });
+  }
+
   private generateTokens(userId: string, email: string, role: string) {
-    const payload = { sub: userId, email, role };
+    const jti = uuidv4();
+    const payload = { sub: userId, email, role, jti };
 
     return {
       accessToken: this.jwtService.sign(payload, {
         secret: this.configService.get<string>('JWT_SECRET'),
         expiresIn: '15m',
       }),
-      refreshToken: this.jwtService.sign(payload, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: '7d',
-      }),
+      refreshToken: this.jwtService.sign(
+        { sub: userId, jti },
+        {
+          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+          expiresIn: '7d',
+        },
+      ),
     };
   }
 }
