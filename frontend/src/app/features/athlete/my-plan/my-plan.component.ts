@@ -243,9 +243,13 @@ export class MyPlanComponent implements OnInit {
     });
   }
 
-  openFeedback(event: { session: Session; dayOfWeek: number; weekNumber: number }) {
+  openFeedback(event: { session: Session; dayOfWeek: number; weekNumber: number; sessionIndex: number }) {
+    const plan = this.selectedPlan();
+    const key = plan ? `${plan._id}-${event.weekNumber}-${event.sessionIndex}` : '';
+    const activityData = this.activityDataMap().get(key) ?? null;
+
     const ref = this.dialog.open(SessionFeedbackDialogComponent, {
-      data: { session: event.session },
+      data: { session: event.session, activityData },
       panelClass: ['flex', 'items-center', 'justify-center', 'p-4'],
     });
 

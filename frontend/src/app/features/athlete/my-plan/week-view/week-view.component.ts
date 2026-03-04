@@ -169,7 +169,7 @@ export class WeekViewComponent {
   week = input.required<Week>();
   activityDataMap = input<Map<string, ActivityData>>(new Map());
   planId = input<string>('');
-  sessionClick = output<{ session: Session; dayOfWeek: number; weekNumber: number }>();
+  sessionClick = output<{ session: Session; dayOfWeek: number; weekNumber: number; sessionIndex: number }>();
 
   dayIndices = [0, 1, 2, 3, 4, 5, 6];
   dayNames = DAY_NAMES;
@@ -235,7 +235,8 @@ export class WeekViewComponent {
   onCellClick(dayIdx: number) {
     const session = this.getSession(dayIdx);
     if (session) {
-      this.sessionClick.emit({ session, dayOfWeek: dayIdx, weekNumber: this.week().weekNumber });
+      const sessionIndex = this.week().sessions.findIndex(s => s.dayOfWeek === dayIdx);
+      this.sessionClick.emit({ session, dayOfWeek: dayIdx, weekNumber: this.week().weekNumber, sessionIndex });
     }
   }
 
