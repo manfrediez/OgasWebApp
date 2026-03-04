@@ -239,13 +239,26 @@ import { PlanSummary } from '../../models/workout-plan.model';
                 <p class="text-xs text-primary-400 mt-2">
                   Las actividades que subas a Strava se sincronizarán automáticamente con tus sesiones.
                 </p>
-                <button
-                  type="button"
-                  (click)="disconnectStrava()"
-                  [disabled]="stravaLoading()"
-                  class="mt-3 rounded-lg bg-danger-500 px-4 py-2 text-sm text-white font-medium hover:bg-danger-600 disabled:opacity-50">
-                  Desconectar
-                </button>
+                <div class="flex gap-2 mt-3">
+                  <button
+                    type="button"
+                    (click)="syncStrava()"
+                    [disabled]="stravaSyncing()"
+                    class="rounded-lg px-4 py-2 text-sm font-medium border border-primary-300 text-primary-700 hover:bg-primary-50 disabled:opacity-50">
+                    @if (stravaSyncing()) {
+                      Sincronizando...
+                    } @else {
+                      Sincronizar actividades
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    (click)="disconnectStrava()"
+                    [disabled]="stravaLoading()"
+                    class="rounded-lg bg-danger-500 px-4 py-2 text-sm text-white font-medium hover:bg-danger-600 disabled:opacity-50">
+                    Desconectar
+                  </button>
+                </div>
               </div>
             } @else {
               <p class="text-sm text-primary-500 mb-3">
@@ -302,6 +315,7 @@ export class ProfileComponent implements OnInit {
   stravaStatus = signal<StravaStatus | null>(null);
   stravaLoading = signal(false);
   stravaSuccess = signal(false);
+  stravaSyncing = signal(false);
 
   // Stats
   statsLoading = signal(false);
@@ -411,6 +425,24 @@ export class ProfileComponent implements OnInit {
         window.location.href = url;
       },
       error: () => this.stravaLoading.set(false),
+    });
+  }
+
+  syncStrava() {
+    this.stravaSyncing.set(true);
+    this.stravaService.syncRecent().pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: ({ synced }) => {
+        this.stravaSyncing.set(false);
+        this.toast.success(synced > 0
+          ? `${synced} actividad${synced > 1 ? 'es' : ''} sincronizada${synced > 1 ? 's' : ''}`
+          : 'No hay actividades nuevas');
+      },
+      error: () => {
+        this.stravaSyncing.set(false);
+        this.toast.error('Error al sincronizar');
+      },
     });
   }
 

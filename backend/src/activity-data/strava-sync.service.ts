@@ -55,6 +55,11 @@ function toArgentinaDateString(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+/** Extract 'YYYY-MM-DD' from a Date stored as midnight UTC (conceptual date) */
+function toUTCDateString(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
 @Injectable()
 export class StravaSyncService {
   private readonly logger = new Logger(StravaSyncService.name);
@@ -292,9 +297,9 @@ export class StravaSyncService {
             const session = week.sessions[i];
             if (session.status !== 'PLANNED') continue;
 
-            const sessionDateStr = toArgentinaDateString(
-              new Date(session.date),
-            );
+            // Session dates are stored as midnight UTC representing the
+            // calendar day, so read them as UTC — do NOT shift to Argentina tz.
+            const sessionDateStr = toUTCDateString(new Date(session.date));
             if (sessionDateStr !== activityDateStr) continue;
 
             const typeMatches =
