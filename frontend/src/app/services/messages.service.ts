@@ -58,6 +58,9 @@ export class MessagesService {
   private fetchUnread(): void {
     this.getUnreadCount().subscribe({
       next: (res) => this.unreadCount.set(res.count),
+      error: (err) => {
+        if (err.status === 401) this.stopUnreadPolling();
+      },
     });
   }
 }
