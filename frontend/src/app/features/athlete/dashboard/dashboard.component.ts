@@ -73,7 +73,7 @@ interface MonthSummary {
         <div class="rounded-2xl bg-primary-50 border border-primary-200 px-6 py-6">
           <p class="text-primary-400 text-sm font-medium">{{ greeting() }}</p>
           <h1 class="text-2xl font-semibold text-primary-800 mt-1">{{ firstName() }}</h1>
-          <p class="text-primary-400 text-sm mt-1">Preparate para dar lo mejor hoy</p>
+          <p class="text-primary-400 text-sm mt-1">{{ todaySession() ? 'Preparate para dar lo mejor hoy' : 'Día de descanso, aprovechá para recuperarte' }}</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -145,7 +145,7 @@ interface MonthSummary {
                   </svg>
                 </div>
                 <div>
-                  <p class="font-medium text-primary-600">Dia de descanso</p>
+                  <p class="font-medium text-primary-600">Día de descanso</p>
                   <p class="text-sm text-primary-400">Aprovechá para recuperarte</p>
                 </div>
               </div>
@@ -189,7 +189,7 @@ interface MonthSummary {
               </div>
               <div class="text-center p-3 bg-primary-50 rounded-xl border border-primary-200">
                 <p class="text-2xl font-bold text-primary-500">{{ monthSummary().planned }}</p>
-                <p class="text-xs font-medium text-primary-400">Pendientes</p>
+                <p class="text-xs font-medium text-primary-400">Restantes</p>
               </div>
               <div class="text-center p-3 bg-primary-50 rounded-xl border border-primary-200">
                 <p class="text-2xl font-bold text-amber-500 dark:text-amber-400">{{ monthSummary().skipped }}</p>
@@ -363,7 +363,7 @@ export class DashboardComponent implements OnInit {
 
   private getGreeting(): string {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Buenos dias';
+    if (hour < 12) return 'Buenos días';
     if (hour < 19) return 'Buenas tardes';
     return 'Buenas noches';
   }

@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed, effect, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { Dialog } from '@angular/cdk/dialog';
 import { UsersService } from '../../../services/users.service';
 import { User } from '../../../core/models/user.model';
@@ -74,8 +75,9 @@ import { ImportExcelDialogComponent } from '../forms/import-excel-dialog/import-
         </div>
 
         <!-- Tabs -->
-        <div class="border-b border-primary-100 mb-6">
-          <nav class="flex gap-1 -mb-px overflow-x-auto">
+        <div class="border-b border-primary-100 mb-6 relative">
+          <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-bg to-transparent pointer-events-none md:hidden z-10"></div>
+          <nav class="flex gap-1 -mb-px overflow-x-auto scrollbar-hide">
             @for (tab of tabs; track tab.id) {
               <button
                 (click)="activeTab.set(tab.id)"
@@ -116,6 +118,7 @@ import { ImportExcelDialogComponent } from '../forms/import-excel-dialog/import-
 export class AthleteDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private location = inject(Location);
   private dialog = inject(Dialog);
   private usersService = inject(UsersService);
   private destroyRef = inject(DestroyRef);
@@ -185,7 +188,7 @@ export class AthleteDetailComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/coach/dashboard']);
+    this.location.back();
   }
 
   openImportDialog() {

@@ -118,4 +118,12 @@ export class StrengthCircuitsService {
     Object.assign(circuit, dto);
     return circuit.save();
   }
+
+  async delete(id: string, coachId: string): Promise<void> {
+    const circuit = await this.findById(id);
+    if (circuit.coachId.toString() !== coachId) {
+      throw new ForbiddenException('Not your circuit');
+    }
+    await this.circuitModel.findByIdAndDelete(id);
+  }
 }

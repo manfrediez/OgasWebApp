@@ -141,7 +141,29 @@ export class StravaSyncService {
     }
 
     this.logger.log(`Sync: processed ${processed} new activities for user=${userId}`);
-    return processed;
+
+    // Re-attempt auto-match on existing unmatched activities
+    const unmatched = await this.activityDataService.findUnmatched(userId);
+    let rematched = 0;
+    for (const activity of unmatched) {
+      const stravaData = activity.stravaData;
+      if (!stravaData) continue;
+      await this.autoMatch(activity._id.toString(), userId, stravaData);
+      // Check if it got matched
+      const refreshed = await this.activityDataService.findByExternalId(
+        'strava',
+        activity.externalId,
+      );
+      if (refreshed?.matched) rematched++;
+    }
+
+    if (rematched > 0) {
+      this.logger.log(
+        `Sync: re-matched ${rematched} previously unmatched activities for user=${userId}`,
+      );
+    }
+
+    return processed + rematched;
   }
 
   /** Shared logic: save a Strava activity and attempt auto-match */

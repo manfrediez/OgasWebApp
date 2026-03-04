@@ -42,17 +42,17 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
                 <div class="space-y-1">
                   @for (ex of circuit.exercises; track $index; let i = $index) {
                     <div class="flex items-center justify-between bg-primary-50 rounded-lg px-3 py-2">
-                      <div class="flex items-center gap-2">
-                        <span class="text-xs text-primary-400 w-5">{{ i + 1 }}.</span>
-                        <span class="text-sm font-medium text-primary-700">{{ ex.name }}</span>
+                      <div class="flex items-center gap-2 min-w-0">
+                        <span class="text-xs text-primary-400 w-5 shrink-0">{{ i + 1 }}.</span>
+                        <span class="text-sm font-medium text-primary-700 truncate">{{ ex.name }}</span>
                         @if (ex.videoUrl) {
                           <a [href]="ex.videoUrl" target="_blank" rel="noopener"
-                             class="text-danger-500 hover:text-danger-700" title="Ver video">
+                             class="text-danger-500 hover:text-danger-700 shrink-0" title="Ver video">
                             ▶
                           </a>
                         }
                       </div>
-                      <div class="flex items-center gap-3 text-xs text-primary-400">
+                      <div class="flex items-center gap-3 text-xs text-primary-400 shrink-0">
                         @if (ex.sets && ex.reps) {
                           <span>{{ ex.sets }} x {{ ex.reps }}</span>
                         }
@@ -62,7 +62,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
                           </span>
                         }
                         @if (ex.notes) {
-                          <span class="italic">{{ ex.notes }}</span>
+                          <span class="italic max-w-[120px] truncate">{{ ex.notes }}</span>
                         }
                       </div>
                     </div>

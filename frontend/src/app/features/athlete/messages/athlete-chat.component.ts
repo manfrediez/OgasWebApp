@@ -46,8 +46,9 @@ import { ToastService } from '../../../shared/services/toast.service';
           @if (hasMore()) {
             <button
               (click)="loadMore()"
-              class="w-full text-center text-sm text-accent-500 hover:text-accent-600 py-2">
-              Cargar anteriores
+              [disabled]="loadingMore()"
+              class="w-full text-center text-sm text-accent-500 hover:text-accent-600 py-2 disabled:opacity-50">
+              {{ loadingMore() ? 'Cargando...' : 'Cargar anteriores' }}
             </button>
           }
           @for (msg of displayMessages(); track msg._id) {
@@ -129,7 +130,13 @@ import { ToastService } from '../../../shared/services/toast.service';
           <button
             (click)="send()"
             [disabled]="!canSend()"
-            class="rounded-lg bg-accent-500 px-5 py-2 text-sm font-medium text-white hover:bg-accent-600 disabled:opacity-50 disabled:cursor-not-allowed">
+            class="rounded-lg bg-accent-500 px-5 py-2 text-sm font-medium text-white hover:bg-accent-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            @if (sending()) {
+              <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+            }
             Enviar
           </button>
         </div>
@@ -157,6 +164,8 @@ export class AthleteChatComponent implements OnInit, OnDestroy {
   hasMore = signal(true);
   newMessage = '';
   selectedFiles = signal<File[]>([]);
+  sending = signal(false);
+  loadingMore = signal(false);
 
   currentUserId = signal('');
 
@@ -207,21 +216,23 @@ export class AthleteChatComponent implements OnInit, OnDestroy {
           }
           this.displayMessages.set(this.messages());
           this.loading.set(false);
+          this.loadingMore.set(false);
           if (initial) {
             this.scrollToBottom();
           }
         },
-        error: () => this.loading.set(false),
+        error: () => { this.loading.set(false); this.loadingMore.set(false); },
       });
   }
 
   loadMore() {
+    this.loadingMore.set(true);
     this.skip += this.limit;
     this.loadMessages();
   }
 
   canSend(): boolean {
-    return this.newMessage.trim().length > 0 || this.selectedFiles().length > 0;
+    return !this.sending() && (this.newMessage.trim().length > 0 || this.selectedFiles().length > 0);
   }
 
   onFilesSelected(event: Event) {
@@ -258,16 +269,25 @@ export class AthleteChatComponent implements OnInit, OnDestroy {
     }
     files.forEach((f) => formData.append('files', f));
 
+    const savedContent = this.newMessage;
+    const savedFiles = [...files];
     this.newMessage = '';
     this.selectedFiles.set([]);
+    this.sending.set(true);
 
     this.messagesService.sendMessage(formData).subscribe({
       next: (msg) => {
+        this.sending.set(false);
         this.messages.set([...this.messages(), msg]);
         this.displayMessages.set(this.messages());
         this.scrollToBottom();
       },
-      error: () => this.toast.error('Error al enviar mensaje'),
+      error: () => {
+        this.sending.set(false);
+        this.newMessage = savedContent;
+        this.selectedFiles.set(savedFiles);
+        this.toast.error('Error al enviar mensaje');
+      },
     });
   }
 

@@ -151,6 +151,14 @@ const DAY_NAMES_FULL = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'S
                 <p class="text-xs text-primary-300 italic">Descanso</p>
               }
             </div>
+          } @else {
+            <!-- Rest day (no session, not today) -->
+            <div class="border border-primary-100 rounded-lg px-3 py-2 bg-primary-50/30">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-primary-400">{{ dayNamesFull[dayIdx] }}</span>
+                <span class="text-xs text-primary-300 italic">Descanso</span>
+              </div>
+            </div>
           }
         }
       </div>

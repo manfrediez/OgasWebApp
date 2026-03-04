@@ -8,6 +8,7 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
 import { ErrorStateComponent } from '../../../../../shared/components/error-state/error-state.component';
 import { DateEsPipe } from '../../../../../shared/pipes/date-es.pipe';
 import { RaceStrategyFormComponent } from '../../../forms/race-strategy-form/race-strategy-form.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ToastService } from '../../../../../shared/services/toast.service';
 
 @Component({
@@ -47,10 +48,29 @@ import { ToastService } from '../../../../../shared/services/toast.service';
                   </div>
                   <p class="text-sm text-primary-400">{{ s.raceDate | dateEs }} - {{ s.totalDistance }} km</p>
                 </div>
-                <div class="flex gap-2">
-                  <button (click)="openForm(s)" class="text-xs text-accent-500 hover:text-accent-700">Editar</button>
+                <div class="flex items-center gap-2">
+                  <button
+                    (click)="openForm(s)"
+                    title="Editar"
+                    class="p-1.5 rounded-lg text-primary-400 hover:text-accent-500 hover:bg-accent-400/10 transition-colors">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/>
+                    </svg>
+                  </button>
                   @if (!s.isPublished) {
-                    <button (click)="publish(s)" class="text-xs text-success-500 hover:text-success-600">Publicar</button>
+                    <button
+                      (click)="publish(s)"
+                      [disabled]="publishing() === s._id"
+                      title="Publicar"
+                      class="p-1.5 rounded-lg text-primary-400 hover:text-green-500 hover:bg-green-500/10 transition-colors disabled:opacity-50">
+                      @if (publishing() === s._id) {
+                        <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                      } @else {
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"/>
+                        </svg>
+                      }
+                    </button>
                   }
                 </div>
               </div>
@@ -85,6 +105,7 @@ export class RaceStrategiesTabComponent implements OnInit {
   strategies = signal<RaceStrategy[]>([]);
   loading = signal(true);
   errorState = signal(false);
+  publishing = signal<string | null>(null);
 
   ngOnInit() {
     this.loadStrategies();
@@ -118,9 +139,22 @@ export class RaceStrategiesTabComponent implements OnInit {
   }
 
   publish(strategy: RaceStrategy) {
-    this.strategiesService.publish(strategy._id).subscribe({
-      next: () => { this.toast.success('Estrategia publicada'); this.loadStrategies(); },
-      error: () => this.toast.error('Error al publicar'),
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Publicar estrategia',
+        message: `¿Publicar "${strategy.raceName}"? El atleta podrá verla. Esta acción no se puede deshacer.`,
+        confirmText: 'Publicar',
+      } as ConfirmDialogData,
+      panelClass: ['flex', 'items-center', 'justify-center', 'p-4'],
+    });
+    ref.closed.subscribe(confirmed => {
+      if (confirmed) {
+        this.publishing.set(strategy._id);
+        this.strategiesService.publish(strategy._id).subscribe({
+          next: () => { this.publishing.set(null); this.toast.success('Estrategia publicada'); this.loadStrategies(); },
+          error: () => { this.publishing.set(null); this.toast.error('Error al publicar'); },
+        });
+      }
     });
   }
 }

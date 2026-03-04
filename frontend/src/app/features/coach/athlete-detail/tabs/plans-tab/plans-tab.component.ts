@@ -172,6 +172,7 @@ export class PlansTabComponent implements OnInit {
         title: 'Eliminar plan',
         message: `¿Estás seguro de eliminar "${plan.name}"? Esta acción no se puede deshacer.`,
         confirmText: 'Eliminar',
+        variant: 'danger',
       } as ConfirmDialogData,
     });
 

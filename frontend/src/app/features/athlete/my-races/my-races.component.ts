@@ -7,15 +7,18 @@ import { GoalRace } from '../../../models/goal-race.model';
 import { RaceStrategy } from '../../../models/race-strategy.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../shared/components/error-state/error-state.component';
 import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 
 @Component({
   selector: 'app-my-races',
   standalone: true,
-  imports: [LoadingSpinnerComponent, EmptyStateComponent, DateEsPipe],
+  imports: [LoadingSpinnerComponent, EmptyStateComponent, ErrorStateComponent, DateEsPipe],
   template: `
     @if (loading()) {
       <app-loading-spinner />
+    } @else if (errorState()) {
+      <app-error-state (retry)="loadData()" />
     } @else {
       <div>
         <h1 class="text-xl font-bold text-primary-700 mb-4">Mis Carreras</h1>
@@ -106,17 +109,34 @@ export class MyRacesComponent implements OnInit {
   races = signal<GoalRace[]>([]);
   publishedStrategies = signal<RaceStrategy[]>([]);
   loading = signal(true);
+  errorState = signal(false);
 
   ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
     const user = this.authService.currentUser();
     if (!user) return;
 
+    this.loading.set(true);
+    this.errorState.set(false);
+
     let loaded = 0;
-    const checkDone = () => { loaded++; if (loaded >= 2) this.loading.set(false); };
+    let hasError = false;
+    const checkDone = () => {
+      loaded++;
+      if (loaded >= 2) {
+        this.loading.set(false);
+        if (hasError && this.races().length === 0 && this.publishedStrategies().length === 0) {
+          this.errorState.set(true);
+        }
+      }
+    };
 
     this.racesService.getByAthlete(user._id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: r => { this.races.set(r); checkDone(); },
-      error: () => checkDone(),
+      error: () => { hasError = true; checkDone(); },
     });
 
     this.strategiesService.getByAthlete(user._id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -124,7 +144,7 @@ export class MyRacesComponent implements OnInit {
         this.publishedStrategies.set(s.filter(st => st.isPublished));
         checkDone();
       },
-      error: () => checkDone(),
+      error: () => { hasError = true; checkDone(); },
     });
   }
 }

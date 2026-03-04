@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef, HostListener } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -41,7 +41,7 @@ import { ToastService } from '../../../shared/services/toast.service';
           </div>
         }
 
-        <form (ngSubmit)="onSubmit()" class="space-y-6">
+        <form (ngSubmit)="onSubmit()" (input)="isDirty = true" (change)="isDirty = true" class="space-y-6">
           <!-- Header -->
           <div class="card-glass rounded-xl p-6 space-y-4">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -98,6 +98,22 @@ import { ToastService } from '../../../shared/services/toast.service';
                 [startDate]="form.startDate"
                 (weekChange)="onWeekChange($index, $event)" />
             }
+            <div class="flex gap-3">
+              <button
+                type="button"
+                (click)="addWeek()"
+                class="rounded-lg border border-accent-500 text-accent-500 px-4 py-2 text-sm font-medium hover:bg-accent-500 hover:text-white transition-colors">
+                + Agregar semana
+              </button>
+              @if (weeks.length > 1) {
+                <button
+                  type="button"
+                  (click)="removeLastWeek()"
+                  class="rounded-lg border border-danger-500 text-danger-500 px-4 py-2 text-sm font-medium hover:bg-danger-500 hover:text-white transition-colors">
+                  Quitar última semana
+                </button>
+              }
+            </div>
           </div>
 
           <!-- Notes -->
@@ -151,6 +167,20 @@ export class PlanEditorComponent implements OnInit {
   saving = signal(false);
   error = signal('');
   templates = signal<WorkoutPlan[]>([]);
+
+  isDirty = false;
+
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent) {
+    if (this.isDirty) {
+      event.preventDefault();
+    }
+  }
+
+  canDeactivate(): boolean {
+    if (!this.isDirty) return true;
+    return confirm('Tenés cambios sin guardar. ¿Estás seguro de que querés salir?');
+  }
 
   form = { name: '', startDate: '', endDate: '', planNumber: null as number | null, sport: '', activationProtocol: '', coachConclusions: '' };
   weeks: Week[] = [
@@ -227,11 +257,27 @@ export class PlanEditorComponent implements OnInit {
     this.weeks = this.weeks.map((w, i) => i === idx ? week : w);
   }
 
+  addWeek() {
+    this.weeks = [...this.weeks, { weekNumber: this.weeks.length + 1, sessions: [] }];
+    this.isDirty = true;
+  }
+
+  removeLastWeek() {
+    if (this.weeks.length <= 1) return;
+    this.weeks = this.weeks.slice(0, -1);
+    this.isDirty = true;
+  }
+
   goBack() {
     this.router.navigate(['/coach/athlete', this.athleteId]);
   }
 
   onSubmit() {
+    if (this.form.endDate && this.form.startDate && this.form.endDate < this.form.startDate) {
+      this.error.set('La fecha fin debe ser posterior a la de inicio');
+      return;
+    }
+
     this.saving.set(true);
     this.error.set('');
 
@@ -264,6 +310,7 @@ export class PlanEditorComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.saving.set(false);
+        this.isDirty = false;
         this.toast.success('Plan guardado');
         this.goBack();
       },

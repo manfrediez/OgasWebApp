@@ -13,6 +13,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 import { ErrorStateComponent } from '../../../shared/components/error-state/error-state.component';
 import { WeekViewComponent } from './week-view/week-view.component';
 import { SessionFeedbackDialogComponent } from './session-feedback-dialog/session-feedback-dialog.component';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-my-plan',
@@ -162,6 +163,7 @@ export class MyPlanComponent implements OnInit {
   private activityDataService = inject(ActivityDataService);
   private stravaService = inject(StravaService);
   private dialog = inject(Dialog);
+  private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
 
   plans = signal<WorkoutPlan[]>([]);
@@ -231,9 +233,13 @@ export class MyPlanComponent implements OnInit {
     this.stravaService.syncRecent().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.syncing.set(false);
+        this.toast.success('Sincronización completada');
         this.loadData();
       },
-      error: () => this.syncing.set(false),
+      error: () => {
+        this.syncing.set(false);
+        this.toast.error('Error al sincronizar con Strava');
+      },
     });
   }
 

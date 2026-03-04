@@ -1,4 +1,5 @@
 import { Component, input } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { Session } from '../../../../models/workout-plan.model';
 import { ActivityData } from '../../../../models/activity-data.model';
 import { SessionStatus } from '../../../../core/models/enums';
@@ -10,7 +11,7 @@ import { HrZoneLabelPipe } from '../../../../shared/pipes/hr-zone-label.pipe';
 @Component({
   selector: 'app-session-detail',
   standalone: true,
-  imports: [WorkoutTypeIconComponent, StatusBadgeComponent, WorkoutTypeLabelPipe, HrZoneLabelPipe],
+  imports: [DecimalPipe, WorkoutTypeIconComponent, StatusBadgeComponent, WorkoutTypeLabelPipe, HrZoneLabelPipe],
   template: `
     <div class="card-glass rounded-xl p-4 space-y-3"
          [class.border-l-4]="needsFeedback()"
@@ -171,7 +172,11 @@ import { HrZoneLabelPipe } from '../../../../shared/pipes/hr-zone-label.pipe';
                 }
               </div>
               <div class="flex justify-between text-[10px] text-primary-400 mt-0.5">
-                <span>Z1</span><span>Z2</span><span>Z3</span><span>Z4</span><span>Z5</span>
+                <span>Z1 {{ zonePercent(ad, 'z1') | number:'1.0-0' }}%</span>
+                <span>Z2 {{ zonePercent(ad, 'z2') | number:'1.0-0' }}%</span>
+                <span>Z3 {{ zonePercent(ad, 'z3') | number:'1.0-0' }}%</span>
+                <span>Z4 {{ zonePercent(ad, 'z4') | number:'1.0-0' }}%</span>
+                <span>Z5 {{ zonePercent(ad, 'z5') | number:'1.0-0' }}%</span>
               </div>
             </div>
           }

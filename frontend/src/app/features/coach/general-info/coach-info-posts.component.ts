@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SlicePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -46,7 +46,7 @@ import { ToastService } from '../../../shared/services/toast.service';
 
       <!-- Form -->
       @if (showForm()) {
-        <div class="card-glass rounded-2xl p-5 mb-6 border-l-4 border-accent-500">
+        <div #formContainer class="card-glass rounded-2xl p-5 mb-6 border-l-4 border-accent-500">
           <h3 class="text-sm font-semibold text-primary-700 mb-4 flex items-center gap-2">
             <svg class="w-4 h-4 text-accent-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/>
@@ -57,6 +57,7 @@ import { ToastService } from '../../../shared/services/toast.service';
             <div>
               <label class="block text-xs font-medium text-primary-500 mb-1.5">Título</label>
               <input
+                #titleInput
                 [(ngModel)]="formTitle"
                 name="title"
                 type="text"
@@ -154,11 +155,18 @@ import { ToastService } from '../../../shared/services/toast.service';
                 </span>
               </div>
               <div class="relative mb-3">
-                <p class="text-sm text-primary-500 whitespace-pre-line">{{ post.content | slice:0:500 }}</p>
-                @if (post.content.length > 500) {
-                  <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent"></div>
+                <p class="text-sm text-primary-500 whitespace-pre-line">{{ expandedPosts.has(post._id) ? post.content : (post.content | slice:0:500) }}</p>
+                @if (post.content.length > 500 && !expandedPosts.has(post._id)) {
+                  <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-surface to-transparent"></div>
                 }
               </div>
+              @if (post.content.length > 500) {
+                <button
+                  (click)="toggleExpand(post._id)"
+                  class="text-xs text-accent-500 hover:text-accent-700 font-medium mb-2">
+                  {{ expandedPosts.has(post._id) ? 'Ver menos' : 'Ver más' }}
+                </button>
+              }
 
               @if (post.attachments.length > 0) {
                 <div class="flex flex-wrap gap-2 mb-3">
@@ -211,12 +219,16 @@ import { ToastService } from '../../../shared/services/toast.service';
     </div>
   `,
 })
-export class CoachInfoPostsComponent implements OnInit {
+export class CoachInfoPostsComponent implements OnInit, AfterViewChecked {
   private route = inject(ActivatedRoute);
   infoService = inject(GeneralInfoService);
   private dialog = inject(Dialog);
   private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
+
+  @ViewChild('formContainer') formContainer?: ElementRef<HTMLElement>;
+  @ViewChild('titleInput') titleInput?: ElementRef<HTMLInputElement>;
+  private pendingScrollToForm = false;
 
   topicId = '';
   topicName = signal('');
@@ -227,6 +239,8 @@ export class CoachInfoPostsComponent implements OnInit {
   editingPost = signal<InfoPost | null>(null);
   existingAttachments = signal<Attachment[]>([]);
   removedAttachments: string[] = [];
+
+  expandedPosts = new Set<string>();
 
   formTitle = '';
   formContent = '';
@@ -239,6 +253,14 @@ export class CoachInfoPostsComponent implements OnInit {
       const topic = topics.find((t) => t._id === this.topicId);
       if (topic) this.topicName.set(topic.name);
     });
+  }
+
+  ngAfterViewChecked() {
+    if (this.pendingScrollToForm && this.formContainer) {
+      this.formContainer.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      this.titleInput?.nativeElement.focus();
+      this.pendingScrollToForm = false;
+    }
   }
 
   loadPosts() {
@@ -266,6 +288,7 @@ export class CoachInfoPostsComponent implements OnInit {
     this.removedAttachments = [];
     this.selectedFiles = [];
     this.showForm.set(true);
+    this.pendingScrollToForm = true;
   }
 
   cancelForm() {
@@ -333,6 +356,7 @@ export class CoachInfoPostsComponent implements OnInit {
         title: 'Eliminar publicación',
         message: `Se eliminará "${post.title}" y todos sus archivos adjuntos.`,
         confirmText: 'Eliminar',
+        variant: 'danger',
       },
       panelClass: 'dialog-panel',
     });
@@ -345,6 +369,14 @@ export class CoachInfoPostsComponent implements OnInit {
         });
       }
     });
+  }
+
+  toggleExpand(postId: string) {
+    if (this.expandedPosts.has(postId)) {
+      this.expandedPosts.delete(postId);
+    } else {
+      this.expandedPosts.add(postId);
+    }
   }
 
   getFileIcon(mimeType: string): string {

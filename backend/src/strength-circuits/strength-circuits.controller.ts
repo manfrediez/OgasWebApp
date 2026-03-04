@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Param,
   Body,
   Query,
@@ -69,5 +70,15 @@ export class StrengthCircuitsController {
     @CurrentUser('sub') coachId: string,
   ) {
     return this.circuitsService.update(id, dto, coachId);
+  }
+
+  @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.COACH)
+  delete(
+    @Param('id') id: string,
+    @CurrentUser('sub') coachId: string,
+  ) {
+    return this.circuitsService.delete(id, coachId);
   }
 }

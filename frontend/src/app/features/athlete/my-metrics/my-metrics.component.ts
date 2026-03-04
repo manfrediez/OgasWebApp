@@ -32,18 +32,21 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
             <div class="card-glass rounded-xl p-4 text-center">
               <p class="text-xs text-primary-400">VAM</p>
               <p class="text-2xl font-bold text-accent-500">{{ metrics()!.vam }}</p>
+              <p class="text-[10px] text-primary-300">km/h</p>
             </div>
           }
           @if (metrics()!.vt2) {
             <div class="card-glass rounded-xl p-4 text-center">
               <p class="text-xs text-primary-400">VT2</p>
               <p class="text-2xl font-bold text-accent-500">{{ metrics()!.vt2 }}</p>
+              <p class="text-[10px] text-primary-300">km/h</p>
             </div>
           }
           @if (metrics()!.fcMax) {
             <div class="card-glass rounded-xl p-4 text-center">
               <p class="text-xs text-primary-400">FC Max</p>
               <p class="text-2xl font-bold text-danger-500">{{ metrics()!.fcMax }}</p>
+              <p class="text-[10px] text-primary-300">bpm</p>
             </div>
           }
         </div>

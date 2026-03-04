@@ -44,18 +44,21 @@ import { MetricsFormComponent } from '../../../forms/metrics-form/metrics-form.c
               <div class="bg-primary-50 rounded-lg p-3">
                 <p class="text-xs text-primary-400">VAM</p>
                 <p class="text-lg font-bold text-primary-700">{{ metrics()!.vam }}</p>
+                <p class="text-[10px] text-primary-300">km/h</p>
               </div>
             }
             @if (metrics()!.vt2) {
               <div class="bg-primary-50 rounded-lg p-3">
                 <p class="text-xs text-primary-400">VT2</p>
                 <p class="text-lg font-bold text-primary-700">{{ metrics()!.vt2 }}</p>
+                <p class="text-[10px] text-primary-300">km/h</p>
               </div>
             }
             @if (metrics()!.fcMax) {
               <div class="bg-primary-50 rounded-lg p-3">
                 <p class="text-xs text-primary-400">FC Max</p>
                 <p class="text-lg font-bold text-primary-700">{{ metrics()!.fcMax }}</p>
+                <p class="text-[10px] text-primary-300">bpm</p>
               </div>
             }
           </div>

@@ -197,6 +197,7 @@ export class CoachInfoTopicsComponent implements OnInit {
         title: 'Eliminar tema',
         message: `Se eliminará "${topic.name}" y todas sus publicaciones y archivos adjuntos. Esta acción no se puede deshacer.`,
         confirmText: 'Eliminar',
+        variant: 'danger',
       },
       panelClass: 'dialog-panel',
     });

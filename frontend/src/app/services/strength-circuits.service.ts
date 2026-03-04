@@ -26,4 +26,8 @@ export class StrengthCircuitsService {
   update(id: string, data: Partial<CreateStrengthCircuitRequest>): Observable<StrengthCircuit> {
     return this.http.patch<StrengthCircuit>(`/api/strength-circuits/${id}`, data);
   }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/strength-circuits/${id}`);
+  }
 }

@@ -1,19 +1,22 @@
 import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { Dialog } from '@angular/cdk/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
 import { UsersService } from '../../services/users.service';
 import { WorkoutPlansService } from '../../services/workout-plans.service';
 import { StravaService, StravaStatus } from '../../services/strava.service';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { PlanSummary } from '../../models/workout-plan.model';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [FormsModule, NavbarComponent],
+  imports: [FormsModule, DecimalPipe, NavbarComponent],
   template: `
     <div class="min-h-screen bg-bg">
       <app-navbar />
@@ -57,7 +60,7 @@ import { PlanSummary } from '../../models/workout-plan.model';
                   <p class="text-xs text-primary-400">sesiones</p>
                 </div>
                 <div class="text-center bg-bg rounded-lg p-3">
-                  <p class="text-2xl font-bold text-primary-700">{{ totalKm() }}</p>
+                  <p class="text-2xl font-bold text-primary-700">{{ totalKm() | number:'1.0-0' }}</p>
                   <p class="text-xs text-primary-400">km total</p>
                 </div>
                 <div class="text-center bg-bg rounded-lg p-3">
@@ -67,8 +70,8 @@ import { PlanSummary } from '../../models/workout-plan.model';
               </div>
               <div class="grid grid-cols-2 gap-3">
                 <div class="text-center bg-bg rounded-lg p-3">
-                  <p class="text-2xl font-bold text-primary-700">{{ totalMinutes() }}</p>
-                  <p class="text-xs text-primary-400">minutos</p>
+                  <p class="text-2xl font-bold text-primary-700">{{ formatMinutes(totalMinutes()) }}</p>
+                  <p class="text-xs text-primary-400">tiempo</p>
                 </div>
                 <div class="text-center bg-bg rounded-lg p-3">
                   <p class="text-2xl font-bold text-primary-700">{{ avgRpe() }}</p>
@@ -125,10 +128,6 @@ import { PlanSummary } from '../../models/workout-plan.model';
               <label class="block text-sm font-medium text-primary-600 mb-1">Dirección</label>
               <input [(ngModel)]="address" name="address" class="w-full" />
             </div>
-
-            @if (success()) {
-              <p class="text-sm text-success-500 bg-green-50 dark:bg-green-900/20 rounded-lg p-2">Perfil actualizado</p>
-            }
 
             @if (error()) {
               <p class="text-sm text-danger-500 bg-red-50 dark:bg-red-900/20 rounded-lg p-2">{{ error() }}</p>
@@ -278,6 +277,7 @@ export class ProfileComponent implements OnInit {
   private stravaService = inject(StravaService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private dialog = inject(Dialog);
   private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
 
@@ -415,17 +415,27 @@ export class ProfileComponent implements OnInit {
   }
 
   disconnectStrava() {
-    if (!confirm('¿Desconectar Strava? Se dejarán de sincronizar las actividades.')) return;
-
-    this.stravaLoading.set(true);
-    this.stravaService.disconnect().subscribe({
-      next: () => {
-        this.stravaStatus.set({ connected: false });
-        this.stravaSuccess.set(false);
-        this.stravaLoading.set(false);
-        this.authService.fetchCurrentUser().subscribe();
-      },
-      error: () => this.stravaLoading.set(false),
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Desconectar Strava',
+        message: '¿Desconectar Strava? Se dejarán de sincronizar las actividades.',
+        confirmText: 'Desconectar',
+        variant: 'danger',
+      } as ConfirmDialogData,
+      panelClass: ['flex', 'items-center', 'justify-center', 'p-4'],
+    });
+    ref.closed.subscribe(confirmed => {
+      if (!confirmed) return;
+      this.stravaLoading.set(true);
+      this.stravaService.disconnect().subscribe({
+        next: () => {
+          this.stravaStatus.set({ connected: false });
+          this.stravaSuccess.set(false);
+          this.stravaLoading.set(false);
+          this.authService.fetchCurrentUser().subscribe();
+        },
+        error: () => this.stravaLoading.set(false),
+      });
     });
   }
 
@@ -475,6 +485,13 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  formatMinutes(minutes: number): string {
+    if (minutes < 60) return `${minutes}min`;
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m > 0 ? `${h}h ${m}min` : `${h}h`;
+  }
+
   goBack() {
     this.router.navigateByUrl(this.authService.getRedirectUrl());
   }
@@ -495,7 +512,6 @@ export class ProfileComponent implements OnInit {
       next: () => {
         this.authService.fetchCurrentUser().subscribe();
         this.toast.success('Perfil actualizado');
-        this.success.set(true);
         this.saving.set(false);
       },
       error: () => {

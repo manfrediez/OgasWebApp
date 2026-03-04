@@ -1,4 +1,9 @@
-import { Routes } from '@angular/router';
+import { Routes, CanDeactivateFn } from '@angular/router';
+import { PlanEditorComponent } from './plan-editor/plan-editor.component';
+
+const canDeactivatePlanEditor: CanDeactivateFn<PlanEditorComponent> = (component) => {
+  return component.canDeactivate();
+};
 
 export const COACH_ROUTES: Routes = [
   {
@@ -55,11 +60,13 @@ export const COACH_ROUTES: Routes = [
         path: 'athlete/:athleteId/plan/new',
         loadComponent: () =>
           import('./plan-editor/plan-editor.component').then(m => m.PlanEditorComponent),
+        canDeactivate: [canDeactivatePlanEditor],
       },
       {
         path: 'athlete/:athleteId/plan/:planId',
         loadComponent: () =>
           import('./plan-editor/plan-editor.component').then(m => m.PlanEditorComponent),
+        canDeactivate: [canDeactivatePlanEditor],
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],

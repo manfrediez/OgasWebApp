@@ -146,7 +146,7 @@ import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.
                           class="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold"
                           [class]="getInactivityClass(athlete.daysSinceLastActivity)"
                         >
-                          {{ athlete.daysSinceLastActivity }}
+                          {{ athlete.daysSinceLastActivity }}d
                         </span>
                       }
                     </td>

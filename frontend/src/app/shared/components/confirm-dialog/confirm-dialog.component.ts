@@ -6,6 +6,7 @@ export interface ConfirmDialogData {
   message: string;
   confirmText?: string;
   cancelText?: string;
+  variant?: 'danger' | 'default';
 }
 
 @Component({
@@ -23,8 +24,8 @@ export interface ConfirmDialogData {
         </button>
         <button
           (click)="dialogRef.close(true)"
-          class="btn-danger">
-          {{ data.confirmText || 'Eliminar' }}
+          [class]="data.variant === 'danger' ? 'btn-danger' : 'btn-primary'">
+          {{ data.confirmText || 'Confirmar' }}
         </button>
       </div>
     </div>
