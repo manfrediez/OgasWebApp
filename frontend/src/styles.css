@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary-50: #F9FAFB;
   --color-primary-100: #F3F4F6;
@@ -31,6 +33,36 @@
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+/* ─── Dark Mode Variable Overrides ─── */
+.dark {
+  --color-primary-50: #0B1120;
+  --color-primary-100: #111827;
+  --color-primary-200: #1F2937;
+  --color-primary-300: #374151;
+  --color-primary-400: #9CA3AF;
+  --color-primary-500: #D1D5DB;
+  --color-primary-600: #E5E7EB;
+  --color-primary-700: #F3F4F6;
+  --color-primary-800: #F9FAFB;
+  --color-primary-900: #FFFFFF;
+
+  --color-accent-300: #0E7490;
+  --color-accent-400: #06B6D4;
+  --color-accent-500: #22D3EE;
+  --color-accent-600: #67E8F9;
+  --color-accent-700: #A5F3FC;
+
+  --color-bg: #030712;
+  --color-surface: #111827;
+  --color-surface-alt: #1F2937;
+
+  --color-danger-500: #F87171;
+  --color-danger-600: #EF4444;
+  --color-warning-500: #FBBF24;
+  --color-success-500: #34D399;
+  --color-success-600: #10B981;
+}
+
 body {
   @apply font-sans text-primary-700 antialiased;
   margin: 0;
@@ -54,11 +86,23 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+.dark .card-glass {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark .card-glass:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
 /* ─── Card Static (no hover effect) ─── */
 .card-glass-static {
   background: var(--color-surface);
   border: 1px solid var(--color-primary-200);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dark .card-glass-static {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 /* ─── Navbar ─── */
@@ -81,13 +125,17 @@ body {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
+.dark .dialog-glass {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
 /* ─── Buttons ─── */
 .btn-primary {
   @apply rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-colors;
-  background: #111827;
+  background: var(--color-primary-800);
 }
 .btn-primary:hover {
-  background: #1F2937;
+  background: var(--color-primary-700);
 }
 .btn-primary:disabled {
   opacity: 0.5;
@@ -107,10 +155,10 @@ body {
 
 .btn-accent {
   @apply rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-colors;
-  background: #06B6D4;
+  background: var(--color-accent-500);
 }
 .btn-accent:hover {
-  background: #0891B2;
+  background: var(--color-accent-600);
 }
 .btn-accent:disabled {
   opacity: 0.5;
@@ -119,10 +167,10 @@ body {
 
 .btn-danger {
   @apply rounded-xl px-4 py-2 text-sm font-medium text-white transition-colors;
-  background: #EF4444;
+  background: var(--color-danger-500);
 }
 .btn-danger:hover {
-  background: #DC2626;
+  background: var(--color-danger-600);
 }
 
 /* ─── Inputs ─── */
@@ -135,8 +183,12 @@ input, select, textarea {
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: #06B6D4;
+  border-color: var(--color-accent-500);
   box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+}
+
+.dark input:focus, .dark select:focus, .dark textarea:focus {
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
 }
 
 button {
@@ -151,7 +203,15 @@ button {
   color: var(--color-primary-700);
 }
 
+.dark .toast-glass {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
 /* ─── CDK Dialog Overlay ─── */
 .cdk-overlay-backdrop {
   background: rgba(0, 0, 0, 0.3);
+}
+
+.dark .cdk-overlay-backdrop {
+  background: rgba(0, 0, 0, 0.6);
 }

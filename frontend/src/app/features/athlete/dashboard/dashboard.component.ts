@@ -163,7 +163,7 @@ interface MonthSummary {
                   <span class="text-sm font-medium text-primary-600">
                     {{ monthSummary().completed }}/{{ monthSummary().total }} sesiones
                   </span>
-                  <span class="text-sm font-bold text-green-600">{{ monthSummary().percent }}%</span>
+                  <span class="text-sm font-bold text-green-600 dark:text-green-400">{{ monthSummary().percent }}%</span>
                 </div>
                 <div class="w-full h-3 bg-primary-100 rounded-full overflow-hidden">
                   <div class="h-full bg-green-500 rounded-full transition-all"
@@ -174,16 +174,16 @@ interface MonthSummary {
 
             <div class="grid grid-cols-3 gap-2 md:gap-3 mb-4">
               <div class="text-center p-3 bg-primary-50 rounded-xl border border-primary-200">
-                <p class="text-2xl font-bold text-green-600">{{ monthSummary().completed }}</p>
-                <p class="text-xs font-medium text-green-500">Completadas</p>
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ monthSummary().completed }}</p>
+                <p class="text-xs font-medium text-green-500 dark:text-green-500">Completadas</p>
               </div>
               <div class="text-center p-3 bg-primary-50 rounded-xl border border-primary-200">
                 <p class="text-2xl font-bold text-primary-500">{{ monthSummary().planned }}</p>
                 <p class="text-xs font-medium text-primary-400">Pendientes</p>
               </div>
               <div class="text-center p-3 bg-primary-50 rounded-xl border border-primary-200">
-                <p class="text-2xl font-bold text-amber-500">{{ monthSummary().skipped }}</p>
-                <p class="text-xs font-medium text-amber-400">Omitidas</p>
+                <p class="text-2xl font-bold text-amber-500 dark:text-amber-400">{{ monthSummary().skipped }}</p>
+                <p class="text-xs font-medium text-amber-400 dark:text-amber-500">Omitidas</p>
               </div>
             </div>
             <div class="flex gap-4 text-sm text-primary-500 pt-3 border-t border-primary-100">

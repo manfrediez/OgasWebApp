@@ -28,11 +28,11 @@ export class StatusBadgeComponent {
       case SessionStatus.PLANNED:
         return `${base} bg-primary-100 text-primary-700`;
       case SessionStatus.COMPLETED:
-        return `${base} bg-green-100 text-green-800`;
+        return `${base} bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400`;
       case SessionStatus.SKIPPED:
-        return `${base} bg-amber-100 text-amber-800`;
+        return `${base} bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400`;
       default:
-        return `${base} bg-gray-100 text-gray-800`;
+        return `${base} bg-primary-100 text-primary-700`;
     }
   });
 }

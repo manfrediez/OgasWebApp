@@ -127,11 +127,11 @@ import { PlanSummary } from '../../models/workout-plan.model';
             </div>
 
             @if (success()) {
-              <p class="text-sm text-success-500 bg-green-50 rounded-lg p-2">Perfil actualizado</p>
+              <p class="text-sm text-success-500 bg-green-50 dark:bg-green-900/20 rounded-lg p-2">Perfil actualizado</p>
             }
 
             @if (error()) {
-              <p class="text-sm text-danger-500 bg-red-50 rounded-lg p-2">{{ error() }}</p>
+              <p class="text-sm text-danger-500 bg-red-50 dark:bg-red-900/20 rounded-lg p-2">{{ error() }}</p>
             }
 
             <button
@@ -179,8 +179,8 @@ import { PlanSummary } from '../../models/workout-plan.model';
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-primary-600 mb-1">Nueva contraseña</label>
-                  <input [(ngModel)]="newPassword" name="newPassword" type="password" required minlength="8" class="w-full"
-                         placeholder="Mínimo 8 caracteres" />
+                  <input [(ngModel)]="newPassword" name="newPassword" type="password" required minlength="6" class="w-full"
+                         placeholder="Mínimo 6 caracteres" />
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-primary-600 mb-1">Confirmar nueva contraseña</label>
@@ -189,7 +189,7 @@ import { PlanSummary } from '../../models/workout-plan.model';
                 </div>
 
                 @if (passwordError()) {
-                  <p class="text-sm text-danger-500 bg-red-50 rounded-lg p-2">{{ passwordError() }}</p>
+                  <p class="text-sm text-danger-500 bg-red-50 dark:bg-red-900/20 rounded-lg p-2">{{ passwordError() }}</p>
                 }
 
                 <button
@@ -218,7 +218,7 @@ import { PlanSummary } from '../../models/workout-plan.model';
             </div>
 
             @if (stravaSuccess()) {
-              <p class="text-sm text-success-500 bg-green-50 rounded-lg p-2 mb-3">Strava conectado exitosamente</p>
+              <p class="text-sm text-success-500 bg-green-50 dark:bg-green-900/20 rounded-lg p-2 mb-3">Strava conectado exitosamente</p>
             }
 
             @if (stravaLoading()) {
@@ -227,7 +227,7 @@ import { PlanSummary } from '../../models/workout-plan.model';
               <div class="space-y-2">
                 <div class="flex items-center gap-2">
                   <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
-                  <span class="text-sm font-medium text-green-700">Conectado</span>
+                  <span class="text-sm font-medium text-green-700 dark:text-green-400">Conectado</span>
                 </div>
                 <p class="text-xs text-primary-400">
                   Athlete ID: {{ stravaStatus()!.athleteId }}
@@ -244,7 +244,7 @@ import { PlanSummary } from '../../models/workout-plan.model';
                   type="button"
                   (click)="disconnectStrava()"
                   [disabled]="stravaLoading()"
-                  class="mt-3 rounded-lg bg-red-500 px-4 py-2 text-sm text-white font-medium hover:bg-red-600 disabled:opacity-50">
+                  class="mt-3 rounded-lg bg-danger-500 px-4 py-2 text-sm text-white font-medium hover:bg-danger-600 disabled:opacity-50">
                   Desconectar
                 </button>
               </div>

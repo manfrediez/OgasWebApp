@@ -62,7 +62,7 @@ import { DateEsPipe } from '../../../../../shared/pipes/date-es.pipe';
                   <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-primary-400">
                     <span>{{ week.completed }}/{{ week.planned }} sesiones</span>
                     @if (week.skipped > 0) {
-                      <span class="text-amber-600">{{ week.skipped }} omitida{{ week.skipped > 1 ? 's' : '' }}</span>
+                      <span class="text-amber-600 dark:text-amber-400">{{ week.skipped }} omitida{{ week.skipped > 1 ? 's' : '' }}</span>
                     }
                     @if (week.avgRpe !== null) {
                       <span>RPE prom: <span class="font-semibold" [class]="getRpeColor(week.avgRpe!)">{{ week.avgRpe }}</span></span>
@@ -104,8 +104,8 @@ export class SummaryTabComponent implements OnInit {
   }
 
   getCompletionColor(pct: number): string {
-    if (pct >= 75) return 'text-green-700';
-    if (pct >= 50) return 'text-amber-600';
+    if (pct >= 75) return 'text-green-700 dark:text-green-400';
+    if (pct >= 50) return 'text-amber-600 dark:text-amber-400';
     return 'text-primary-400';
   }
 
@@ -116,9 +116,9 @@ export class SummaryTabComponent implements OnInit {
   }
 
   getRpeColor(rpe: number): string {
-    if (rpe <= 3) return 'text-green-700';
-    if (rpe <= 6) return 'text-yellow-700';
-    if (rpe <= 8) return 'text-orange-600';
-    return 'text-red-600';
+    if (rpe <= 3) return 'text-green-700 dark:text-green-400';
+    if (rpe <= 6) return 'text-yellow-700 dark:text-yellow-400';
+    if (rpe <= 8) return 'text-orange-600 dark:text-orange-400';
+    return 'text-red-600 dark:text-red-400';
   }
 }

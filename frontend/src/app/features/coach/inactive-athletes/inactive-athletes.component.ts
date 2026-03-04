@@ -99,8 +99,8 @@ export class InactiveAthletesComponent implements OnInit {
   }
 
   getBadgeColor(days: number | null): string {
-    if (days === null || days >= 10) return 'bg-red-100 text-red-800';
-    if (days >= 3) return 'bg-amber-100 text-amber-800';
-    return 'bg-cyan-100 text-cyan-800';
+    if (days === null || days >= 10) return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
+    if (days >= 3) return 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400';
+    return 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-400';
   }
 }

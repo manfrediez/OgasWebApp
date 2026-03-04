@@ -37,13 +37,13 @@ export class ToastContainerComponent {
   getClasses(type: string): string {
     switch (type) {
       case 'success':
-        return 'border-l-4 border-l-green-500 text-green-800';
+        return 'border-l-4 border-l-green-500 text-green-800 dark:text-green-400';
       case 'error':
-        return 'border-l-4 border-l-red-500 text-red-800';
+        return 'border-l-4 border-l-red-500 text-red-800 dark:text-red-400';
       case 'info':
-        return 'border-l-4 border-l-sky-500 text-sky-800';
+        return 'border-l-4 border-l-sky-500 text-sky-800 dark:text-sky-400';
       default:
-        return 'border-l-4 border-l-gray-500 text-gray-800';
+        return 'border-l-4 border-l-primary-500 text-primary-700';
     }
   }
 }

@@ -25,16 +25,16 @@ import { AuthService } from '../../../core/services/auth.service';
         </div>
 
         @if (error()) {
-          <p class="text-sm text-danger-500 bg-red-50 rounded-lg p-2">{{ error() }}</p>
+          <p class="text-sm text-danger-500 bg-red-50 dark:bg-red-900/20 rounded-lg p-2">{{ error() }}</p>
         }
 
         @if (inviteLink()) {
-          <div class="bg-green-50 rounded-lg p-4 space-y-3">
+          <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 space-y-3">
             <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg class="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p class="text-sm font-medium text-green-800">
+              <p class="text-sm font-medium text-green-800 dark:text-green-400">
                 @if (emailSent()) {
                   Invitación enviada por email exitosamente
                 } @else {
@@ -46,12 +46,12 @@ import { AuthService } from '../../../core/services/auth.service';
               <input
                 readonly
                 [value]="inviteLink()"
-                class="flex-1 text-xs bg-white border border-green-200 rounded-lg px-3 py-2 text-green-700 cursor-text" />
+                class="flex-1 text-xs bg-surface border border-green-200 dark:border-green-800 rounded-lg px-3 py-2 text-green-700 dark:text-green-400 cursor-text" />
               <button
                 type="button"
                 (click)="copyLink()"
                 class="shrink-0 px-3 py-2 text-xs font-medium rounded-lg transition-colors"
-                [class]="copied() ? 'bg-green-600 text-white' : 'bg-white border border-green-300 text-green-700 hover:bg-green-100'">
+                [class]="copied() ? 'bg-green-600 text-white' : 'bg-surface border border-green-300 dark:border-green-700 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'">
                 {{ copied() ? 'Copiado!' : 'Copiar' }}
               </button>
             </div>

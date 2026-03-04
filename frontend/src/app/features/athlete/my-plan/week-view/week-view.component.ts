@@ -25,7 +25,7 @@ const DAY_NAMES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
           }
         </div>
         @if (hasPendingFeedback()) {
-          <span class="text-xs font-medium text-amber-700 bg-amber-50/60 rounded-full px-2.5 py-0.5">
+          <span class="text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-900/30 rounded-full px-2.5 py-0.5">
             {{ pendingCount() }} sin feedback
           </span>
         }
@@ -117,8 +117,8 @@ export class WeekViewComponent {
     const total = this.weekTotal();
     const pct = total > 0 ? Math.round((this.weekCompleted() / total) * 100) : 0;
     const base = 'rounded-full px-2 py-0.5 text-[10px] font-semibold';
-    if (pct >= 80) return `${base} bg-green-500/20 text-green-600`;
-    if (pct >= 50) return `${base} bg-yellow-500/20 text-yellow-600`;
+    if (pct >= 80) return `${base} bg-green-500/20 text-green-600 dark:text-green-400`;
+    if (pct >= 50) return `${base} bg-yellow-500/20 text-yellow-600 dark:text-yellow-400`;
     return `${base} bg-primary-50 text-primary-400`;
   });
 
@@ -171,9 +171,9 @@ export class WeekViewComponent {
   }
 
   getRpeClass(rpe: number): string {
-    if (rpe <= 3) return 'bg-green-100 text-green-800';
-    if (rpe <= 6) return 'bg-yellow-100 text-yellow-800';
-    if (rpe <= 8) return 'bg-orange-100 text-orange-800';
-    return 'bg-red-100 text-red-800';
+    if (rpe <= 3) return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
+    if (rpe <= 6) return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
+    if (rpe <= 8) return 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-400';
+    return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
   }
 }

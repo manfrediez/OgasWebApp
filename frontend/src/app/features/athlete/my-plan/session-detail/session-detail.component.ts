@@ -27,7 +27,7 @@ import { HrZoneLabelPipe } from '../../../../shared/pipes/hr-zone-label.pipe';
               RPE {{ session().athletePerception }}
             </span>
           } @else if (needsFeedback()) {
-            <span class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+            <span class="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
               Pendiente
             </span>
           }
@@ -203,10 +203,10 @@ export class SessionDetailComponent {
   }
 
   getRpeClass(rpe: number): string {
-    if (rpe <= 3) return 'bg-green-100 text-green-800';
-    if (rpe <= 6) return 'bg-yellow-100 text-yellow-800';
-    if (rpe <= 8) return 'bg-orange-100 text-orange-800';
-    return 'bg-red-100 text-red-800';
+    if (rpe <= 3) return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
+    if (rpe <= 6) return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
+    if (rpe <= 8) return 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-400';
+    return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
   }
 
   formatDuration(seconds: number): string {
@@ -226,9 +226,9 @@ export class SessionDetailComponent {
   getComparisonClass(actual: number | undefined, planned: number | undefined): string {
     if (!actual || !planned || planned === 0) return 'text-primary-700';
     const diff = Math.abs(actual - planned) / planned;
-    if (diff <= 0.10) return 'text-green-700';
-    if (diff <= 0.25) return 'text-amber-600';
-    return 'text-red-600';
+    if (diff <= 0.10) return 'text-green-700 dark:text-green-400';
+    if (diff <= 0.25) return 'text-amber-600 dark:text-amber-400';
+    return 'text-red-600 dark:text-red-400';
   }
 
   zonePercent(ad: ActivityData, zone: 'z1' | 'z2' | 'z3' | 'z4' | 'z5'): number {

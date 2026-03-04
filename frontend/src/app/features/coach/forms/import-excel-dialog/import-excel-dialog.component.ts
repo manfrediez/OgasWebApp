@@ -77,9 +77,9 @@ export interface ImportExcelDialogData {
         </div>
       } @else {
         <div class="space-y-4">
-          <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-            <h3 class="font-semibold text-green-800 mb-2">Importación completada</h3>
-            <ul class="text-sm text-green-700 space-y-1">
+          <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+            <h3 class="font-semibold text-green-800 dark:text-green-400 mb-2">Importación completada</h3>
+            <ul class="text-sm text-green-700 dark:text-green-400 space-y-1">
               <li>{{ result()!.plans }} plan{{ result()!.plans !== 1 ? 'es' : '' }} creado{{ result()!.plans !== 1 ? 's' : '' }}</li>
               <li>{{ result()!.goalRaces }} carrera{{ result()!.goalRaces !== 1 ? 's' : '' }} objetivo creada{{ result()!.goalRaces !== 1 ? 's' : '' }}</li>
               <li>{{ result()!.strategies }} estrategia{{ result()!.strategies !== 1 ? 's' : '' }} creada{{ result()!.strategies !== 1 ? 's' : '' }}</li>

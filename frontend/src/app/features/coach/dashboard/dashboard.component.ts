@@ -65,23 +65,23 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
           </div>
           <div class="card-glass rounded-2xl p-5">
             <div class="flex items-center gap-3 mb-2">
-              <div class="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center">
-                <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <div class="h-10 w-10 rounded-xl bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center">
+                <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5"/>
                 </svg>
               </div>
-              <p class="text-xs font-semibold text-green-600 uppercase tracking-wide">Próximas Carreras</p>
+              <p class="text-xs font-semibold text-green-600 dark:text-green-400 uppercase tracking-wide">Próximas Carreras</p>
             </div>
             <p class="text-3xl font-bold text-primary-700">{{ upcomingRaces() }}</p>
           </div>
           <div class="card-glass rounded-2xl p-5">
             <div class="flex items-center gap-3 mb-2">
-              <div class="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <div class="h-10 w-10 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center">
+                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/>
                 </svg>
               </div>
-              <p class="text-xs font-semibold text-amber-600 uppercase tracking-wide">Mensajes Sin Leer</p>
+              <p class="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide">Mensajes Sin Leer</p>
             </div>
             <p class="text-3xl font-bold" [class]="totalUnread() > 0 ? 'text-accent-500' : 'text-primary-700'">
               {{ totalUnread() }}
@@ -169,12 +169,12 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
                 }
                 <div class="shrink-0 ml-2">
                   @if (athlete.isActive) {
-                    <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                    <span class="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:text-green-400">
                       <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
                       Activo
                     </span>
                   } @else {
-                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-400">
                       <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
                       Pendiente
                     </span>
@@ -222,8 +222,8 @@ export class DashboardComponent implements OnInit {
   }
 
   getCompletionColor(pct: number): string {
-    if (pct >= 75) return 'text-green-800';
-    if (pct >= 50) return 'text-amber-700';
+    if (pct >= 75) return 'text-green-800 dark:text-green-400';
+    if (pct >= 50) return 'text-amber-700 dark:text-amber-400';
     return 'text-primary-400';
   }
 
