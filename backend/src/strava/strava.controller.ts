@@ -84,6 +84,18 @@ export class StravaController {
     return this.stravaService.getConnectionStatus(userId);
   }
 
+  @Post('sync')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ATHLETE)
+  @HttpCode(200)
+  async syncRecent(@CurrentUser('sub') userId: string) {
+    const processed = await this.stravaSyncService.syncRecentActivities(
+      userId,
+      3,
+    );
+    return { synced: processed };
+  }
+
   @Get('webhook')
   webhookValidation(
     @Query('hub.mode') mode: string,

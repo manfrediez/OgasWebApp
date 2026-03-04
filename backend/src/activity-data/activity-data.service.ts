@@ -121,6 +121,24 @@ export class ActivityDataService {
     return updated;
   }
 
+  async findUnmatchedWithAccess(
+    athleteId: string,
+    requesterId: string,
+    role: string,
+  ): Promise<ActivityDataDocument[]> {
+    if (!Types.ObjectId.isValid(athleteId)) {
+      throw new BadRequestException('Invalid athlete ID');
+    }
+    await assertAccess(requesterId, role, athleteId, this.userModel);
+    return this.activityModel
+      .find({
+        athleteId: new Types.ObjectId(athleteId),
+        matched: false,
+      })
+      .sort({ startDate: -1 })
+      .exec();
+  }
+
   async findUnmatched(athleteId: string): Promise<ActivityDataDocument[]> {
     return this.activityModel
       .find({

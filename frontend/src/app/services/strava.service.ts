@@ -23,4 +23,8 @@ export class StravaService {
   disconnect(): Observable<{ disconnected: boolean }> {
     return this.http.post<{ disconnected: boolean }>('/api/strava/disconnect', {});
   }
+
+  syncRecent(): Observable<{ synced: number }> {
+    return this.http.post<{ synced: number }>('/api/strava/sync', {});
+  }
 }

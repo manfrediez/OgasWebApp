@@ -1,9 +1,11 @@
 import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DatePipe } from '@angular/common';
 import { Dialog } from '@angular/cdk/dialog';
 import { AuthService } from '../../../core/services/auth.service';
 import { WorkoutPlansService } from '../../../services/workout-plans.service';
 import { ActivityDataService } from '../../../services/activity-data.service';
+import { StravaService } from '../../../services/strava.service';
 import { WorkoutPlan, Session, UpdateSessionFeedbackRequest } from '../../../models/workout-plan.model';
 import { ActivityData } from '../../../models/activity-data.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -15,7 +17,7 @@ import { SessionFeedbackDialogComponent } from './session-feedback-dialog/sessio
 @Component({
   selector: 'app-my-plan',
   standalone: true,
-  imports: [LoadingSpinnerComponent, EmptyStateComponent, ErrorStateComponent, WeekViewComponent],
+  imports: [LoadingSpinnerComponent, EmptyStateComponent, ErrorStateComponent, WeekViewComponent, DatePipe],
   template: `
     @if (loading()) {
       <app-loading-spinner />
@@ -58,6 +60,49 @@ import { SessionFeedbackDialogComponent } from './session-feedback-dialog/sessio
               </div>
             }
           </div>
+
+          <!-- Unmatched Strava activities -->
+          @if (unmatchedActivities().length > 0) {
+            <div class="mb-6 card-glass rounded-2xl p-4 border-l-4 border-l-orange-500">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-semibold text-primary-700 flex items-center gap-2">
+                  <svg class="w-5 h-5 text-orange-500" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/>
+                  </svg>
+                  Actividades Strava sin vincular
+                </h3>
+                <button
+                  (click)="syncStrava()"
+                  [disabled]="syncing()"
+                  class="flex items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-orange-600 transition-colors disabled:opacity-50">
+                  @if (syncing()) {
+                    <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    Sincronizando...
+                  } @else {
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M2.985 19.644l3.181-3.182" />
+                    </svg>
+                    Sincronizar Strava
+                  }
+                </button>
+              </div>
+              <div class="space-y-2">
+                @for (activity of unmatchedActivities(); track activity._id) {
+                  <div class="flex items-center gap-3 rounded-lg bg-white/60 px-3 py-2 text-sm">
+                    <svg class="w-4 h-4 text-orange-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/>
+                    </svg>
+                    <span class="font-medium text-primary-700 truncate">{{ activity.name }}</span>
+                    <span class="text-primary-400 text-xs shrink-0">{{ activity.type }}</span>
+                    <span class="text-primary-400 text-xs shrink-0 ml-auto">{{ activity.startDate | date:'d MMM' }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
 
           <!-- All weeks -->
           <div class="space-y-4">
@@ -115,6 +160,7 @@ export class MyPlanComponent implements OnInit {
   private authService = inject(AuthService);
   private plansService = inject(WorkoutPlansService);
   private activityDataService = inject(ActivityDataService);
+  private stravaService = inject(StravaService);
   private dialog = inject(Dialog);
   private destroyRef = inject(DestroyRef);
 
@@ -125,6 +171,8 @@ export class MyPlanComponent implements OnInit {
   selectedPlan = signal<WorkoutPlan | null>(null);
 
   activityDataMap = signal<Map<string, ActivityData>>(new Map());
+  unmatchedActivities = signal<ActivityData[]>([]);
+  syncing = signal(false);
 
   ngOnInit() {
     this.loadData();
@@ -165,11 +213,28 @@ export class MyPlanComponent implements OnInit {
       },
       error: () => {},
     });
+
+    // Load unmatched Strava activities
+    this.activityDataService.getUnmatched(user._id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: activities => this.unmatchedActivities.set(activities),
+      error: () => {},
+    });
   }
 
   selectPlan(idx: number) {
     this.selectedPlanIdx.set(idx);
     this.selectedPlan.set(this.plans()[idx]);
+  }
+
+  syncStrava() {
+    this.syncing.set(true);
+    this.stravaService.syncRecent().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.syncing.set(false);
+        this.loadData();
+      },
+      error: () => this.syncing.set(false),
+    });
   }
 
   openFeedback(event: { session: Session; dayOfWeek: number; weekNumber: number }) {

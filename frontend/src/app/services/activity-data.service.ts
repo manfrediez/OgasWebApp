@@ -11,6 +11,10 @@ export class ActivityDataService {
     return this.http.get<ActivityData[]>(`/api/activity-data/athlete/${athleteId}`);
   }
 
+  getUnmatched(athleteId: string): Observable<ActivityData[]> {
+    return this.http.get<ActivityData[]>(`/api/activity-data/unmatched/${athleteId}`);
+  }
+
   getBySession(planId: string, weekNum: number, sessionIdx: number): Observable<ActivityData | null> {
     return this.http.get<ActivityData | null>(`/api/activity-data/session/${planId}/${weekNum}/${sessionIdx}`);
   }

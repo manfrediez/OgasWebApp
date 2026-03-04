@@ -167,6 +167,24 @@ export class StravaService {
     return data;
   }
 
+  async fetchRecentActivities(
+    userId: string,
+    after: number,
+    perPage = 30,
+  ): Promise<any[]> {
+    const accessToken = await this.getValidAccessToken(userId);
+    const { data } = await firstValueFrom(
+      this.httpService.get(
+        'https://www.strava.com/api/v3/athlete/activities',
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          params: { after, per_page: perPage },
+        },
+      ),
+    );
+    return data;
+  }
+
   async fetchActivityStreams(userId: string, activityId: number) {
     const accessToken = await this.getValidAccessToken(userId);
     try {

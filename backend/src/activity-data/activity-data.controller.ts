@@ -45,6 +45,19 @@ export class ActivityDataController {
     );
   }
 
+  @Get('unmatched/:athleteId')
+  getUnmatched(
+    @Param('athleteId') athleteId: string,
+    @CurrentUser('sub') userId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.activityDataService.findUnmatchedWithAccess(
+      athleteId,
+      userId,
+      role,
+    );
+  }
+
   @Get(':id')
   getById(
     @Param('id') id: string,
