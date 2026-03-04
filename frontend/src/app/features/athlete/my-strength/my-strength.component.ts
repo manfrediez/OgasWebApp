@@ -45,6 +45,12 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
                       <div class="flex items-center gap-2">
                         <span class="text-xs text-primary-400 w-5">{{ i + 1 }}.</span>
                         <span class="text-sm font-medium text-primary-700">{{ ex.name }}</span>
+                        @if (ex.videoUrl) {
+                          <a [href]="ex.videoUrl" target="_blank" rel="noopener"
+                             class="text-danger-500 hover:text-danger-700" title="Ver video">
+                            ▶
+                          </a>
+                        }
                       </div>
                       <div class="flex items-center gap-3 text-xs text-primary-400">
                         @if (ex.sets && ex.reps) {

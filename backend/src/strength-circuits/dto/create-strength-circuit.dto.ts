@@ -38,6 +38,11 @@ export class CreateExerciseDto {
   @IsString()
   @MaxLength(1000)
   notes?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  videoUrl?: string;
 }
 
 export class CreateStrengthCircuitDto {

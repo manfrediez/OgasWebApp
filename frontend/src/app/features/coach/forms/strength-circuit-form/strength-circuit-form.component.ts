@@ -49,7 +49,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
                 <input [(ngModel)]="ex.name" [name]="'exName' + $index" placeholder="Nombre del ejercicio" class="flex-1 mr-2" />
                 <button type="button" (click)="removeExercise($index)" aria-label="Eliminar ejercicio" class="text-xs text-danger-500">X</button>
               </div>
-              <div class="grid grid-cols-3 gap-2">
+              <div class="grid grid-cols-2 gap-2">
                 <div>
                   <label class="block text-xs text-primary-400">Series</label>
                   <input [(ngModel)]="ex.sets" [name]="'exSets' + $index" type="number" class="w-full" />
@@ -58,10 +58,14 @@ import { ToastService } from '../../../../shared/services/toast.service';
                   <label class="block text-xs text-primary-400">Reps</label>
                   <input [(ngModel)]="ex.reps" [name]="'exReps' + $index" class="w-full" placeholder="8-12" />
                 </div>
-                <div>
-                  <label class="block text-xs text-primary-400">Notas</label>
-                  <input [(ngModel)]="ex.notes" [name]="'exNotes' + $index" class="w-full" />
-                </div>
+              </div>
+              <div>
+                <label class="block text-xs text-primary-400">Notas</label>
+                <input [(ngModel)]="ex.notes" [name]="'exNotes' + $index" class="w-full" />
+              </div>
+              <div>
+                <label class="block text-xs text-primary-400">Video YouTube</label>
+                <input [(ngModel)]="ex.videoUrl" [name]="'exVideo' + $index" class="w-full" placeholder="https://youtube.com/..." />
               </div>
             </div>
           }

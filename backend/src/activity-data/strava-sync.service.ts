@@ -23,10 +23,37 @@ const STRAVA_TYPE_MAP: Record<string, WorkoutType[]> = {
     WorkoutType.COMPETITION,
     WorkoutType.ACTIVATION,
   ],
+  TrailRun: [
+    WorkoutType.CONTINUOUS,
+    WorkoutType.INTERVAL,
+    WorkoutType.ELEVATION,
+    WorkoutType.QUALITY,
+    WorkoutType.COMPETITION,
+    WorkoutType.ACTIVATION,
+  ],
+  VirtualRun: [
+    WorkoutType.CONTINUOUS,
+    WorkoutType.INTERVAL,
+    WorkoutType.QUALITY,
+    WorkoutType.ACTIVATION,
+  ],
+  Walk: [WorkoutType.CONTINUOUS, WorkoutType.ACTIVATION],
+  Hike: [WorkoutType.ELEVATION, WorkoutType.CONTINUOUS],
   Ride: [WorkoutType.BIKE],
+  VirtualRide: [WorkoutType.BIKE],
   WeightTraining: [WorkoutType.STRENGTH],
   Workout: [WorkoutType.STRENGTH, WorkoutType.ACTIVATION],
 };
+
+/** Convert a Date to 'YYYY-MM-DD' in Argentina timezone (UTC-3, no DST) */
+function toArgentinaDateString(date: Date): string {
+  const ms = date.getTime() - 3 * 60 * 60 * 1000; // UTC-3
+  const ar = new Date(ms);
+  const y = ar.getUTCFullYear();
+  const m = String(ar.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(ar.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
 
 @Injectable()
 export class StravaSyncService {
@@ -65,7 +92,7 @@ export class StravaSyncService {
     const userId = user._id.toString();
     const externalId = event.object_id.toString();
 
-    // Dedup on update events
+    // Dedup on create events
     if (event.aspect_type === 'create') {
       const existing = await this.activityDataService.findByExternalId(
         'strava',
@@ -81,6 +108,48 @@ export class StravaSyncService {
       userId,
       event.object_id,
     );
+
+    await this.processActivity(userId, stravaActivity);
+  }
+
+  /** Sync recent activities from Strava for a user */
+  async syncRecentActivities(userId: string, days = 3): Promise<number> {
+    const after = Math.floor(Date.now() / 1000) - days * 86400;
+    const activities = await this.stravaService.fetchRecentActivities(
+      userId,
+      after,
+      30,
+    );
+
+    this.logger.log(
+      `Sync: fetched ${activities.length} recent activities for user=${userId} (last ${days} days)`,
+    );
+
+    let processed = 0;
+    for (const summary of activities) {
+      const externalId = summary.id.toString();
+      const existing =
+        await this.activityDataService.findByExternalId('strava', externalId);
+      if (existing) continue;
+
+      const full = await this.stravaService.fetchActivity(
+        userId,
+        summary.id,
+      );
+      await this.processActivity(userId, full);
+      processed++;
+    }
+
+    this.logger.log(`Sync: processed ${processed} new activities for user=${userId}`);
+    return processed;
+  }
+
+  /** Shared logic: save a Strava activity and attempt auto-match */
+  private async processActivity(
+    userId: string,
+    stravaActivity: any,
+  ): Promise<void> {
+    const externalId = stravaActivity.id.toString();
 
     // Calculate derived metrics
     const distanceKm =
@@ -99,7 +168,13 @@ export class StravaSyncService {
     }));
 
     // Calculate HR zones distribution
-    let hrZonesDistribution: { z1: number; z2: number; z3: number; z4: number; z5: number } | null = null;
+    let hrZonesDistribution: {
+      z1: number;
+      z2: number;
+      z3: number;
+      z4: number;
+      z5: number;
+    } | null = null;
     if (stravaActivity.has_heartrate) {
       hrZonesDistribution = await this.calculateHRZones(
         userId,
@@ -148,18 +223,46 @@ export class StravaSyncService {
     stravaActivity: any,
   ) {
     try {
-      const activityDate = new Date(stravaActivity.start_date);
-      activityDate.setHours(0, 0, 0, 0);
+      const activityDateStr = toArgentinaDateString(
+        new Date(stravaActivity.start_date),
+      );
+      const compatibleTypes = STRAVA_TYPE_MAP[stravaActivity.type] || [];
+
+      this.logger.log(
+        `AutoMatch START: activity=${activityId} stravaType=${stravaActivity.type} date=${activityDateStr} compatibleTypes=[${compatibleTypes.join(',')}]`,
+      );
+
+      if (compatibleTypes.length === 0) {
+        this.logger.log(
+          `AutoMatch SKIP: no compatible workout types for Strava type "${stravaActivity.type}"`,
+        );
+        return;
+      }
+
+      // Query plans that cover this date — use a day range in Argentina tz
+      const dayStartUTC = new Date(`${activityDateStr}T03:00:00.000Z`); // 00:00 ARG = 03:00 UTC
+      const dayEndUTC = new Date(`${activityDateStr}T26:59:59.999Z`.replace(/26/, '02')); // next day 02:59:59 UTC
+      // Correct: next day 02:59:59.999 UTC = 23:59:59.999 ARG
+      const nextDay = new Date(dayStartUTC.getTime() + 24 * 60 * 60 * 1000 - 1);
 
       const plans = await this.workoutPlanModel
         .find({
           athleteId: new Types.ObjectId(userId),
-          startDate: { $lte: new Date(stravaActivity.start_date) },
-          endDate: { $gte: activityDate },
+          startDate: { $lte: nextDay },
+          endDate: { $gte: dayStartUTC },
         })
         .exec();
 
-      const compatibleTypes = STRAVA_TYPE_MAP[stravaActivity.type] || [];
+      if (plans.length === 0) {
+        this.logger.log(
+          `AutoMatch SKIP: no plans found for user=${userId} covering date=${activityDateStr}`,
+        );
+        return;
+      }
+
+      this.logger.log(
+        `AutoMatch: found ${plans.length} plan(s) covering date=${activityDateStr}`,
+      );
 
       for (const plan of plans) {
         for (const week of plan.weeks) {
@@ -167,11 +270,16 @@ export class StravaSyncService {
             const session = week.sessions[i];
             if (session.status !== 'PLANNED') continue;
 
-            const sessionDate = new Date(session.date);
-            sessionDate.setHours(0, 0, 0, 0);
+            const sessionDateStr = toArgentinaDateString(
+              new Date(session.date),
+            );
+            if (sessionDateStr !== activityDateStr) continue;
 
-            if (sessionDate.getTime() !== activityDate.getTime()) continue;
-            if (!compatibleTypes.includes(session.type)) continue;
+            const typeMatches =
+              compatibleTypes.includes(session.type) ||
+              (session.secondaryType &&
+                compatibleTypes.includes(session.secondaryType));
+            if (!typeMatches) continue;
 
             // Check no other activity is already matched to this session
             const existingMatch =
@@ -194,14 +302,21 @@ export class StravaSyncService {
             await plan.save();
 
             this.logger.log(
-              `Auto-matched and completed activity ${activityId} to plan ${plan._id} week ${week.weekNumber} session ${i}`,
+              `AutoMatch SUCCESS: activity=${activityId} → plan=${plan._id} week=${week.weekNumber} session=${i} (type=${session.type}, secondary=${session.secondaryType || 'none'})`,
             );
             return;
           }
         }
       }
+
+      this.logger.log(
+        `AutoMatch FAIL: no matching session found for activity=${activityId} stravaType=${stravaActivity.type} date=${activityDateStr}`,
+      );
     } catch (err) {
-      this.logger.warn(`Auto-match failed for activity ${activityId}: ${err}`);
+      this.logger.warn(
+        `Auto-match error for activity ${activityId}: ${err.message}`,
+        err.stack,
+      );
     }
   }
 

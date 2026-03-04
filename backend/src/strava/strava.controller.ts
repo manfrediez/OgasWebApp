@@ -114,7 +114,10 @@ export class StravaController {
       this.stravaSyncService
         .processWebhookEvent(dto)
         .catch((err) =>
-          this.logger.error(`Webhook processing error: ${err.message}`),
+          this.logger.error(
+            `Webhook processing error for activity ${dto.object_id}: ${err.message}`,
+            err.stack,
+          ),
         );
     }
 

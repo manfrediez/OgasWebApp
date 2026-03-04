@@ -6,6 +6,7 @@ export interface Exercise {
   timerRest?: number;
   timerRounds?: number;
   notes?: string;
+  videoUrl?: string;
 }
 
 export interface StrengthCircuit {
