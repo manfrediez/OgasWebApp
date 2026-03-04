@@ -99,7 +99,6 @@ export class MessagesController {
   }
 
   @Get('files/:storedName')
-  @UseGuards(JwtAuthGuard)
   serveFile(
     @Param('storedName') storedName: string,
     @Res() res: Response,

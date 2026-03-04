@@ -8,18 +8,22 @@ import { WorkoutPlan, Session, UpdateSessionFeedbackRequest } from '../../../mod
 import { ActivityData } from '../../../models/activity-data.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../shared/components/error-state/error-state.component';
 import { WeekViewComponent } from './week-view/week-view.component';
 import { SessionFeedbackDialogComponent } from './session-feedback-dialog/session-feedback-dialog.component';
 
 @Component({
   selector: 'app-my-plan',
   standalone: true,
-  imports: [LoadingSpinnerComponent, EmptyStateComponent, WeekViewComponent],
+  imports: [LoadingSpinnerComponent, EmptyStateComponent, ErrorStateComponent, WeekViewComponent],
   template: `
     @if (loading()) {
       <app-loading-spinner />
+    } @else if (errorState()) {
+      <app-error-state (retry)="loadData()" />
     } @else if (plans().length === 0) {
-      <app-empty-state icon="📋" message="No tenés planes asignados" submessage="Tu coach te asignará un plan pronto" />
+      <app-empty-state icon="📋" message="No tenés planes asignados" submessage="Tu coach te asignará un plan pronto"
+        actionLabel="Contactar a mi coach" actionLink="/athlete/messages" />
     } @else {
       <div>
         @if (selectedPlan(); as plan) {
@@ -116,14 +120,22 @@ export class MyPlanComponent implements OnInit {
 
   plans = signal<WorkoutPlan[]>([]);
   loading = signal(true);
+  errorState = signal(false);
   selectedPlanIdx = signal(0);
   selectedPlan = signal<WorkoutPlan | null>(null);
 
   activityDataMap = signal<Map<string, ActivityData>>(new Map());
 
   ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
     const user = this.authService.currentUser();
     if (!user) return;
+
+    this.loading.set(true);
+    this.errorState.set(false);
 
     this.plansService.getByAthlete(user._id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: plans => {
@@ -133,7 +145,10 @@ export class MyPlanComponent implements OnInit {
         }
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.errorState.set(true);
+        this.loading.set(false);
+      },
     });
 
     // Load activity data for this athlete

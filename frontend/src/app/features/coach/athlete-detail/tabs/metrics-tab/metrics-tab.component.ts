@@ -5,13 +5,14 @@ import { AthleteMetricsService } from '../../../../../services/athlete-metrics.s
 import { AthleteMetrics } from '../../../../../models/athlete-metrics.model';
 import { LoadingSpinnerComponent } from '../../../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../../shared/components/error-state/error-state.component';
 import { DateEsPipe } from '../../../../../shared/pipes/date-es.pipe';
 import { MetricsFormComponent } from '../../../forms/metrics-form/metrics-form.component';
 
 @Component({
   selector: 'app-metrics-tab',
   standalone: true,
-  imports: [LoadingSpinnerComponent, EmptyStateComponent, DateEsPipe],
+  imports: [LoadingSpinnerComponent, EmptyStateComponent, ErrorStateComponent, DateEsPipe],
   template: `
     <div>
       <div class="flex justify-end mb-4">
@@ -24,8 +25,11 @@ import { MetricsFormComponent } from '../../../forms/metrics-form/metrics-form.c
 
       @if (loading()) {
         <app-loading-spinner />
+      } @else if (errorState()) {
+        <app-error-state (retry)="loadMetrics()" />
       } @else if (!metrics()) {
-        <app-empty-state icon="📈" message="Sin métricas" submessage="Cargá las métricas del atleta" />
+        <app-empty-state icon="📈" message="Sin métricas" submessage="Cargá las métricas del atleta"
+          actionLabel="Crear Métricas" (actionClick)="openForm()" />
       } @else {
         <div class="card-glass rounded-xl p-6 space-y-6">
           <!-- Datos principales -->
@@ -137,18 +141,24 @@ export class MetricsTabComponent implements OnInit {
   athleteId = input.required<string>();
   metrics = signal<AthleteMetrics | null>(null);
   loading = signal(true);
+  errorState = signal(false);
 
   ngOnInit() {
     this.loadMetrics();
   }
 
   loadMetrics() {
+    this.loading.set(true);
+    this.errorState.set(false);
     this.metricsService.getByAthlete(this.athleteId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: m => {
         this.metrics.set(m);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.errorState.set(true);
+        this.loading.set(false);
+      },
     });
   }
 

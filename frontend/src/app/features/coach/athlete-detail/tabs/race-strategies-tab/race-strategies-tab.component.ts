@@ -5,6 +5,7 @@ import { RaceStrategiesService } from '../../../../../services/race-strategies.s
 import { RaceStrategy } from '../../../../../models/race-strategy.model';
 import { LoadingSpinnerComponent } from '../../../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../../shared/components/error-state/error-state.component';
 import { DateEsPipe } from '../../../../../shared/pipes/date-es.pipe';
 import { RaceStrategyFormComponent } from '../../../forms/race-strategy-form/race-strategy-form.component';
 import { ToastService } from '../../../../../shared/services/toast.service';
@@ -12,7 +13,7 @@ import { ToastService } from '../../../../../shared/services/toast.service';
 @Component({
   selector: 'app-race-strategies-tab',
   standalone: true,
-  imports: [LoadingSpinnerComponent, EmptyStateComponent, DateEsPipe],
+  imports: [LoadingSpinnerComponent, EmptyStateComponent, ErrorStateComponent, DateEsPipe],
   template: `
     <div>
       <div class="flex justify-end mb-4">
@@ -25,8 +26,11 @@ import { ToastService } from '../../../../../shared/services/toast.service';
 
       @if (loading()) {
         <app-loading-spinner />
+      } @else if (errorState()) {
+        <app-error-state (retry)="loadStrategies()" />
       } @else if (strategies().length === 0) {
-        <app-empty-state icon="🗺️" message="Sin estrategias" submessage="Creá una estrategia de carrera" />
+        <app-empty-state icon="🗺️" message="Sin estrategias" submessage="Creá una estrategia de carrera"
+          actionLabel="Nueva Estrategia" (actionClick)="openForm()" />
       } @else {
         <div class="space-y-3">
           @for (s of strategies(); track s._id) {
@@ -80,12 +84,15 @@ export class RaceStrategiesTabComponent implements OnInit {
   athleteId = input.required<string>();
   strategies = signal<RaceStrategy[]>([]);
   loading = signal(true);
+  errorState = signal(false);
 
   ngOnInit() {
     this.loadStrategies();
   }
 
   loadStrategies() {
+    this.loading.set(true);
+    this.errorState.set(false);
     this.strategiesService.getByAthlete(this.athleteId()).pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
@@ -93,7 +100,10 @@ export class RaceStrategiesTabComponent implements OnInit {
         this.strategies.set(s);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.errorState.set(true);
+        this.loading.set(false);
+      },
     });
   }
 

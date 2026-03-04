@@ -18,7 +18,8 @@ import { GoalRace } from '../../../models/goal-race.model';
 import { AthleteMetrics } from '../../../models/athlete-metrics.model';
 import { SessionStatus } from '../../../core/models/enums';
 
-import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
+import { ErrorStateComponent } from '../../../shared/components/error-state/error-state.component';
 import { WorkoutTypeIconComponent } from '../../../shared/components/workout-type-icon/workout-type-icon.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { SessionFeedbackDialogComponent } from '../my-plan/session-feedback-dialog/session-feedback-dialog.component';
@@ -48,7 +49,8 @@ interface MonthSummary {
   imports: [
     DecimalPipe,
     RouterLink,
-    LoadingSpinnerComponent,
+    ErrorStateComponent,
+    SkeletonComponent,
     WorkoutTypeIconComponent,
     StatusBadgeComponent,
     WorkoutTypeLabelPipe,
@@ -56,7 +58,15 @@ interface MonthSummary {
   ],
   template: `
     @if (loading()) {
-      <app-loading-spinner />
+      <div class="max-w-4xl mx-auto space-y-6">
+        <app-skeleton variant="greeting" />
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <app-skeleton variant="session" />
+          <app-skeleton variant="month-summary" />
+        </div>
+      </div>
+    } @else if (errorState()) {
+      <app-error-state (retry)="loadData()" />
     } @else {
       <div class="max-w-4xl mx-auto space-y-6">
         <!-- Greeting -->
@@ -307,6 +317,7 @@ export class DashboardComponent implements OnInit {
   messagesService = inject(MessagesService);
 
   loading = signal(true);
+  errorState = signal(false);
   firstName = signal('');
   todaySession = signal<Session | null>(null);
   todaySessionMeta = signal<{ planId: string; weekNumber: number; sessionIndex: number } | null>(null);
@@ -317,9 +328,15 @@ export class DashboardComponent implements OnInit {
   greeting = signal('');
 
   ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
     const user = this.authService.currentUser();
     if (!user) return;
 
+    this.loading.set(true);
+    this.errorState.set(false);
     this.firstName.set(user.firstName);
     this.greeting.set(this.getGreeting());
 
@@ -337,7 +354,10 @@ export class DashboardComponent implements OnInit {
         this.metrics.set(metrics);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.errorState.set(true);
+        this.loading.set(false);
+      },
     });
   }
 

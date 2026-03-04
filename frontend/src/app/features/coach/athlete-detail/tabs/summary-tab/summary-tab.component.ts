@@ -4,15 +4,18 @@ import { WorkoutPlansService } from '../../../../../services/workout-plans.servi
 import { PlanSummary, WeekStats } from '../../../../../models/workout-plan.model';
 import { LoadingSpinnerComponent } from '../../../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../../shared/components/error-state/error-state.component';
 import { DateEsPipe } from '../../../../../shared/pipes/date-es.pipe';
 
 @Component({
   selector: 'app-summary-tab',
   standalone: true,
-  imports: [LoadingSpinnerComponent, EmptyStateComponent, DateEsPipe],
+  imports: [LoadingSpinnerComponent, EmptyStateComponent, ErrorStateComponent, DateEsPipe],
   template: `
     @if (loading()) {
       <app-loading-spinner />
+    } @else if (errorState()) {
+      <app-error-state (retry)="loadData()" />
     } @else if (summaries().length === 0) {
       <app-empty-state icon="📊" message="Sin datos" submessage="No hay planes para mostrar estadísticas" />
     } @else {
@@ -92,14 +95,24 @@ export class SummaryTabComponent implements OnInit {
   athleteId = input.required<string>();
   summaries = signal<PlanSummary[]>([]);
   loading = signal(true);
+  errorState = signal(false);
 
   ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.loading.set(true);
+    this.errorState.set(false);
     this.plansService.getAthleteSummary(this.athleteId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: data => {
         this.summaries.set(data);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.errorState.set(true);
+        this.loading.set(false);
+      },
     });
   }
 

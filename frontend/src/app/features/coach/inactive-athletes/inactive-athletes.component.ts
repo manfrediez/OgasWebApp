@@ -2,20 +2,27 @@ import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { UsersService, InactiveAthlete } from '../../../services/users.service';
-import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../shared/components/error-state/error-state.component';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 
 @Component({
   selector: 'app-inactive-athletes',
   standalone: true,
-  imports: [RouterLink, LoadingSpinnerComponent, EmptyStateComponent, DateEsPipe],
+  imports: [RouterLink, EmptyStateComponent, ErrorStateComponent, SkeletonComponent, DateEsPipe],
   template: `
     <div>
       <h1 class="text-2xl font-bold text-primary-700 mb-6">Atletas Inactivos</h1>
 
       @if (loading()) {
-        <app-loading-spinner />
+        <div class="flex flex-col gap-3">
+          @for (_ of [1,2,3,4]; track $index) {
+            <app-skeleton variant="card" />
+          }
+        </div>
+      } @else if (errorState()) {
+        <app-error-state (retry)="loadData()" />
       } @else if (athletes().length === 0) {
         <app-empty-state
           icon="✅"
@@ -79,8 +86,15 @@ export class InactiveAthletesComponent implements OnInit {
 
   athletes = signal<InactiveAthlete[]>([]);
   loading = signal(true);
+  errorState = signal(false);
 
   ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.loading.set(true);
+    this.errorState.set(false);
     this.usersService.getInactiveAthletes().pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
@@ -88,7 +102,10 @@ export class InactiveAthletesComponent implements OnInit {
         this.athletes.set(athletes);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.errorState.set(true);
+        this.loading.set(false);
+      },
     });
   }
 

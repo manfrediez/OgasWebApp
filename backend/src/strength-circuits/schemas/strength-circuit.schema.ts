@@ -25,6 +25,9 @@ export class Exercise {
 
   @Prop({ default: '' })
   notes: string;
+
+  @Prop({ default: '' })
+  videoUrl: string;
 }
 
 export const ExerciseSchema = SchemaFactory.createForClass(Exercise);

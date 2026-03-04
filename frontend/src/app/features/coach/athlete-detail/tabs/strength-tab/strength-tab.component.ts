@@ -5,12 +5,13 @@ import { StrengthCircuitsService } from '../../../../../services/strength-circui
 import { StrengthCircuit } from '../../../../../models/strength-circuit.model';
 import { LoadingSpinnerComponent } from '../../../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../../shared/components/error-state/error-state.component';
 import { StrengthCircuitFormComponent } from '../../../forms/strength-circuit-form/strength-circuit-form.component';
 
 @Component({
   selector: 'app-strength-tab',
   standalone: true,
-  imports: [LoadingSpinnerComponent, EmptyStateComponent],
+  imports: [LoadingSpinnerComponent, EmptyStateComponent, ErrorStateComponent],
   template: `
     <div>
       <div class="flex justify-end mb-4">
@@ -23,8 +24,11 @@ import { StrengthCircuitFormComponent } from '../../../forms/strength-circuit-fo
 
       @if (loading()) {
         <app-loading-spinner />
+      } @else if (errorState()) {
+        <app-error-state (retry)="loadCircuits()" />
       } @else if (circuits().length === 0) {
-        <app-empty-state icon="💪" message="Sin circuitos" submessage="Creá un circuito de fuerza" />
+        <app-empty-state icon="💪" message="Sin circuitos" submessage="Creá un circuito de fuerza"
+          actionLabel="Nuevo Circuito" (actionClick)="openForm()" />
       } @else {
         <div class="space-y-3">
           @for (circuit of circuits(); track circuit._id) {
@@ -76,18 +80,24 @@ export class StrengthTabComponent implements OnInit {
   athleteId = input.required<string>();
   circuits = signal<StrengthCircuit[]>([]);
   loading = signal(true);
+  errorState = signal(false);
 
   ngOnInit() {
     this.loadCircuits();
   }
 
   loadCircuits() {
+    this.loading.set(true);
+    this.errorState.set(false);
     this.circuitsService.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: c => {
         this.circuits.set(c);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.errorState.set(true);
+        this.loading.set(false);
+      },
     });
   }
 

@@ -3,14 +3,17 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UsersService, AthleteSummary } from '../../../services/users.service';
-import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../shared/components/error-state/error-state.component';
+import { OnboardingComponent } from '../../../shared/components/onboarding/onboarding.component';
+import { OnboardingService } from '../../../shared/services/onboarding.service';
 import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, FormsModule, LoadingSpinnerComponent, EmptyStateComponent, DateEsPipe],
+  imports: [RouterLink, FormsModule, SkeletonComponent, EmptyStateComponent, ErrorStateComponent, OnboardingComponent, DateEsPipe],
   template: `
     <div class="max-w-6xl mx-auto">
       <!-- Header -->
@@ -32,12 +35,25 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
       </div>
 
       @if (loading()) {
-        <app-loading-spinner />
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          @for (_ of [1,2,3,4]; track $index) {
+            <app-skeleton variant="stat" />
+          }
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (_ of [1,2,3,4,5,6]; track $index) {
+            <app-skeleton variant="card" />
+          }
+        </div>
+      } @else if (errorState()) {
+        <app-error-state (retry)="loadData()" />
       } @else if (athletes().length === 0) {
         <app-empty-state
           icon="🏃"
           message="No tenés atletas aún"
-          submessage="Invitá a tu primer atleta para comenzar" />
+          submessage="Invitá a tu primer atleta para comenzar"
+          actionLabel="Invitar Atleta"
+          actionLink="/coach/invite" />
       } @else {
         <!-- Summary Cards -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -186,14 +202,17 @@ import { DateEsPipe } from '../../../shared/pipes/date-es.pipe';
         </div>
       }
     </div>
+    <app-onboarding />
   `,
 })
 export class DashboardComponent implements OnInit {
   private usersService = inject(UsersService);
   private destroyRef = inject(DestroyRef);
+  private onboardingService = inject(OnboardingService);
 
   athletes = signal<AthleteSummary[]>([]);
   loading = signal(true);
+  errorState = signal(false);
   searchTerm = signal('');
 
   filteredAthletes = computed(() => {
@@ -210,14 +229,24 @@ export class DashboardComponent implements OnInit {
   totalUnread = computed(() => this.athletes().reduce((sum, a) => sum + a.unreadMessages, 0));
 
   ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.loading.set(true);
+    this.errorState.set(false);
     this.usersService.getAthletesSummary().pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: athletes => {
         this.athletes.set(athletes);
         this.loading.set(false);
+        this.onboardingService.checkOnboarding(athletes.length);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.errorState.set(true);
+        this.loading.set(false);
+      },
     });
   }
 

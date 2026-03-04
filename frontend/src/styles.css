@@ -132,10 +132,17 @@ body {
 /* ─── Buttons ─── */
 .btn-primary {
   @apply rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-colors;
-  background: var(--color-primary-800);
+  background: #1F2937;
 }
 .btn-primary:hover {
-  background: var(--color-primary-700);
+  background: #374151;
+}
+.dark .btn-primary {
+  background: #E5E7EB;
+  color: #111827;
+}
+.dark .btn-primary:hover {
+  background: #F3F4F6;
 }
 .btn-primary:disabled {
   opacity: 0.5;

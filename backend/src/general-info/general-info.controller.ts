@@ -199,7 +199,6 @@ export class GeneralInfoController {
   // ── files ──
 
   @Get('files/:storedName')
-  @UseGuards(JwtAuthGuard)
   serveFile(
     @Param('storedName') storedName: string,
     @Res() res: Response,

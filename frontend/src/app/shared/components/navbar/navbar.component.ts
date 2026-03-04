@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { MessagesService } from '../../../services/messages.service';
 import { ThemeService } from '../../services/theme.service';
+import { CommandPaletteService } from '../../services/command-palette.service';
 import { Role } from '../../../core/models/enums';
 
 @Component({
@@ -17,6 +18,13 @@ import { Role } from '../../../core/models/enums';
       </a>
       @if (auth.currentUser(); as user) {
         <div class="flex items-center gap-2 md:gap-4">
+          <button (click)="paletteService.open()" aria-label="Buscar" class="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-primary-200 text-sm text-primary-400 hover:bg-primary-50 hover:text-primary-600 transition-all">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+            </svg>
+            <span class="text-xs">Buscar...</span>
+            <kbd class="ml-1 px-1.5 py-0.5 rounded border border-primary-200 text-[10px] font-medium">⌘K</kbd>
+          </button>
           <button (click)="theme.toggle()" [attr.aria-label]="theme.darkMode() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'" class="p-1.5 rounded-lg hover:bg-primary-50 text-primary-500 border border-transparent hover:border-primary-200 transition-all">
             @if (theme.darkMode()) {
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -53,6 +61,7 @@ export class NavbarComponent {
   auth = inject(AuthService);
   messagesService = inject(MessagesService);
   theme = inject(ThemeService);
+  paletteService = inject(CommandPaletteService);
   private router = inject(Router);
 
   goHome(): void {

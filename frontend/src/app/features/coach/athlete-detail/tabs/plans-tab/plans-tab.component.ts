@@ -6,6 +6,7 @@ import { WorkoutPlansService } from '../../../../../services/workout-plans.servi
 import { WorkoutPlan } from '../../../../../models/workout-plan.model';
 import { LoadingSpinnerComponent } from '../../../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../../shared/components/error-state/error-state.component';
 import { DateEsPipe } from '../../../../../shared/pipes/date-es.pipe';
 import {
   ConfirmDialogComponent,
@@ -20,7 +21,7 @@ import { ToastService } from '../../../../../shared/services/toast.service';
 @Component({
   selector: 'app-plans-tab',
   standalone: true,
-  imports: [RouterLink, LoadingSpinnerComponent, EmptyStateComponent, DateEsPipe],
+  imports: [RouterLink, LoadingSpinnerComponent, EmptyStateComponent, ErrorStateComponent, DateEsPipe],
   template: `
     <div>
       <div class="flex justify-end mb-4">
@@ -33,8 +34,11 @@ import { ToastService } from '../../../../../shared/services/toast.service';
 
       @if (loading()) {
         <app-loading-spinner />
+      } @else if (errorState()) {
+        <app-error-state (retry)="loadPlans()" />
       } @else if (plans().length === 0) {
-        <app-empty-state icon="📋" message="No hay planes" submessage="Creá un nuevo plan de entrenamiento" />
+        <app-empty-state icon="📋" message="No hay planes" submessage="Creá un nuevo plan de entrenamiento"
+          [actionLink]="'/coach/athlete/' + athleteId() + '/plan/new'" actionLabel="Crear Plan" />
       } @else {
         <div class="space-y-3">
           @for (plan of plans(); track plan._id) {
@@ -97,12 +101,15 @@ export class PlansTabComponent implements OnInit {
   athleteId = input.required<string>();
   plans = signal<WorkoutPlan[]>([]);
   loading = signal(true);
+  errorState = signal(false);
 
   ngOnInit() {
     this.loadPlans();
   }
 
-  private loadPlans() {
+  loadPlans() {
+    this.loading.set(true);
+    this.errorState.set(false);
     this.plansService.getByAthlete(this.athleteId()).pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
@@ -110,7 +117,10 @@ export class PlansTabComponent implements OnInit {
         this.plans.set(res.data ?? res);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.errorState.set(true);
+        this.loading.set(false);
+      },
     });
   }
 

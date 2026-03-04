@@ -4,21 +4,28 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MessagesService } from '../../../services/messages.service';
 import { ConversationSummary } from '../../../models/message.model';
-import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../shared/components/error-state/error-state.component';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 @Component({
   selector: 'app-coach-conversations',
   standalone: true,
-  imports: [RouterLink, FormsModule, LoadingSpinnerComponent, EmptyStateComponent],
+  imports: [RouterLink, FormsModule, EmptyStateComponent, ErrorStateComponent, SkeletonComponent],
   template: `
     <div>
       <h1 class="text-2xl font-bold text-primary-700 mb-6">Mensajes</h1>
 
       @if (loading()) {
-        <app-loading-spinner />
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (_ of [1,2,3,4,5,6]; track $index) {
+            <app-skeleton variant="conversation" />
+          }
+        </div>
+      } @else if (errorState()) {
+        <app-error-state (retry)="loadData()" />
       } @else if (conversations().length === 0) {
         <app-empty-state
           icon="💬"
@@ -80,6 +87,7 @@ export class CoachConversationsComponent implements OnInit {
 
   conversations = signal<ConversationSummary[]>([]);
   loading = signal(true);
+  errorState = signal(false);
   searchTerm = signal('');
 
   filteredConversations = computed(() => {
@@ -97,12 +105,21 @@ export class CoachConversationsComponent implements OnInit {
   });
 
   ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.loading.set(true);
+    this.errorState.set(false);
     this.messagesService.getConversations().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (convs) => {
         this.conversations.set(convs);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.errorState.set(true);
+        this.loading.set(false);
+      },
     });
   }
 

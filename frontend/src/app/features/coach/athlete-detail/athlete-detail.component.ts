@@ -1,10 +1,11 @@
-import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, effect, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dialog } from '@angular/cdk/dialog';
 import { UsersService } from '../../../services/users.service';
 import { User } from '../../../core/models/user.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { ErrorStateComponent } from '../../../shared/components/error-state/error-state.component';
 import { PlansTabComponent } from './tabs/plans-tab/plans-tab.component';
 import { MetricsTabComponent } from './tabs/metrics-tab/metrics-tab.component';
 import { GoalRacesTabComponent } from './tabs/goal-races-tab/goal-races-tab.component';
@@ -18,6 +19,7 @@ import { ImportExcelDialogComponent } from '../forms/import-excel-dialog/import-
   standalone: true,
   imports: [
     LoadingSpinnerComponent,
+    ErrorStateComponent,
     PlansTabComponent,
     MetricsTabComponent,
     GoalRacesTabComponent,
@@ -28,6 +30,8 @@ import { ImportExcelDialogComponent } from '../forms/import-excel-dialog/import-
   template: `
     @if (loading()) {
       <app-loading-spinner />
+    } @else if (errorState()) {
+      <app-error-state (retry)="loadAthlete()" />
     } @else if (athlete()) {
       <div>
         <div class="flex items-center gap-4 mb-6">
@@ -51,7 +55,6 @@ import { ImportExcelDialogComponent } from '../forms/import-excel-dialog/import-
               }
             </h1>
             <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-primary-400">
-              <span>{{ athlete()!.email }}</span>
               @if (athlete()!.phone) {
                 <span>{{ athlete()!.phone }}</span>
               }
@@ -120,6 +123,7 @@ export class AthleteDetailComponent implements OnInit {
   athleteId = '';
   athlete = signal<User | null>(null);
   loading = signal(true);
+  errorState = signal(false);
   activeTab = signal('plans');
   athleteAge = computed(() => {
     const a = this.athlete();
@@ -141,14 +145,42 @@ export class AthleteDetailComponent implements OnInit {
     { id: 'strength', label: 'Fuerza' },
   ];
 
+  private tabIds = this.tabs.map(t => t.id);
+
+  constructor() {
+    effect(() => {
+      const tab = this.activeTab();
+      if (tab) {
+        this.router.navigate([], {
+          queryParams: { tab },
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        });
+      }
+    });
+  }
+
   ngOnInit() {
+    const tabParam = this.route.snapshot.queryParamMap.get('tab');
+    if (tabParam && this.tabIds.includes(tabParam)) {
+      this.activeTab.set(tabParam);
+    }
     this.athleteId = this.route.snapshot.paramMap.get('athleteId')!;
+    this.loadAthlete();
+  }
+
+  loadAthlete() {
+    this.loading.set(true);
+    this.errorState.set(false);
     this.usersService.getById(this.athleteId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: user => {
         this.athlete.set(user);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.errorState.set(true);
+        this.loading.set(false);
+      },
     });
   }
 

@@ -1,16 +1,18 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { ChildrenOutletContexts, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { MessagesService } from '../../../services/messages.service';
+import { routeAnimation } from '../../../shared/animations/route.animation';
 
 @Component({
   selector: 'app-coach-layout',
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, NavbarComponent],
+  animations: [routeAnimation],
   template: `
     <div class="flex flex-col h-screen">
       <app-navbar />
-      <main class="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6 relative z-[1]">
+      <main class="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6 relative z-[1]" [@routeAnimation]="getRouteAnimationData()">
         <router-outlet />
       </main>
 
@@ -60,6 +62,7 @@ import { MessagesService } from '../../../services/messages.service';
 })
 export class CoachLayoutComponent implements OnInit, OnDestroy {
   private messagesService = inject(MessagesService);
+  private contexts = inject(ChildrenOutletContexts);
 
   tabs = [
     { label: 'Dashboard', route: '/coach/dashboard', icon: '📊', badge: undefined as (() => number) | undefined },
@@ -69,6 +72,10 @@ export class CoachLayoutComponent implements OnInit, OnDestroy {
     { label: 'Mensajes', route: '/coach/messages', icon: '💬', badge: () => this.messagesService.unreadCount() },
     { label: 'Invitar', route: '/coach/invite', icon: '✉️', badge: undefined as (() => number) | undefined },
   ];
+
+  getRouteAnimationData() {
+    return this.contexts.getContext('primary')?.route?.snapshot?.url;
+  }
 
   ngOnInit() {
     this.messagesService.startUnreadPolling();

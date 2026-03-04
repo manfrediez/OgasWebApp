@@ -3,33 +3,111 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UsersService, AthleteGridItem } from '../../../services/users.service';
+import { ErrorStateComponent } from '../../../shared/components/error-state/error-state.component';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 
 @Component({
   selector: 'app-athletes-list',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, ErrorStateComponent, SkeletonComponent],
   template: `
     <div class="max-w-7xl mx-auto">
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
         <h1 class="text-2xl font-bold text-primary-800">Atletas</h1>
-        <div class="relative">
+        <div class="relative w-full sm:w-auto">
           <input
             type="text"
             placeholder="Buscar por nombre o apellido..."
             [ngModel]="search()"
             (ngModelChange)="onSearchChange($event)"
-            class="pl-10 pr-4 py-2.5 border border-primary-300 rounded-lg w-96 text-base focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent"
+            class="pl-10 pr-4 py-2.5 border border-primary-300 rounded-lg w-full sm:w-96 text-base focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent"
           />
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400">🔍</span>
         </div>
       </div>
 
       @if (loading()) {
-        <div class="flex justify-center py-12">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-700"></div>
-        </div>
-      } @else {
         <div class="bg-surface rounded-xl shadow-sm border border-primary-100 overflow-hidden">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-primary-50 border-b border-primary-200">
+                <th class="text-left px-6 py-3 text-xs font-semibold text-primary-500 uppercase tracking-wider">Atleta</th>
+                <th class="text-center px-4 py-3 text-xs font-semibold text-primary-500 uppercase tracking-wider">Días inactivo</th>
+                <th class="text-center px-4 py-3 text-xs font-semibold text-primary-500 uppercase tracking-wider">Días activos (30d)</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-primary-500 uppercase tracking-wider">Próx. competencia</th>
+                <th class="text-center px-4 py-3 text-xs font-semibold text-primary-500 uppercase tracking-wider">Acción</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-primary-100">
+              @for (_ of [1,2,3,4,5]; track $index) {
+                <app-skeleton variant="table-row" />
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else if (errorState()) {
+        <app-error-state (retry)="loadAthletes()" />
+      } @else {
+        <!-- Mobile card view -->
+        <div class="md:hidden space-y-3">
+          @for (athlete of athletes(); track athlete._id) {
+            <div
+              (click)="goToAthlete(athlete._id)"
+              class="card-glass rounded-xl p-4 cursor-pointer hover:shadow-md transition-shadow">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-full bg-primary-700 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                  {{ athlete.firstName[0] }}{{ athlete.lastName[0] }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-primary-700 truncate">{{ athlete.firstName }} {{ athlete.lastName }}</h3>
+                </div>
+                @if (athlete.isActive) {
+                  <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 shrink-0">Activo</span>
+                } @else {
+                  <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 shrink-0">Pendiente</span>
+                }
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-primary-50 rounded-lg p-2">
+                  <p class="text-xs text-primary-400 mb-0.5">Inactivo</p>
+                  @if (athlete.daysSinceLastActivity === null) {
+                    <span class="text-sm font-semibold text-primary-400">—</span>
+                  } @else {
+                    <span class="text-sm font-semibold" [class]="athlete.daysSinceLastActivity >= 10 ? 'text-red-600' : athlete.daysSinceLastActivity >= 3 ? 'text-yellow-600' : 'text-green-600'">
+                      {{ athlete.daysSinceLastActivity }}d
+                    </span>
+                  }
+                </div>
+                <div class="bg-primary-50 rounded-lg p-2">
+                  <p class="text-xs text-primary-400 mb-0.5">Activos 30d</p>
+                  <span class="text-sm font-semibold text-primary-600">{{ athlete.activeDaysLast30 }}</span>
+                </div>
+                <div class="bg-primary-50 rounded-lg p-2">
+                  <p class="text-xs text-primary-400 mb-0.5">Carrera</p>
+                  @if (athlete.nextRace) {
+                    <span class="text-sm font-semibold text-accent-600">{{ getDaysUntil(athlete.nextRace.date) }}d</span>
+                  } @else {
+                    <span class="text-sm font-semibold text-primary-400">—</span>
+                  }
+                </div>
+              </div>
+              @if (athlete.nextRace) {
+                <p class="text-xs text-primary-400 mt-2 truncate">{{ athlete.nextRace.name }} · {{ athlete.nextRace.distance }}</p>
+              }
+            </div>
+          } @empty {
+            <div class="py-12 text-center text-primary-500">
+              @if (search()) {
+                No se encontraron atletas para "{{ search() }}"
+              } @else {
+                No tenés atletas registrados
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Desktop table view -->
+        <div class="hidden md:block bg-surface rounded-xl shadow-sm border border-primary-100 overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead>
@@ -118,34 +196,35 @@ import { UsersService, AthleteGridItem } from '../../../services/users.service';
               </tbody>
             </table>
           </div>
-
-          @if (totalPages() > 1) {
-            <div class="flex items-center justify-between px-6 py-3 border-t border-primary-200 bg-primary-50">
-              <span class="text-sm text-primary-500">
-                {{ total() }} atletas en total
-              </span>
-              <div class="flex items-center gap-3">
-                <button
-                  (click)="goToPage(page() - 1)"
-                  [disabled]="page() <= 1"
-                  class="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary-100 transition-colors"
-                >
-                  Anterior
-                </button>
-                <span class="text-sm text-primary-500">
-                  Página {{ page() }} de {{ totalPages() }}
-                </span>
-                <button
-                  (click)="goToPage(page() + 1)"
-                  [disabled]="page() >= totalPages()"
-                  class="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary-100 transition-colors"
-                >
-                  Siguiente
-                </button>
-              </div>
-            </div>
-          }
         </div>
+
+        <!-- Pagination (shared) -->
+        @if (totalPages() > 1) {
+          <div class="flex items-center justify-between px-4 md:px-6 py-3 mt-3 md:mt-0 md:border-t border-primary-200 bg-primary-50 rounded-xl md:rounded-none">
+            <span class="text-sm text-primary-500">
+              {{ total() }} atletas
+            </span>
+            <div class="flex items-center gap-3">
+              <button
+                (click)="goToPage(page() - 1)"
+                [disabled]="page() <= 1"
+                class="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary-100 transition-colors"
+              >
+                Anterior
+              </button>
+              <span class="text-sm text-primary-500">
+                {{ page() }}/{{ totalPages() }}
+              </span>
+              <button
+                (click)="goToPage(page() + 1)"
+                [disabled]="page() >= totalPages()"
+                class="px-3 py-1.5 text-sm font-medium rounded-lg border border-primary-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary-100 transition-colors"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        }
       }
     </div>
   `,
@@ -158,6 +237,7 @@ export class AthletesListComponent implements OnInit {
 
   athletes = signal<AthleteGridItem[]>([]);
   loading = signal(true);
+  errorState = signal(false);
   page = signal(1);
   totalPages = signal(1);
   total = signal(0);
@@ -199,8 +279,9 @@ export class AthletesListComponent implements OnInit {
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   }
 
-  private loadAthletes() {
+  loadAthletes() {
     this.loading.set(true);
+    this.errorState.set(false);
     const searchVal = this.search().trim() || undefined;
     this.usersService.getAthletesGrid(this.page(), this.LIMIT, searchVal).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
@@ -210,6 +291,7 @@ export class AthletesListComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
+        this.errorState.set(true);
         this.loading.set(false);
       },
     });
